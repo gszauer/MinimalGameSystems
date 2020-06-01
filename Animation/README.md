@@ -143,7 +143,7 @@ void Print(const Animation::Data& data) {
     std::cout << "\tTracks:\n";
 
     // Loop trough all tracks in the animation clip
-    for (unsigned int t = 0; t < numTracks, ++t) {
+    for (unsigned int t = 0; t < numTracks; ++t) {
         std::cout << "\tTrack " << t << ":\n";
 
         // Current track data
@@ -163,7 +163,7 @@ void Print(const Animation::Data& data) {
         else {
             std::cout << "scale\n";
         }
-        std::cout << "\t\tOffset: " << trackOffset << "\n;
+        std::cout << "\t\tOffset: " << trackOffset << "\n";
         std::cout << "\t\tSize: " << trackSize << "\n";
         
         unsigned int frameStride = 3;
@@ -185,18 +185,19 @@ void Print(const Animation::Data& data) {
                 data.mFrameData[frameIndex++],
                 data.mFrameData[frameIndex++],
                 data.mFrameData[frameIndex++],
-                (trackComponent == COMPONENT_ROTATION)? data.mFrameData[frameIndex++] : 0;
+                (frameStride == 4)? data.mFrameData[frameIndex++] : 0
             };
             float frameValue[4] = {
                 data.mFrameData[frameIndex++],
                 data.mFrameData[frameIndex++],
                 data.mFrameData[frameIndex++],
-                (trackComponent == COMPONENT_ROTATION)? data.mFrameData[frameIndex++] : 0;
+                (frameStride == 4)? data.mFrameData[frameIndex++] : 0
             };
-            float frameOut[4] = {data.mFrameData[frameIndex++],
+            float frameOut[4] = {
                 data.mFrameData[frameIndex++],
                 data.mFrameData[frameIndex++],
-                (trackComponent == COMPONENT_ROTATION)? data.mFrameData[frameIndex++] : 0;
+                data.mFrameData[frameIndex++],
+                (frameStride == 4)? data.mFrameData[frameIndex++] : 0
             };
 
             std::cout << "\t\tFrame " << f << ":\n";
@@ -230,9 +231,9 @@ The sample files provided in this repo where generated offline using the [glTF l
 * ```Data(const Data& other);``` - Copy constructor, trivial
 * ```Data& operator=(const Data& other);``` - Assignment operator, trivial
 * ```~Data();``` - Destructor, trivial
-* ```void Set(float* frameData, unsigned int frameSize, unsigned int* trackData, unsigned int trackSize);``` - Sets the frame and track data of the ```Animation::Data``` object. This function is the only way to set the data. It also calculates  ```mStartTime``` and ```mEndTime```.
-* ```const float* GetFrameData() const;``` - Getter to immutable ```mFrameData```. This is intended to give a "debug view", not for direct modification. That being said, direct modification _should_ be safe so long as the pointer is fresh.
-* ```unsigned int FrameDataSize() const;``` - Geter to ```mFrameDataSize```
+* ```void Set(float* frameData, unsigned int frameSize, unsigned int* trackData, unsigned int trackSize);``` - Sets the frame and track data of the ```Animation::Data``` object. This function is the only way to set the data. It also calculates  ```mStartTime``` and ```mEndTime```
+* ```const float* GetFrameData() const;``` - Getter to immutable ```mFrameData```. This is intended to give a "debug view", not for direct modification. That being said, direct modification _should_ be safe so long as the pointer is fresh
+* ```unsigned int FrameDataSize() const;``` - Geter to ```mFrameDataSize```, trivial
 * ```const unsigned int* GetTrackData() const;``` - TODO
 * ```unsigned int TrackDataSize() const;``` - TODO
 * ```float GetStartTime() const;``` - TODO

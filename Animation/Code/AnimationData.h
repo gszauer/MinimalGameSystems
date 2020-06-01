@@ -66,4 +66,9 @@ namespace Animation {
     };
 }
 
+#if 0
+#include <iosfwd>
+std::ostream& operator<<(std::ostream& os, const Animation::Data& dt);
+#endif
+
 #endif

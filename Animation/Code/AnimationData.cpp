@@ -1,6 +1,102 @@
 #include "AnimationData.h"
 #include "AnimationState.h"
 
+#if 0
+#include <ostream>
+std::ostream& operator<<(std::ostream& os, const Animation::Data& data) {
+	const char* label = data.GetLabel();
+	float startTime = data.GetStartTime();
+	float endTime = data.GetEndtime();
+	const unsigned int* trackData = data.GetTrackData();
+	unsigned int trackDataSize = data.TrackDataSize();
+	const float* frameData = data.GetFrameData();
+
+	unsigned int trackStride = 4;
+	unsigned int numTracks = trackDataSize / trackStride;
+
+	os << "Animation: " << label << "\n";
+	os << "\tNumber of tracks: " << numTracks << "\n";
+	os << "\tStart time: " << startTime << "\n";
+	os << "\tEnd time: " << endTime << "\n";
+	os << "\tTracks:\n";
+
+	// Loop trough all tracks in the animation clip
+	for (unsigned int t = 0; t < numTracks; ++t) {
+		os << "\tTrack " << t << ":\n";
+
+		// Current track data
+		unsigned int trackId = trackData[t * trackStride + 0];
+		unsigned int trackComponent = trackData[t * trackStride + 1];
+		unsigned int trackOffset = trackData[t * trackStride + 2];
+		unsigned int trackSize = trackData[t * trackStride + 3];
+
+		os << "\t\tTarget: " << trackId << "\n";
+		os << "\t\tComponent: ";
+		if (trackComponent == 0) { // 0 = position
+			os << "position\n";
+		}
+		else if (trackComponent == 1) { // 1 - rotation
+			os << "rotation\n";
+		}
+		else { // 2 - scale
+			os << "scale\n";
+		}
+		os << "\t\tOffset: " << trackOffset << "\n";
+		os << "\t\tSize: " << trackSize << "\n";
+
+		unsigned int frameStride = 3; // position and scale are vec3
+		if (trackComponent = 1) { // rotation is quat
+			frameStride = 4;
+		}
+
+		unsigned int numFrames = trackSize / frameStride;
+		os << "\t\tNumber of frames:" << numFrames << "\n";
+		os << "\t\tFrames:\n";
+
+		// Loop trough all frames in current track
+		for (unsigned int f = 0; f < numFrames; ++f) {
+			int frameIndex = trackOffset + f * frameStride;
+
+			// Current frame data
+			float frameTime = frameData[frameIndex++];
+			float frameIn[4] = {
+				frameData[frameIndex++],
+				frameData[frameIndex++],
+				frameData[frameIndex++],
+				(frameStride == 4) ? frameData[frameIndex++] : 0
+			};
+			float frameValue[4] = {
+				frameData[frameIndex++],
+				frameData[frameIndex++],
+				frameData[frameIndex++],
+				(frameStride == 4) ? frameData[frameIndex++] : 0
+			};
+			float frameOut[4] = {
+				frameData[frameIndex++],
+				frameData[frameIndex++],
+				frameData[frameIndex++],
+				(frameStride == 4) ? frameData[frameIndex++] : 0
+			};
+
+			os << "\t\tFrame " << f << ":\n";
+			os << "\t\t\tTime: " << frameTime << "\n";
+			for (int c = 0; c < frameStride; ++c) {
+				os << "\t\t\tIn[" << c << "]: " << frameIn[c];
+				os << (c == frameStride - 1) ? "\n" : ", ";
+			}
+			for (int c = 0; c < frameStride; ++c) {
+				os << "\t\t\tValue[" << c << "]: " << frameValue[c];
+				os << (c == frameStride - 1) ? "\n" : ", ";
+			}
+			for (int c = 0; c < frameStride; ++c) {
+				os << "\t\t\tValue[" << c << "]: " << frameOut[c];
+				os << (c == frameStride - 1) ? "\n" : ", ";
+			}
+		}
+	}
+}
+#endif
+
 namespace Animation {
 	bool FloatCompare(float a, float b) {
 		return (a == b); // TODO
