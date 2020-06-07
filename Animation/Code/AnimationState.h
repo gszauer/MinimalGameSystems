@@ -38,12 +38,18 @@ namespace Animation {
         void GetAbsoluteRotation(unsigned int index, float* outQuat) const;
         void GetAbsoluteScale(unsigned int index, float* outVec3) const;
 
+        void GetRelativeTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const;
         void GetAbsoluteTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const;
 
         unsigned int Serialize(char* output, unsigned int outputSize);
-        void DeSerialize(char* input);
+        void DeSerialize(char* input, unsigned int inputSize);
         unsigned int SerializedSize() const;
     };
 }
+
+#if 0
+#include <iosfwd>
+std::ostream& operator<<(std::ostream& os, const Animation::State& state);
+#endif
 
 #endif

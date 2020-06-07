@@ -1,5 +1,55 @@
 #include "AnimationState.h"
 
+#if 0
+#include <ostream>
+std::ostream& operator<<(std::ostream& os, const Animation::State& state) {
+    unsigned int size = state.Size();
+
+    os << "Number of nodes in scene graph: " << size << "\n";
+    os << "Parent child relationships: " << "\n";
+    for (unsigned int i = 0; i < size; ++i) {
+        os << "\tParent: " << state.GetParent(i) << ", Child: " << i << "\n";
+    }
+
+    unsigned int trackStride = 10;
+    os << "Local transforms: \n";
+    for (unsigned int i = 0; i < size; ++i) {
+        float position[3], rotation[4], scale[3] = { 0 };
+        state.GetRelativeTransform(i, position, rotation, scale);
+
+        os << "\t" << i << ": position {";
+        os << position[0] << ", ";
+        os << position[1] << ", ";
+        os << position[2] << "}, rotation {";
+        os << rotation[0] << ", ";
+        os << rotation[1] << ", ";
+        os << rotation[2] << ", ";
+        os << rotation[3] << "}, scale {";
+        os << scale[0] << ", ";
+        os << scale[1] << ", ";
+        os << scale[2] << "}\n";
+    }
+
+    os << "Global transforms: \n";
+    for (unsigned int i = 0; i < size; ++i) {
+        float position[3], rotation[4], scale[3] = { 0 };
+        state.GetAbsoluteTransform(i, position, rotation, scale);
+
+        os << "\t" << i << ": position {";
+        os << position[0] << ", ";
+        os << position[1] << ", ";
+        os << position[2] << "}, rotation {";
+        os << rotation[0] << ", ";
+        os << rotation[1] << ", ";
+        os << rotation[2] << ", ";
+        os << rotation[3] << "}, scale {";
+        os << scale[0] << ", ";
+        os << scale[1] << ", ";
+        os << scale[2] << "}\n";
+    }
+}
+#endif
+
 namespace Animation {
     static void CombineTransforms(float* outPos, float* outRot, float* outScale, const float* posA, const float* rotA, const float* sclA, const float* posB, const float* rotB, const float* sclB) {
         // vec * vec
@@ -284,6 +334,25 @@ void Animation::State::SetRelativeRotation(unsigned int index, const float* rot)
     rotation[3] = rot[3];
 }
 
+void Animation::State::GetRelativeTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const {
+    float* position = &mTransforms[index * 10];
+    float* rotation = &mTransforms[index * 10 + 3];
+    float* scale = &mTransforms[index * 10 + 7];
+    
+    outPos[0] = position[0];
+    outPos[1] = position[1];
+    outPos[2] = position[2];
+
+    outRot[0] = rotation[0];
+    outRot[1] = rotation[1];
+    outRot[2] = rotation[2];
+    outRot[3] = rotation[3];
+
+    outScl[0] = scale[0];
+    outScl[1] = scale[1];
+    outScl[2] = scale[2];
+}
+
 void Animation::State::GetAbsoluteTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const {
     float parentPos[3], parentRot[3], parentScl[3];
 
@@ -348,6 +417,6 @@ unsigned int Animation::State::Serialize(char* output, unsigned int outputSize) 
     return 0;
 }
 
-void Animation::State::DeSerialize(char* input) {
+void Animation::State::DeSerialize(char* input, unsigned int inputSize) {
     // TODO
 }

@@ -47,19 +47,15 @@ namespace Animation {
         unsigned int TrackDataSize() const;
 
         float GetStartTime() const;
-        void SetStartTime(float time);
-
         float GetEndtime() const;
-        void SetEndTime(float time);
-
-        bool IsValid() const;
         float GetDuration() const;
+        bool IsValid() const;
 
         const char* GetLabel() const;
         void SetLabel(const char* label);
 
         unsigned int Serialize(char* output, unsigned int outputSize) const;
-        void DeSerialize(char* input);
+        void DeSerialize(char* input, unsigned int inputSize);
         unsigned int SerializedSize() const;
 
         float Sample(State& out, float time, bool looping) const;

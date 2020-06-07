@@ -2,34 +2,46 @@
 #define _H_ANIMATION_SKIN_
 
 namespace Animation {
-	class State;
 
-	struct SkinDescriptor {
-		union {
-			unsigned char* data;
-			unsigned int* uint;
-			float* scalar;
+	namespace Skin {
+		template<typename T, unsigned int N>
+		class Descriptor {
+		protected:
+			T* mData;
+			unsigned int mDataSize; // sieof data type
+			unsigned int mOffset;   // offset in bytes
+			unsigned int mLength;   // length in bytes
+			unsigned int mStride;   // stride in bytes
+			unsigned int mSize;	   // data size in bytes (ie vec3 = sizeof(float) * 3)
+		public:
+			SkinDescriptor();
+			SkinDescriptor(T* data, unsigned int dataSize, unsigned int offset = 0);
+			SkinDescriptor(const SkinDescriptor&);
+			SkinDescriptor& operator=(const SkinDescriptor&);
+			~SkinDescriptor();
+
+			unsigned int Size() const; // Or Count. How many elements would be in here if it was an std::vector 
+			const T& operator[](unsigned int index) const; // Access each element, intended to be read only
+			T& operator[](unsigned int index); // Access each element, read or write
+
+			const T* GetData() const;
+			unsigned int GetDataSize() const;
+			unsigned int GetOffset() const;
+			unsigned int GetLength() const;
+			unsigned int GetStride() const;
+			unsigned int GetSize() const;
+
+			void SetData(T* data);
+			void SetDataSize(unsigned int size);
+			void SetOffset(unsigned int offset);
+			void SetLength(unsigned int length);
+			void SetStride(unsigned int stride);
+			void SetSize(unsigned int size);
 		};
-		unsigned int dataSize; // sieof data type
-		unsigned int offset;   // offset in bytes
-		unsigned int length;   // length in bytes
-		unsigned int stride;   // stride in bytes
-		unsigned int size;	   // data size in bytes (ie vec3 = sizeof(float) * 3)
 
-		inline SkinDescriptor();
-
-		unsigned int GetNumElements() const; // ie: How many vertices are there
-		unsigned int GetElementSize() const; // ie: how big is a single element, like 3 floats, 4
-
-		unsigned int* GetUIntAt(unsigned int index) const;
-		float* GetScalarAt(unsigned int index) const;
-	};
-
-	SkinDescriptor MakeVec3Descriptor(float* array, unsigned int size);
-	SkinDescriptor MakeVec4Descriptor(float* array, unsigned int size);
-	SkinDescriptor MakeUInt4Descriptor(unsigned int* array, unsigned int size);
-
-	void Skin(SkinDescriptor& output, const float* skinMatrixPalette, const float* invBindPalette, const SkinDescriptor& input, float w, const SkinDescriptor& influences, const SkinDescriptor& weights);
+		void Apply(Descriptor<float, 3>& output, const Descriptor<float, 3>& input, float w, const float* animationMatrixPalette, const float* invBindPalette, const Descriptor<unsigned int, 4>& influences, const Descriptor<float, 4>& weights);
+		void Apply(Descriptor<float, 3>& output, const Descriptor<float, 3>& input, float w, const float* skinMatrixPalette, const Descriptor<unsigned int, 4>& influences, const Descriptor<float, 4>& weights);
+	}
 }
 
 #endif

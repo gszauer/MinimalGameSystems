@@ -182,16 +182,8 @@ float Animation::Data::GetStartTime() const {
 	return mStartTime;
 }
 
-void Animation::Data::SetStartTime(float time) {
-	mStartTime = time;
-}
-
 float Animation::Data::GetEndtime() const {
 	return mEndTime;
-}
-
-void Animation::Data::SetEndTime(float time) {
-	mEndTime = time;
 }
 
 bool Animation::Data::IsValid() const {
@@ -489,7 +481,7 @@ unsigned int Animation::Data::Serialize(char* output, unsigned int outputSize) c
 	// TODO
 }
 
-void Animation::Data::DeSerialize(char* input) {
+void Animation::Data::DeSerialize(char* input, unsigned int inputSize) {
 	// TODO
 }
 

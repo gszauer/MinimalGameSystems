@@ -95,7 +95,33 @@ float* Animation::SkinDescriptor::GetScalarAt(unsigned int index) const {
 	return (float*)(data + index * stride);
 }
 
-Animation::SkinDescriptor Animation::MakeVec3Descriptor(float* array, unsigned int size) {
+Animation::SkinDescriptor Animation::MakeFloatDescriptor(float* array, unsigned int size) {
+	SkinDescriptor descriptor;
+
+	descriptor.scalar = array;
+	descriptor.dataSize = sizeof(float);
+	descriptor.offset = 0;
+	descriptor.length = sizeof(float) * size;
+	descriptor.stride = sizeof(float);
+
+	return descriptor;
+}
+
+
+Animation::SkinDescriptor Animation::MakeFloat2Descriptor(float* array, unsigned int size) {
+	SkinDescriptor descriptor;
+
+	descriptor.scalar = array;
+	descriptor.dataSize = sizeof(float);
+	descriptor.offset = 0;
+	descriptor.length = sizeof(float) * size;
+	descriptor.stride = sizeof(float) * 2;
+
+	return descriptor;
+}
+
+
+Animation::SkinDescriptor Animation::MakeFloat3Descriptor(float* array, unsigned int size) {
 	SkinDescriptor descriptor;
 
 	descriptor.scalar = array;
@@ -107,7 +133,7 @@ Animation::SkinDescriptor Animation::MakeVec3Descriptor(float* array, unsigned i
 	return descriptor;
 }
 
-Animation::SkinDescriptor Animation::MakeVec4Descriptor(float* array, unsigned int size) {
+Animation::SkinDescriptor Animation::MakeFloat4Descriptor(float* array, unsigned int size) {
 	SkinDescriptor descriptor;
 
 	descriptor.scalar = array;
@@ -115,6 +141,43 @@ Animation::SkinDescriptor Animation::MakeVec4Descriptor(float* array, unsigned i
 	descriptor.offset = 0;
 	descriptor.length = sizeof(float) * size;
 	descriptor.stride = sizeof(float) * 4;
+
+	return descriptor;
+}
+
+
+Animation::SkinDescriptor Animation::MakeUIntDescriptor(unsigned int* array, unsigned int size) {
+	SkinDescriptor descriptor;
+
+	descriptor.uint = array;
+	descriptor.dataSize = sizeof(unsigned int);
+	descriptor.offset = 0;
+	descriptor.length = sizeof(unsigned int) * size;
+	descriptor.stride = sizeof(unsigned int);
+
+	return descriptor;
+}
+
+Animation::SkinDescriptor Animation::MakeUInt2Descriptor(unsigned int* array, unsigned int size) {
+	SkinDescriptor descriptor;
+
+	descriptor.uint = array;
+	descriptor.dataSize = sizeof(unsigned int);
+	descriptor.offset = 0;
+	descriptor.length = sizeof(unsigned int) * size;
+	descriptor.stride = sizeof(unsigned int) * 2;
+
+	return descriptor;
+}
+
+Animation::SkinDescriptor Animation::MakeUInt3Descriptor(unsigned int* array, unsigned int size) {
+	SkinDescriptor descriptor;
+
+	descriptor.uint = array;
+	descriptor.dataSize = sizeof(unsigned int);
+	descriptor.offset = 0;
+	descriptor.length = sizeof(unsigned int) * size;
+	descriptor.stride = sizeof(unsigned int) * 3;
 
 	return descriptor;
 }
