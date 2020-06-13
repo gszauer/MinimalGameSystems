@@ -136,6 +136,10 @@ The start and end time of an animation clip depend on the tracks. The track that
 
 ### Interpreting Animation::Data
 
+The only thing that's non trivial about <code>Animtion::Data</code> is the granularity at which interpolation types can be defined. Interpolation can change on a per frame basis. This means frames 1 and 2 might interpolate lineraly, frames 2 and 3 might use constant interpolation and frames 3 and 4 might use cubic interpolation. This isn't uncommon, Unity's Animation window works the same way. The following criteria is used to determine how two frames should be interpolated.
+
+TODO: Show interpolation selection logic
+
 The following code prints out the ```Animation::Data``` class. It demonstrates how to access all important elements inside the ```Animation::Data``` class.
 
 
@@ -318,9 +322,9 @@ float* scale = &mTransforms[index * 10 + 7];
 The data in ```mTransforms``` is segmented twice. On the top level, there is one transform located every 10 floats. Below that, each transform contains three floats for position, four for rotation, and five for scale.
 
 ```
-+----------------------+---------------------------------+
++--------------+-------------+-------------+-------------+
 | Transform 0  | Transform 1 | Transform 2 | Transform 3 |
-+--------------------------+---------+-------------------+
++--------------+-----------+-+-------+-----+-------------+
   |                        |         |  
   |   +-------------+      |         |   +-------------+      
   |   | Transform 0 |      |         |   | Transform 2 | 
@@ -428,6 +432,14 @@ The ```Serialize``` and ```Deserialize``` functions are intended to save and loa
 * ```unsigned int Serialize(char* output, unsigned int outputSize) const;``` - Serializes the class into the output buffer. Size is expected in bytes
 * ```void DeSerialize(char* input, unsigned int inputSize);``` - De-Serializes class from the input buffer. Size is expected in bytes
 * ```unsigned int SerializedSize() const;``` - Returns how many bytes are needed to serialize this class.
+
+# Skinning
+
+TODO
+
+# Blending
+
+TODO
 
 # Usage
 
