@@ -66,167 +66,129 @@ namespace Animation {
 	}
 
 	static void MultiplyMat4Vec4(float* out, const float* mat, const float* vec) {
-		// TODO
+		out[0] = vec[0] * mat[0] + vec[1] * mat[4] + vec[2] * mat[8] + vec[3] * mat[12];
+		out[1] = vec[0] * mat[1] + vec[1] * mat[5] + vec[2] * mat[9] + vec[3] * mat[13];
+		out[2] = vec[0] * mat[2] + vec[1] * mat[6] + vec[2] * mat[10] + vec[3] * mat[14];
+		out[3] = vec[0] * mat[3] + vec[1] * mat[7] + vec[2] * mat[11] + vec[3] * mat[15];
 	}
 }
 
-Animation::SkinDescriptor::SkinDescriptor() {
-	data = 0;
-	dataSize = 0;
-	offset = 0;
-	length = 0;
-	stride = 0;
-	size = 0;
+template<typename T, unsigned int N>
+Animation::Skin::Descriptor<T, N>::Descriptor() {
+	mData = 0;
+	mCount = 0;
+	mOffset = 0;
+	mStride = 0;
 }
 
-unsigned int Animation::SkinDescriptor::GetNumElements() const {
-	return (stride / length) / dataSize;
+template<typename T, unsigned int N>
+Animation::Skin::Descriptor<T, N>::Descriptor(T* data, unsigned int count, unsigned int stride, unsigned int offset) {
+	mData = data;
+	mCount = 0;
+	mOffset = 0;
+	mStride = 0;
 }
 
-unsigned int Animation::SkinDescriptor::GetElementSize() const {
-	return size / dataSize;
+template<typename T, unsigned int N>
+void Animation::Skin::Descriptor<T, N>::Set(T* data, unsigned int count, unsigned int stride, unsigned int offset) {
+	mData = data;
+	mCount = count;
+	mOffset = offset;
+	mStride = stride;
 }
 
-unsigned int* Animation::SkinDescriptor::GetUIntAt(unsigned int index) const {
-	return (unsigned int*)(data + index * stride);
+template<typename T, unsigned int N>
+unsigned int Animation::Skin::Descriptor<T, N>::Size() const {
+	return mCount;
 }
 
-float* Animation::SkinDescriptor::GetScalarAt(unsigned int index) const {
-	return (float*)(data + index * stride);
+template<typename T, unsigned int N>
+const T& Animation::Skin::Descriptor<T, N>::operator[](unsigned int index) const {
+	unsigned char* data = (unsigned char*)mData;
+	T* cast = (T*)&data[index * (sizeof(T) * N + mStride)];
+	return *cast;
 }
 
-Animation::SkinDescriptor Animation::MakeFloatDescriptor(float* array, unsigned int size) {
-	SkinDescriptor descriptor;
-
-	descriptor.scalar = array;
-	descriptor.dataSize = sizeof(float);
-	descriptor.offset = 0;
-	descriptor.length = sizeof(float) * size;
-	descriptor.stride = sizeof(float);
-
-	return descriptor;
+template<typename T, unsigned int N>
+T& Animation::Skin::Descriptor<T, N>::operator[](unsigned int index) {
+	unsigned char* data = (unsigned char*)mData;
+	T* cast = (T*)&data[index * (sizeof(T) * N + mStride)];
+	return *cast;
 }
 
-
-Animation::SkinDescriptor Animation::MakeFloat2Descriptor(float* array, unsigned int size) {
-	SkinDescriptor descriptor;
-
-	descriptor.scalar = array;
-	descriptor.dataSize = sizeof(float);
-	descriptor.offset = 0;
-	descriptor.length = sizeof(float) * size;
-	descriptor.stride = sizeof(float) * 2;
-
-	return descriptor;
+template<typename T, unsigned int N>
+const T* Animation::Skin::Descriptor<T, N>::GetData() const {
+	return mData;
 }
 
-
-Animation::SkinDescriptor Animation::MakeFloat3Descriptor(float* array, unsigned int size) {
-	SkinDescriptor descriptor;
-
-	descriptor.scalar = array;
-	descriptor.dataSize = sizeof(float);
-	descriptor.offset = 0;
-	descriptor.length = sizeof(float) * size;
-	descriptor.stride = sizeof(float) * 3;
-
-	return descriptor;
+template<typename T, unsigned int N>
+unsigned int Animation::Skin::Descriptor<T, N>::GetOffset() const {
+	return mOffset;
 }
 
-Animation::SkinDescriptor Animation::MakeFloat4Descriptor(float* array, unsigned int size) {
-	SkinDescriptor descriptor;
-
-	descriptor.scalar = array;
-	descriptor.dataSize = sizeof(float);
-	descriptor.offset = 0;
-	descriptor.length = sizeof(float) * size;
-	descriptor.stride = sizeof(float) * 4;
-
-	return descriptor;
+template<typename T, unsigned int N>
+unsigned int Animation::Skin::Descriptor<T, N>::GetStride() const {
+	return mStride;
 }
 
-
-Animation::SkinDescriptor Animation::MakeUIntDescriptor(unsigned int* array, unsigned int size) {
-	SkinDescriptor descriptor;
-
-	descriptor.uint = array;
-	descriptor.dataSize = sizeof(unsigned int);
-	descriptor.offset = 0;
-	descriptor.length = sizeof(unsigned int) * size;
-	descriptor.stride = sizeof(unsigned int);
-
-	return descriptor;
+template<typename T, unsigned int N>
+unsigned int Animation::Skin::Descriptor<T, N>::GetCount() const {
+	return mCount;
 }
 
-Animation::SkinDescriptor Animation::MakeUInt2Descriptor(unsigned int* array, unsigned int size) {
-	SkinDescriptor descriptor;
-
-	descriptor.uint = array;
-	descriptor.dataSize = sizeof(unsigned int);
-	descriptor.offset = 0;
-	descriptor.length = sizeof(unsigned int) * size;
-	descriptor.stride = sizeof(unsigned int) * 2;
-
-	return descriptor;
+template<typename T, unsigned int N>
+void Animation::Skin::Descriptor<T, N>::SetData(T* data) {
+	mData = data;
 }
 
-Animation::SkinDescriptor Animation::MakeUInt3Descriptor(unsigned int* array, unsigned int size) {
-	SkinDescriptor descriptor;
-
-	descriptor.uint = array;
-	descriptor.dataSize = sizeof(unsigned int);
-	descriptor.offset = 0;
-	descriptor.length = sizeof(unsigned int) * size;
-	descriptor.stride = sizeof(unsigned int) * 3;
-
-	return descriptor;
+template<typename T, unsigned int N>
+void Animation::Skin::Descriptor<T, N>::SetOffset(unsigned int offset) {
+	mOffset;
 }
 
-Animation::SkinDescriptor Animation::MakeUInt4Descriptor(unsigned int* array, unsigned int size) {
-	SkinDescriptor descriptor;
-
-	descriptor.uint = array;
-	descriptor.dataSize = sizeof(unsigned int);
-	descriptor.offset = 0;
-	descriptor.length = sizeof(unsigned int) * size;
-	descriptor.stride = sizeof(unsigned int) * 4;
-
-	return descriptor;
+template<typename T, unsigned int N>
+void Animation::Skin::Descriptor<T, N>::SetCount(unsigned int length) {
+	mCount = length;
 }
 
-void Animation::Skin(SkinDescriptor& output, const float* skinPalette, const float* invBindPalette, const SkinDescriptor & input, float w, const SkinDescriptor & influences, const SkinDescriptor & weights) {
-	unsigned int numVerts = input.GetNumElements();
+template<typename T, unsigned int N>
+void Animation::Skin::Descriptor<T, N>::SetStride(unsigned int stride) {
+	mStride = stride;
+}
+
+void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float, 3>& input, float w, const float* animationMatrixPalette, const float* invBindPalette, const Descriptor<unsigned int, 4>& influences, const Descriptor<float, 4>& weights) {
+	unsigned int numVerts = input.Size();
 
 	for (unsigned int i = 0; i < numVerts; ++i) {
-		float* inputScalar = input.GetScalarAt(i);
+		const float* inputScalar = &input[i];
 		float vertex[4] = {
 			inputScalar[0],
 			inputScalar[1],
 			inputScalar[2],
 			w
 		};
-		unsigned int* influence = influences.GetUIntAt(i);
-		float* weight = weights.GetScalarAt(i);
+		const unsigned int* influence = &influences[i];
+		const float* weight = &weights[i];
 
 		float m0[16], m1[16], m2[16], m3[16], skin[16] = { 0 };
 
 		if (weight[0] >= 0.000001f) {
-			MultiplyMatrices(m0, &skinPalette[influence[0] * 16], &invBindPalette[influence[0] * 16]);
+			MultiplyMatrices(m0, &animationMatrixPalette[influence[0] * 16], &invBindPalette[influence[0] * 16]);
 			ScaleMatrix(m0, m0, weight[0]);
 		}
 
 		if (weight[1] >= 0.000001f) {
-			MultiplyMatrices(m1, &skinPalette[influence[1] * 16], &invBindPalette[influence[1] * 16]);
+			MultiplyMatrices(m1, &animationMatrixPalette[influence[1] * 16], &invBindPalette[influence[1] * 16]);
 			ScaleMatrix(m1, m1, weight[1]);
 		}
 
 		if (weight[2] >= 0.000001f) {
-			MultiplyMatrices(m2, &skinPalette[influence[2] * 16], &invBindPalette[influence[2] * 16]);
+			MultiplyMatrices(m2, &animationMatrixPalette[influence[2] * 16], &invBindPalette[influence[2] * 16]);
 			ScaleMatrix(m2, m2, weight[2]);
 		}
 
 		if (weight[3] >= 0.000001f) {
-			MultiplyMatrices(m3, &skinPalette[influence[3] * 16], &invBindPalette[influence[3] * 16]);
+			MultiplyMatrices(m3, &animationMatrixPalette[influence[3] * 16], &invBindPalette[influence[3] * 16]);
 			ScaleMatrix(m3, m3, weight[3]);
 		}
 
@@ -237,7 +199,53 @@ void Animation::Skin(SkinDescriptor& output, const float* skinPalette, const flo
 		float result[4] = { 0 };
 		MultiplyMat4Vec4(result, skin, vertex);
 
-		float* outputScalar = output.GetScalarAt(i);
+		float* outputScalar = &output[i];
+		outputScalar[0] = result[0];
+		outputScalar[1] = result[1];
+		outputScalar[2] = result[2];
+	}
+}
+
+void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float, 3>& input, float w, const float* skinMatrixPalette, const Descriptor<unsigned int, 4>& influences, const Descriptor<float, 4>& weights) {
+	unsigned int numVerts = input.Size();
+
+	for (unsigned int i = 0; i < numVerts; ++i) {
+		const float* inputScalar = &input[i];
+		float vertex[4] = {
+			inputScalar[0],
+			inputScalar[1],
+			inputScalar[2],
+			w
+		};
+		const unsigned int* influence = &influences[i];
+		const float* weight = &weights[i];
+
+		float m0[16], m1[16], m2[16], m3[16], skin[16] = { 0 };
+
+		if (weight[0] >= 0.000001f) {
+			ScaleMatrix(m0, &skinMatrixPalette[influence[0] * 16], weight[0]);
+		}
+
+		if (weight[1] >= 0.000001f) {
+			ScaleMatrix(m1, &skinMatrixPalette[influence[1] * 16], weight[1]);
+		}
+
+		if (weight[2] >= 0.000001f) {
+			ScaleMatrix(m2, &skinMatrixPalette[influence[2] * 16], weight[2]);
+		}
+
+		if (weight[3] >= 0.000001f) {
+			ScaleMatrix(m3, &skinMatrixPalette[influence[3] * 16], weight[3]);
+		}
+
+		AddMatrices(skin, m0, m1);
+		AddMatrices(skin, skin, m2);
+		AddMatrices(skin, skin, m3);
+
+		float result[4] = { 0 };
+		MultiplyMat4Vec4(result, skin, vertex);
+
+		float* outputScalar = &output[i];
 		outputScalar[0] = result[0];
 		outputScalar[1] = result[1];
 		outputScalar[2] = result[2];

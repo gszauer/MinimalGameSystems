@@ -23,12 +23,14 @@
     <ClInclude Include="Code\AnimationData.h" />
     <ClInclude Include="Code\AnimationSkin.h" />
     <ClInclude Include="Code\AnimationState.h" />
+    <ClInclude Include="Code\glad.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\AnimationBlend.cpp" />
     <ClCompile Include="Code\AnimationData.cpp" />
     <ClCompile Include="Code\AnimationSkin.cpp" />
     <ClCompile Include="Code\AnimationState.cpp" />
+    <ClCompile Include="Code\glad.c" />
     <ClCompile Include="Code\WinMain.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -145,7 +145,7 @@ namespace Animation {
         outMatrix[15] = 1.0f;
     }
 
-    static void MultiplyMatrices(float* out, const float* a, const float* b) {
+    void MultiplyMatrices(float* out, const float* a, const float* b) {
         // Column 0
         out[0] = a[0] * b[0] + a[4] * b[1] + a[8] * b[2] + a[12] * b[3];
         out[1] = a[1] * b[0] + a[5] * b[1] + a[9] * b[2] + a[13] * b[3];

@@ -4,7 +4,7 @@ This library is intended to be a simple, easy to use animation library that's ea
 
 The goal of this library is simplicity, to provide a minimal surface API for animation. The code here aims to be easy and intuitive by providing a minimal API to interact with. For basic animations, you only need two class, ```Animation::State``` and ```Animation::Data```. Aside from the core classes, utilities for skinning and animation blending are also provided.
 
-The readability of the logic for many of these functions suffers from trying to keep the API as small as possible. For an in depth guide to animation programming that covers all of the techniques implemented here check out my book [Hands-On C++ Game Animation Programming](https://animationprogramming.com ). The following files are provided
+The readability of the logic for many of these functions suffers from trying to keep the API as small as possible. For an in depth guide to animation programming that covers all of the techniques implemented here check out my book [Hands-On C++ Game Animation Programming](https://animationprogramming.com). The following files are provided
 
 * ```AnimationData[.h, .cpp]``` - **required** - Contains ```Animation::Data```, analogous to an animation clip.
 * ```AnimationState[.h, .cpp]``` - **required** - Contains ```Aniamtion::State```, analogous to an animated pose. 
@@ -25,10 +25,10 @@ Troughout the rest of this document, animation data will be used interchangably 
 
 In a more straight forward animation system, animation data is represented by several classes. In my [book](https://animationprogramming.com) I break this down into the following classes:
 
-* __[Frame](TODO)__ Encodes a value at a given time. Also contains tangents for cubic interpolation. You can interpolate between two frames
-* __[Track](TODO)__ A track is made up of multiple frames. You can have different types of tracks like scalar, vector or quaternion tracks. Sampling a track results in the data type of the track
-* __[TransformTrack](TODO)__ A transform track is made up of multiple Tracks. It maps tracks to joints. Each joint can have three tracks: position, rotation and scale. Sampling a TransformTrack will always result in a Transform object.
-* __[Clip](TODO)__ A clip, such as "waling" is made up of multiple transform tracks. Each TransformTrack describes the motion of one joint over time. An animation clip describes the motion of multiple joints, a skeleton over time. A clip samples into a Pose.
+* __[Frame](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/Frame.h)__ Encodes a value at a given time. Also contains tangents for cubic interpolation. You can interpolate between two frames
+* __[Track](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/Track.h)__ A track is made up of multiple frames. You can have different types of tracks like scalar, vector or quaternion tracks. Sampling a track results in the data type of the track
+* __[TransformTrack](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/TransformTrack.h)__ A transform track is made up of multiple Tracks. It maps tracks to joints. Each joint can have three tracks: position, rotation and scale. Sampling a TransformTrack will always result in a Transform object.
+* __[Clip](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/Clip.h)__ A clip, such as "waling" is made up of multiple transform tracks. Each TransformTrack describes the motion of one joint over time. An animation clip describes the motion of multiple joints, a skeleton over time. A clip samples into a Pose.
 
 In this animation system, all of that data still exists, it's just all packed into one compact class. The ```Animation::Data``` class contains the following members:
 
@@ -57,7 +57,7 @@ The ```mFrameData``` variable contains all of the frames that are inside of the 
 +----------------------+----------------------------------+----------------------------+
 ```
 
-An animation track usually drives every component of a vector, not just a single one. To make a track work with higher order data, animation systems often have different classes like ```ScalarTrack```, ```VectorTrack```, ```QuaternionTrack```. In my [book](https://animationprogramming.com) book i chose to template the __[Track](TODO)__ class, this library takes a different approac..
+An animation track usually drives every component of a vector, not just a single one. To make a track work with higher order data, animation systems often have different classes like ```ScalarTrack```, ```VectorTrack```, ```QuaternionTrack```. In my [book](https://animationprogramming.com) book i chose to template the __[Track](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/Track.h)__ class, this library takes a different approac..
 
 Conceptually, each type of track has to have it's own type of frame. This is important because the size of a single frame (in bytes) changes based on how much data a frame represents. Consider the following frame structures
 
@@ -235,7 +235,7 @@ void Print(const Animation::Data& data) {
 
 It's up to the user to load and populate data. The ```Animation::Data``` class provides no functionality for loading anything from disk or from unknown formats. Animation data can be assigned using the ```Set``` function of ```Animation::Data```. The class does provide a ```Serialize``` and ```Deserialize``` function to quickly load and save animation data.
 
-The sample files provided in this repo where generated offline using the [glTF loader code](TODO) written in [Hands-On C++ Game Animation Programming](TODO). I modified the loading code to convert glTF files to the serialized format expected by this library instead.
+The sample files provided in this repo where generated offline using the [glTF loader code](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/GLTFLoader.h) written in [Hands-On C++ Game Animation Programming](https://animationprogramming.com). I modified the loading code to convert glTF files to the serialized format expected by this library instead.
 
 I do have plans to add a minimal glTF loader with no external dependancies later, until that happens the utility of this library is limited.
 

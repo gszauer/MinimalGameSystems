@@ -99,7 +99,8 @@ std::ostream& operator<<(std::ostream& os, const Animation::Data& data) {
 
 namespace Animation {
 	bool FloatCompare(float a, float b) {
-		return (a == b); // TODO
+		float delta = a - b;
+		return delta < 0.000001f && delta > -0.000001f;
 	}
 	
 	float FastInvSqrt(float number) { // 1 / sqrt(number)
