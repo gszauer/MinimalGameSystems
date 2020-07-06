@@ -1,101 +1,6 @@
 #include "AnimationData.h"
 #include "AnimationState.h"
-
-#if 0
-#include <ostream>
-std::ostream& operator<<(std::ostream& os, const Animation::Data& data) {
-	const char* label = data.GetLabel();
-	float startTime = data.GetStartTime();
-	float endTime = data.GetEndtime();
-	const unsigned int* trackData = data.GetTrackData();
-	unsigned int trackDataSize = data.TrackDataSize();
-	const float* frameData = data.GetFrameData();
-
-	unsigned int trackStride = 4;
-	unsigned int numTracks = trackDataSize / trackStride;
-
-	os << "Animation: " << label << "\n";
-	os << "\tNumber of tracks: " << numTracks << "\n";
-	os << "\tStart time: " << startTime << "\n";
-	os << "\tEnd time: " << endTime << "\n";
-	os << "\tTracks:\n";
-
-	// Loop trough all tracks in the animation clip
-	for (unsigned int t = 0; t < numTracks; ++t) {
-		os << "\tTrack " << t << ":\n";
-
-		// Current track data
-		unsigned int trackId = trackData[t * trackStride + 0];
-		unsigned int trackComponent = trackData[t * trackStride + 1];
-		unsigned int trackOffset = trackData[t * trackStride + 2];
-		unsigned int trackSize = trackData[t * trackStride + 3];
-
-		os << "\t\tTarget: " << trackId << "\n";
-		os << "\t\tComponent: ";
-		if (trackComponent == 0) { // 0 = position
-			os << "position\n";
-		}
-		else if (trackComponent == 1) { // 1 - rotation
-			os << "rotation\n";
-		}
-		else { // 2 - scale
-			os << "scale\n";
-		}
-		os << "\t\tOffset: " << trackOffset << "\n";
-		os << "\t\tSize: " << trackSize << "\n";
-
-		unsigned int frameStride = 3; // position and scale are vec3
-		if (trackComponent = 1) { // rotation is quat
-			frameStride = 4;
-		}
-
-		unsigned int numFrames = trackSize / frameStride;
-		os << "\t\tNumber of frames:" << numFrames << "\n";
-		os << "\t\tFrames:\n";
-
-		// Loop trough all frames in current track
-		for (unsigned int f = 0; f < numFrames; ++f) {
-			int frameIndex = trackOffset + f * frameStride;
-
-			// Current frame data
-			float frameTime = frameData[frameIndex++];
-			float frameIn[4] = {
-				frameData[frameIndex++],
-				frameData[frameIndex++],
-				frameData[frameIndex++],
-				(frameStride == 4) ? frameData[frameIndex++] : 0
-			};
-			float frameValue[4] = {
-				frameData[frameIndex++],
-				frameData[frameIndex++],
-				frameData[frameIndex++],
-				(frameStride == 4) ? frameData[frameIndex++] : 0
-			};
-			float frameOut[4] = {
-				frameData[frameIndex++],
-				frameData[frameIndex++],
-				frameData[frameIndex++],
-				(frameStride == 4) ? frameData[frameIndex++] : 0
-			};
-
-			os << "\t\tFrame " << f << ":\n";
-			os << "\t\t\tTime: " << frameTime << "\n";
-			for (int c = 0; c < frameStride; ++c) {
-				os << "\t\t\tIn[" << c << "]: " << frameIn[c];
-				os << (c == frameStride - 1) ? "\n" : ", ";
-			}
-			for (int c = 0; c < frameStride; ++c) {
-				os << "\t\t\tValue[" << c << "]: " << frameValue[c];
-				os << (c == frameStride - 1) ? "\n" : ", ";
-			}
-			for (int c = 0; c < frameStride; ++c) {
-				os << "\t\t\tValue[" << c << "]: " << frameOut[c];
-				os << (c == frameStride - 1) ? "\n" : ", ";
-			}
-		}
-	}
-}
-#endif
+#include "AnimationHelpers.h"
 
 namespace Animation {
 	bool FloatCompare(float a, float b) {
@@ -150,16 +55,9 @@ Animation::Data& Animation::Data::operator=(const Data& other) {
 }
 
 Animation::Data::~Data() {
-	if (mTrackData != 0) {
-		delete[] mTrackData;
-	}
-
-	if (mFrameData != 0) {
-		delete[] mFrameData;
-	}
-
+	Set(0, 0, 0, 0);
 	if (mLabel != 0) {
-		delete[] mLabel;
+		Animation::Free(mLabel);
 	}
 }
 
@@ -201,7 +99,7 @@ const char* Animation::Data::GetLabel() const {
 
 void Animation::Data::SetLabel(const char* label) {
 	if (mLabel != 0) {
-		delete[] mLabel;
+		Animation::Free(mLabel);
 		mLabel = 0;
 	}
 
@@ -216,7 +114,7 @@ void Animation::Data::SetLabel(const char* label) {
 	if (length == 0) {
 		return;
 	}
-	mLabel = new char[length + 1];
+	mLabel = (char*)Animation::Allocate(sizeof(char) * (length + 1));
 	// StrCpy
 	for (; *mLabel = *label; ++label, ++mLabel);
 	mLabel[length] = '\0';
@@ -414,7 +312,7 @@ void Animation::Data::Set(float* frameData, unsigned int frameSize, unsigned int
 	// Set frame data
 	if (frameData == 0 || frameSize == 0) {
 		if (mFrameData != 0) {
-			delete[] mFrameData;
+			Animation::Free(mFrameData);
 		}
 		mFrameData = 0;
 		mFrameDataSize = 0;
@@ -423,9 +321,9 @@ void Animation::Data::Set(float* frameData, unsigned int frameSize, unsigned int
 
 	if (frameSize != mFrameDataSize) {
 		if (mFrameData != 0) {
-			delete[] mFrameData;
+			Animation::Free(mFrameData);
 		}
-		mFrameData = new float[frameSize];
+		mFrameData = (float*)Animation::Allocate(sizeof(float) * frameSize);
 		mFrameDataSize = frameSize;
 	}
 
@@ -436,7 +334,7 @@ void Animation::Data::Set(float* frameData, unsigned int frameSize, unsigned int
 	// Set track data
 	if (trackData == 0 || trackSize == 0) {
 		if (mTrackData != 0) {
-			delete[] mTrackData;
+			Animation::Free(mTrackData);
 		}
 		mTrackData = 0;
 		mTrackDataSize = 0;
@@ -445,9 +343,9 @@ void Animation::Data::Set(float* frameData, unsigned int frameSize, unsigned int
 
 	if (trackSize != mTrackDataSize) {
 		if (mTrackData != 0) {
-			delete[] mTrackData;
+			Animation::Free(mTrackData);
 		}
-		mTrackData = new unsigned int[trackSize];
+		mTrackData = (unsigned int*)Animation::Allocate(sizeof(unsigned int) * trackSize);
 		mTrackDataSize = trackSize;
 	}
 

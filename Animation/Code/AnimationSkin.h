@@ -2,7 +2,6 @@
 #define _H_ANIMATION_SKIN_
 
 namespace Animation {
-
 	namespace Skin {
 		template<typename T, unsigned int N>
 		class Descriptor {

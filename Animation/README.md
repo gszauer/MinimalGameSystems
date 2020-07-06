@@ -8,8 +8,13 @@ The readability of the logic for many of these functions suffers from trying to 
 
 * ```AnimationData[.h, .cpp]``` - **required** - Contains ```Animation::Data```, analogous to an animation clip.
 * ```AnimationState[.h, .cpp]``` - **required** - Contains ```Aniamtion::State```, analogous to an animated pose. 
+* ```AnimationHelpers[.h, .cpp]``` - **required** - Contains helper functions that can be used as is or replaced by more specialized implementations.
 * ```AnimationBlend[.h, .cpp]``` - **optional** - Contains code to blend animations smoothly.
 * ```AnimationSkin[.h, .cpp]``` - **optional** - Contains code to skin meshes using ```Animation::State```.
+
+# Helpers
+
+The ```AnimationState[.h, .cpp]``` files contains helper function. These helper functions wrap functionality that is already available (and probably better implemented) in the standard library. The intention with this was to provide a central place for all standard library functions so they can be re-implemented with more appropriate versions.
 
 # State And Data
 
@@ -88,8 +93,6 @@ struct Float3Frame {
 ```
 
 This makes the diagram of how ```mFrameData``` is segmented harder to read. Two segments both containing 5 frames could have a different size (in bytes) if one segment could hold a vector track while another segment could hold a quaternion track. The ```mFrameData``` is already segmented into tracks. Each track is also segmented into frames, like so:
-
-
 
 ```
 +----------------------+----------------------------------+----------------------------+
@@ -237,7 +240,7 @@ It's up to the user to load and populate data. The ```Animation::Data``` class p
 
 The sample files provided in this repo where generated offline using the [glTF loader code](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/GLTFLoader.h) written in [Hands-On C++ Game Animation Programming](https://animationprogramming.com). I modified the loading code to convert glTF files to the serialized format expected by this library instead.
 
-I do have plans to add a minimal glTF loader with no external dependancies later, until that happens the utility of this library is limited.
+> I do have plans to add a minimal glTF loader with no external dependancies later, until that happens the utility of this library is limited.
 
 ### Animation::Data functions
 
@@ -265,7 +268,7 @@ I do have plans to add a minimal glTF loader with no external dependancies later
 
 The ```Animation::State``` object is analogous to a ```Pose``` class or something similar. The ```Aniamtion::State``` class is a wrapper for a simple hierarchy. This hierarchy is the animated scene, or in the case of character animation, the animates pose or skeleton.
 
-> I've played around with the idea of removing ```Animation::State``` in favor of a descriptor type of scheme. Where ```Animation::Data::Sample``` would take an ```Animation::HierarchyDescriptor``` object that provides a mapping to where the transform data should be stored. This would make the animation code presented here much easier to integrate into existing code bases, and it would eliminate two spots in code that do memory allocation. The problem i'm having with that is how to describe the hierarchy relationship.
+> I've played around with the idea of removing ```Animation::State``` in favor of a descriptor type of scheme. Where ```Animation::Data::Sample``` would take an ```Animation::HierarchyDescriptor``` object that provides a mapping to where the transform data should be stored. This would make the animation code presented here much easier to integrate into existing code bases, and it would eliminate two spots in code that do memory allocation. I'm not sure how the descriptor would store the hierarchy relationship.
 
 The ```Animation::State``` class encodes a hierarchy using the following member variables:
 

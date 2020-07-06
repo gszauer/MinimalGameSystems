@@ -41,15 +41,10 @@ namespace Animation {
         void GetRelativeTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const;
         void GetAbsoluteTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const;
 
-        unsigned int Serialize(char* output, unsigned int outputSize);
-        void DeSerialize(char* input, unsigned int inputSize);
-        unsigned int SerializedSize() const;
+        void SerializeToString(char* output) const;
+        void DeSerializeFromString(const char* input);
+        unsigned int SerializedStringLength() const;
     };
 }
-
-#if 0
-#include <iosfwd>
-std::ostream& operator<<(std::ostream& os, const Animation::State& state);
-#endif
 
 #endif
