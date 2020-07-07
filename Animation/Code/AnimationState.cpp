@@ -22,9 +22,13 @@ Animation::State& Animation::State::operator=(const Animation::State& other) {
 
     Resize(other.Size());
     for (unsigned int i = 0; i < mSize; ++i) {
-        mTransforms[i] = other.mTransforms[i];
         mHierarchy[i] = other.mHierarchy[i];
     }
+
+    for (unsigned int i = 0; i < mSize * 10; ++i) {
+        mTransforms[i] = other.mTransforms[i];
+    }
+
 
     return *this;
 }

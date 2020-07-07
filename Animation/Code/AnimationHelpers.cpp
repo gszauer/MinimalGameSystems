@@ -207,6 +207,8 @@ char* Animation::WriteInt(char* target, int v) {
     return WriteUInt(target, uv);
 }
 
+#include <cmath>
+
 char* Animation::WriteFloat(char* target, float v) {
     if (v < 0) {
         *target = '-';
@@ -224,14 +226,15 @@ char* Animation::WriteFloat(char* target, float v) {
     target += 1;
 
     float part = v - (float)whole;
-    part = part * 100000.0f; // 100000 = 10^5, since there are 5 decimal places
-    whole = (unsigned int)part;
-    target = WriteUInt(target, whole);
 
-    target -= 1; // Remove space, write left of digits, add space
-    for (unsigned int numLeft = 5 - CountDigits(whole); numLeft > 0; numLeft--) {
-        *target = '0';
-        target += 1;
+    for (unsigned int i = 0; i < 5; ++i) {
+        part = part * 10.0f; // Move up one
+        while (part > 10.0f) { part -= 10.0f; }
+        whole = (unsigned int)part; // Get Digit
+        //if (whole <= 9) {
+            *target = '0' + whole; // Since it's a single digit
+            target += 1;
+        //}
     }
     *target = ' ';
     target += 1;
@@ -304,11 +307,12 @@ const char* Animation::ReadFloat(const char* target, float& f) {
 
     unsigned int whole = 0;
     target = ReadUInt(target, whole);
-    unsigned int part = 0;
+    float part = 0.0f;
 
+    float shift[] = { 0.1f, 0.01f, 0.001f, 0.0001f, 0.00001f, 0.000001f };
     if (*target == '.') {
         target += 1;
-        
+
         { // Start ReadUInt, but only 5 numbers.
             // First, make sure the next token is valid
             char current = *target;
@@ -318,12 +322,12 @@ const char* Animation::ReadFloat(const char* target, float& f) {
                     char current = *target;
                     // If token is valid, process it
                     if (current >= '0' && current <= '9') { 
-                        part = (part * 10) + (current - '0');
+                        part += shift[i] * (current - '0');
+                        target += 1; // increment target
                     }
                     else { // otherwise break
                         break;
                     }
-                    target += 1; // increment target
                 }
                 // We read in 5 tokens, if there are more numbers, ignore them
                 current = *target;
@@ -335,31 +339,7 @@ const char* Animation::ReadFloat(const char* target, float& f) {
         } // End ReadUInt, but only 5 numbers.
     }
 
-    f = (float)whole;
-    
-    float f_part = 0.0f;
-    switch(CountDigits(part)) {
-    case 1:
-        f_part = (float)part * 0.1f;
-        break;
-    case 2:
-        f_part = (float)part * 0.01f;
-        break;
-    case 3:
-        f_part = (float)part * 0.001f;
-        break;
-    case 4:
-        f_part = (float)part * 0.0001f;
-        break;
-    case 5:
-        f_part = (float)part * 0.00001f;
-        break;
-    default:
-        f_part = 0;
-        break;
-    }
-    
-    f += f_part;
+    f = (float)whole + part;
     if (negative) {
         f = -f;
     }
@@ -368,7 +348,11 @@ const char* Animation::ReadFloat(const char* target, float& f) {
 }
 
 void* Animation::Allocate(unsigned int bytes) {
-    return new char[bytes];
+    char* result = new char[bytes];
+    for (unsigned int i = 0; i < bytes; ++i) {
+        result[i] = 0;
+    }
+    return result;
 }
 
 void Animation::Free(void* memory) {
