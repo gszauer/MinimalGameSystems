@@ -73,34 +73,124 @@ protected: // OpenGL 3.3 stuff to draw the mesh to screen
 	GLuint mIBO = 0;
 	GLuint mShader = 0;
 	bool mOpenGLInitialized = false;
+private:
+	void LoadModel();
+	void LoadAnimation();
+	void InitDescriptors();
+	void InitOpenGL();
 public:
 	void Initialize();
 	void Update(float dt);
 	void Render(float aspect);
 	void Shutdown();
-
-	unsigned int Serialize(char* output, unsigned int outputSize) const;
-	bool DeSerialize(const char* input, unsigned int inputSize);
-	unsigned int SerializedSize() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // CPUSkinnedCharacterSample Implementation
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void CPUSkinnedCharacterSample::Initialize() {
-	mOpenGLInitialized = false;
-	std::ifstream t("Assets/CPUSample.txt");
+void CPUSkinnedCharacterSample::LoadModel() {
+	std::ifstream file("Assets/womanMesh.txt");
 	std::stringstream buffer;
-	buffer << t.rdbuf();
-
+	buffer << file.rdbuf();
 	const std::string& str = buffer.str();
-	if (!DeSerialize(str.c_str(), str.size())) {
-		return;
-	}
-	mPlayTime = 0.0f;
+	const char* input = str.c_str();
 
-	// TODO: Setup descriptors
+	unsigned int posSize = 0;
+	unsigned int normSize = 0;
+	unsigned int texSize = 0;
+	unsigned int weightSize = 0;
+	unsigned int infSize = 0;
+	unsigned int idxSize = 0;
+
+	input = Animation::ReadUInt(input, posSize);
+	mVertices.resize(posSize * 3);
+	for (unsigned int i = 0; i < posSize; ++i) {
+		input = Animation::ReadFloat(input, mVertices[i * 3 + 0]);
+		input = Animation::ReadFloat(input, mVertices[i * 3 + 1]);
+		input = Animation::ReadFloat(input, mVertices[i * 3 + 2]);
+	}
+
+	input = Animation::ReadUInt(input, normSize);
+	mNormals.resize(normSize * 3);
+	for (unsigned int i = 0; i < normSize; ++i) {
+		input = Animation::ReadFloat(input, mNormals[i * 3 + 0]);
+		input = Animation::ReadFloat(input, mNormals[i * 3 + 1]);
+		input = Animation::ReadFloat(input, mNormals[i * 3 + 2]);
+	}
+
+	input = Animation::ReadUInt(input, texSize);
+	mTexCoords.resize(texSize * 2);
+	for (unsigned int i = 0; i < texSize; ++i) {
+		input = Animation::ReadFloat(input, mTexCoords[i * 2 + 0]);
+		input = Animation::ReadFloat(input, mTexCoords[i * 2 + 1]);
+	}
+
+	input = Animation::ReadUInt(input, weightSize);
+	mWeights.resize(weightSize * 4);
+	for (unsigned int i = 0; i < weightSize; ++i) {
+		input = Animation::ReadFloat(input, mWeights[i * 4 + 0]);
+		input = Animation::ReadFloat(input, mWeights[i * 4 + 1]);
+		input = Animation::ReadFloat(input, mWeights[i * 4 + 2]);
+		input = Animation::ReadFloat(input, mWeights[i * 4 + 3]);
+	}
+
+	input = Animation::ReadUInt(input, infSize);
+	mInfluences.resize(infSize * 4);
+	for (unsigned int i = 0; i < infSize; ++i) {
+		input = Animation::ReadUInt(input, mInfluences[i * 4 + 0]);
+		input = Animation::ReadUInt(input, mInfluences[i * 4 + 1]);
+		input = Animation::ReadUInt(input, mInfluences[i * 4 + 2]);
+		input = Animation::ReadUInt(input, mInfluences[i * 4 + 3]);
+	}
+
+	input = Animation::ReadUInt(input, idxSize);
+	mIndices.resize(idxSize);
+	for (unsigned int i = 0; i < idxSize; ++i) {
+		input = Animation::ReadUInt(input, mIndices[i]);
+	}
+
+	buffer.clear();
+	file.close();
+
+	mSkinned.resize(mVertices.size() + mNormals.size());
+}
+
+void CPUSkinnedCharacterSample::LoadAnimation() {
+	std::ifstream file("Assets/bindState.txt");
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	const char* input = buffer.str().c_str();
+	mBindPose.DeSerializeFromString(input);
+	buffer.clear();
+	file.close();
+
+	file = std::ifstream("Assets/restState.txt");
+	buffer << file.rdbuf();
+	input = buffer.str().c_str();
+	mRestPose.DeSerializeFromString(input);
+	mAnimatedPose = mRestPose;
+	buffer.clear();
+	file.close();
+
+	file = std::ifstream("Assets/walkingData.txt");
+	buffer << file.rdbuf();
+	input = buffer.str().c_str();
+	mAniamtionData.DeSerializeFromString(input);
+	buffer.clear();
+	file.close();
+
+	mPlayTime = 0.0f;
+	mInvBindPosePalette.resize(mBindPose.Size() * 16);
+	mAnimatedPosePalette.resize(mBindPose.Size() * 16);
+}
+
+void CPUSkinnedCharacterSample::InitDescriptors() {
+	// TODO
+}
+
+void CPUSkinnedCharacterSample::InitOpenGL() {
+	mOpenGLInitialized = false;
 
 	if (sizeof(unsigned int) != sizeof(float)) {
 		return;
@@ -132,7 +222,7 @@ void CPUSkinnedCharacterSample::Initialize() {
 	bytes += sizeof(float) * mTexCoords.size();
 	bytes += sizeof(unsigned int) * mInfluences.size();
 	bytes += sizeof(float) * mWeights.size();
-	
+
 	std::vector<float> staticBufferData;
 	staticBufferData.resize(mTexCoords.size() + mInfluences.size() + mWeights.size());
 
@@ -176,6 +266,13 @@ void CPUSkinnedCharacterSample::Initialize() {
 	// TODO: Compile and set up shaders
 
 	mOpenGLInitialized = true;
+}
+
+void CPUSkinnedCharacterSample::Initialize() {
+	LoadModel();
+	LoadAnimation();
+	InitDescriptors();
+	InitOpenGL();
 }
 
 void CPUSkinnedCharacterSample::Update(float dt) {
@@ -250,96 +347,6 @@ void CPUSkinnedCharacterSample::Shutdown() {
 	glDeleteVertexArrays(1, &mVAO);
 	mOpenGLInitialized = false;
 }
-
-unsigned int CPUSkinnedCharacterSample::Serialize(char* output, unsigned int outputSize) const {
-	// TOOD
-	return 0;
-}
-
-#define READ_UINT_BLOCK(target, count, comps, stream) \
-	target.resize(count * comps); \
-	for (unsigned int i = 0; i < count; ++i) { \
-		for (unsigned int j = 0; j < comps; ++j) { \
-			target[i * comps + j] = ReadUInt(stream); \
-			stream = AdvanceUInt(stream); \
-		} \
-	}
-
-#define READ_FLOAT_BLOCK(target, count, comps, stream) \
-	target.resize(count * comps); \
-	for (unsigned int i = 0; i < count; ++i) { \
-		for (unsigned int j = 0; j < comps; ++j) { \
-			target[i * comps + j] = ReadFloat(stream); \
-			stream = AdvanceFloat(stream); \
-		} \
-	}
-
-#define READ_UINT(name, stream) \
-	unsigned int name = ReadUInt(stream); \
-	stream = AdvanceUInt(stream);
-
-bool CPUSkinnedCharacterSample::DeSerialize(const char* input, unsigned int inputSize) {
-	const char* start = input;
-	// TODO: Confirm that input size is big enough to hold the header data
-
-	//READ_UINT(numVerts, input);
-	//READ_UINT(numNorms, input);
-	//READ_UINT(numTexCoords, input);
-	//READ_UINT(numInfluences, input);
-	//READ_UINT(numWeights, input);
-	//READ_UINT(numIndices, input);
-	//READ_UINT(animatedDataSize, input);
-	//READ_UINT(restPoseSize, input);
-	//READ_UINT(bindPoseSize, input);
-
-	// TODO: Confirm that input size is big enough to hold actual data
-
-	//READ_FLOAT_BLOCK(mVertices, numVerts, 3, input);
-	//READ_FLOAT_BLOCK(mNormals, numNorms, 3, input);
-	//READ_FLOAT_BLOCK(mTexCoords, numTexCoords, 2, input);
-	//READ_UINT_BLOCK(mInfluences, numInfluences, 4, input);
-	//READ_FLOAT_BLOCK(mWeights, numWeights, 4, input);
-	//READ_UINT_BLOCK(mIndices, numIndices, 1, input);
-
-	// TODO: Deserialize animatedDataSize
-	// TODO: Deserialize restPoseSize
-	// TODO: Deserialize bindPoseSize
-
-	if (input - start != inputSize) {
-		return false;
-	}
-
-	return true;
-}
-
-unsigned int CPUSkinnedCharacterSample::SerializedSize() const {
-	unsigned int total = 0;
-
-	total += sizeof(unsigned int); // Num Verts (position)
-	total += sizeof(unsigned int); // Num Verts (normal)
-	total += sizeof(unsigned int); // Num Verts (texcoords)
-	total += sizeof(unsigned int); // Num Verts (influences)
-	total += sizeof(unsigned int); // Num Verts (weights)
-	total += sizeof(unsigned int); // Num Verts (indices)
-	total += sizeof(unsigned int); // mAniamtionData size
-	total += sizeof(unsigned int); // mRestPose size
-	total += sizeof(unsigned int); // mBindPose size
-
-	total += sizeof(float) * mVertices.size();
-	total += sizeof(float) * mNormals.size();
-	total += sizeof(float) * mTexCoords.size();
-	total += sizeof(float) * mInfluences.size();
-	total += sizeof(float) * mWeights.size();
-	total += sizeof(float) * mIndices.size();
-
-	//total += mAniamtionData.SerializedSize(); // Animation data
-	//total += mRestPose.SerializedSize();
-	//total += mBindPose.SerializedSize();
-	// TODO
-	
-	return total;
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////
 // Everything below this line is just WinMain + OpenGL loader. Nothing too interesting.
 ///////////////////////////////////////////////////////////////////////////////////////
