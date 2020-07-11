@@ -2,28 +2,6 @@
 #include "AnimationState.h"
 #include "AnimationHelpers.h"
 
-namespace Animation {
-	bool FloatCompare(float a, float b) {
-		float delta = a - b;
-		return delta < 0.000001f && delta > -0.000001f;
-	}
-	
-	float FastInvSqrt(float number) { // 1 / sqrt(number)
-		long i;
-		float x2, y;
-		const float threehalfs = 1.5F;
-
-		x2 = number * 0.5F;
-		y = number;
-		i = *(long*)&y;                       // evil floating point bit level hacking
-		i = 0x5f3759df - (i >> 1);               // what the fuck?
-		y = *(float*)&i;
-		y = y * (threehalfs - (x2 * y * y));   // 1st iteration
-
-		return y;
-	}
-}
-
 Animation::Data::Data() {
 	mFrameData = 0;
 	mFrameDataSize = 0;
@@ -50,12 +28,17 @@ Animation::Data& Animation::Data::operator=(const Data& other) {
 		return *this;
 	}
 
-	Set(other.mFrameData, other.mFrameDataSize, other.mTrackData, other.mTrackDataSize);
+	SetRawData(other.mFrameData, other.mFrameDataSize, other.mTrackData, other.mTrackDataSize);
 	SetLabel(other.GetLabel());
 }
 
 Animation::Data::~Data() {
-	Set(0, 0, 0, 0);
+	if (mFrameData != 0) {
+		Animation::Free(mFrameData);
+	}
+	if (mTrackData != 0) {
+		Animation::Free(mTrackData);
+	}
 	if (mLabel != 0) {
 		Animation::Free(mLabel);
 	}
@@ -86,11 +69,11 @@ float Animation::Data::GetEndtime() const {
 }
 
 bool Animation::Data::IsValid() const {
-	return mEndTime > mStartTime && mFrameDataSize > 0 && mTrackDataSize > 0;
+	return GetEndtime() > GetStartTime() && mFrameDataSize > 0 && mTrackDataSize > 0;
 }
 
 float Animation::Data::GetDuration() const {
-	return mEndTime - mStartTime;
+	return GetEndtime() - GetStartTime();
 }
 
 const char* Animation::Data::GetLabel() const {
@@ -115,36 +98,38 @@ void Animation::Data::SetLabel(const char* label) {
 		return;
 	}
 	mLabel = (char*)Animation::Allocate(sizeof(char) * (length + 1));
-	// StrCpy
-	for (; *mLabel = *label; ++label, ++mLabel);
+	for (char* cpy = mLabel; *cpy = *label; ++label, ++cpy); // StrCpy
 	mLabel[length] = '\0';
 }
 
 float Animation::Data::Sample(State& out, float time, bool looping) const {
 	// Adjust time to fit valid range for clip
+	float startTime = GetStartTime();
+	float endTime = GetEndtime();
+	
 	if (looping) {
-		float duration = mEndTime - mStartTime;
+		float duration = GetDuration();
 		if (duration <= 0) {
 			return 0.0f;
 		}
 
-		// time = fmodf(time - mStartTime, mEndTime - mStartTime);
-		float fmodA = time - mStartTime;
-		float fmodB = mEndTime - mStartTime;
+		// time = fmodf(time - startTime, endTime - startTime);
+		float fmodA = time - startTime;
+		float fmodB = endTime - startTime;
 		int truncated = (int)(fmodA / fmodB);
 		time = fmodA - ((float)truncated * fmodB);
 		// End fmod
 
-		while (time < mStartTime) {
-			time += mEndTime - mStartTime;
+		while (time < startTime) {
+			time += endTime - startTime;
 		}
 	}
 	else {
-		if (time < mStartTime) {
-			time = mStartTime;
+		if (time < startTime) {
+			time = startTime;
 		}
-		if (time > mEndTime) {
-			time = mEndTime;
+		if (time > endTime) {
+			time = endTime;
 		}
 	}
 	
@@ -308,7 +293,7 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 
 #pragma warning(push)
 #pragma warning(disable:6385) // If you manage to overflow the track buffer the animation was huge
-void Animation::Data::Set(float* frameData, unsigned int frameSize, unsigned int* trackData, unsigned int trackSize) {
+void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize, const unsigned int* trackData, unsigned int trackSize) {
 	// Set frame data
 	if (frameData == 0 || frameSize == 0) {
 		if (mFrameData != 0) {
@@ -375,16 +360,120 @@ void Animation::Data::Set(float* frameData, unsigned int frameSize, unsigned int
 }
 #pragma warning(pop)
 
-unsigned int Animation::Data::Serialize(char* output, unsigned int outputSize) const {
-	return 0;
-	// TODO
+void Animation::Data::SerializeToString(char* output) const {
+	char* last = output;
+	unsigned int written = 0;
+	unsigned int delta = 0;
+
+	output = WriteUInt(output, mFrameDataSize);
+	output = WriteNewLine(output);
+
+	for (unsigned int i = 0; i < mFrameDataSize; ++i) {
+		output = WriteFloat(output, mFrameData[i]);
+	}
+	output = WriteNewLine(output);
+
+	output = WriteUInt(output, mTrackDataSize);
+	output = WriteNewLine(output);
+	for (unsigned int i = 0; i < mTrackDataSize; ++i) {
+		output = WriteUInt(output, mTrackData[i]);
+	}
+	output = WriteNewLine(output);
+
+	output = WriteFloat(output, mStartTime);
+	output = WriteFloat(output, mEndTime);
+	output = WriteNewLine(output);
+
+	unsigned int labelLength = 0;
+	if (mLabel != 0) {
+		char* it = mLabel;
+		while (*it != '\0') {
+			labelLength += 1;
+			it += 1;
+		}
+	}
+	output = WriteUInt(output, labelLength);
+
+	for (unsigned int i = 0; i < labelLength; ++i) {
+		*output = mLabel[i];
+		output += 1;
+	}
+
+	*output = '\0';
 }
 
-void Animation::Data::DeSerialize(char* input, unsigned int inputSize) {
-	// TODO
+unsigned int Animation::Data::SerializedStringLength() const {
+	unsigned int size = 0;
+
+	size += UIntStringLength(mFrameDataSize) + 1;
+	size += 1;
+
+	for (unsigned int i = 0; i < mFrameDataSize; ++i) {
+		size += FloatStringLength(mFrameData[i]) + 1;
+	}
+	size += 1;
+
+	size += UIntStringLength(mTrackDataSize) + 1;
+	size += 1;
+	for (unsigned int i = 0; i < mTrackDataSize; ++i) {
+		size += UIntStringLength(mTrackData[i]) + 1;
+	}
+	size += 1;
+
+	size += FloatStringLength(mStartTime) + 1;
+	size += FloatStringLength(mEndTime) + 1;
+	size += 1;
+
+	unsigned int labelLength = 0;
+	if (mLabel != 0) {
+		char* it = mLabel;
+		while (*it != '\0') {
+			labelLength += 1;
+			it += 1;
+		}
+	}
+	size += UIntStringLength(labelLength) + 1;
+
+	for (unsigned int i = 0; i < labelLength; ++i) {
+		size += 1;
+	}
+
+	size += 1;
+
+	return size;
 }
 
-unsigned int Animation::Data::SerializedSize() const {
-	// TODO
-	return 0;
+void Animation::Data::DeSerializeFromString(const char* input) {
+	input = IgnoreUntilNumber(input);
+	input = ReadUInt(input, mFrameDataSize);
+	if (mFrameData != 0) {
+		Free(mFrameData);
+	}
+	mFrameData = (float*)Allocate(sizeof(float) * mFrameDataSize);
+
+	for (unsigned int i = 0; i < mFrameDataSize; ++i) {
+		input = ReadFloat(input, mFrameData[i]);
+	}
+
+	input = ReadUInt(input, mTrackDataSize);
+	if (mTrackData != 0) {
+		Free(mTrackData);
+	}
+	mTrackData = (unsigned int*)Allocate(sizeof(unsigned int) * mTrackDataSize);
+	for (unsigned int i = 0; i < mTrackDataSize; ++i) {
+		input = ReadUInt(input, mTrackData[i]);
+	}
+
+	input = ReadFloat(input, mStartTime);
+	input = ReadFloat(input, mEndTime);
+
+	unsigned int labelLength = 0;
+	input = ReadUInt(input, labelLength);
+	mLabel = (char*)Allocate(sizeof(char) * labelLength + 1);
+	mLabel[labelLength] = '\0';
+
+	for (unsigned int i = 0; i < labelLength; ++i) {
+		mLabel[i] = *input;
+		input += 1;
+	}
 }

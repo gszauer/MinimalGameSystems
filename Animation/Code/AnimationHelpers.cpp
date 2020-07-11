@@ -229,7 +229,7 @@ char* Animation::WriteFloat(char* target, float v) {
 
     for (unsigned int i = 0; i < 5; ++i) {
         part = part * 10.0f; // Move up one
-        while (part > 10.0f) { part -= 10.0f; }
+        while (part >= 10.0f) { part -= 10.0f; }
         whole = (unsigned int)part; // Get Digit
         //if (whole <= 9) {
             *target = '0' + whole; // Since it's a single digit
@@ -357,4 +357,24 @@ void* Animation::Allocate(unsigned int bytes) {
 
 void Animation::Free(void* memory) {
     delete[] ((char*)memory);
+}
+
+bool Animation::FloatCompare(float a, float b) {
+    float delta = a - b;
+    return delta < 0.000001f && delta > -0.000001f;
+}
+
+float Animation::FastInvSqrt(float number) { // 1 / sqrt(number)
+    long i;
+    float x2, y;
+    const float threehalfs = 1.5F;
+
+    x2 = number * 0.5F;
+    y = number;
+    i = *(long*)&y;                       // evil floating point bit level hacking
+    i = 0x5f3759df - (i >> 1);               // what the fuck?
+    y = *(float*)&i;
+    y = y * (threehalfs - (x2 * y * y));   // 1st iteration
+
+    return y;
 }

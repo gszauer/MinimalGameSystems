@@ -42,11 +42,17 @@ unsigned int Animation::State::Size() const {
 }
 
 void Animation::State::Resize(unsigned int size) {
+    if (mSize == size && mTransforms != 0 && mHierarchy != 0) {
+        return;
+    }
+
     if (mTransforms != 0) {
         Animation::Free(mTransforms);
+        mTransforms = 0;
     }
     if (mHierarchy != 0) {
         Animation::Free(mHierarchy);
+        mHierarchy = 0;
     }
 
     if (size == 0) {
@@ -242,6 +248,8 @@ unsigned int Animation::State::SerializedStringLength() const {
     }
     stringLength += lineBreak;
 
+    stringLength += 1; // null terminator
+
     return stringLength;
 }
 
@@ -266,6 +274,7 @@ void Animation::State::SerializeToString(char* output) const {
         output = WriteFloat(output, mTransforms[i * 10 + 9]);
     }
     output = WriteNewLine(output);
+    *output = '\0';
 }
 
 void Animation::State::DeSerializeFromString(const char* input) {
@@ -288,4 +297,6 @@ void Animation::State::DeSerializeFromString(const char* input) {
         input = ReadFloat(input, mTransforms[i * 10 + 8]);
         input = ReadFloat(input, mTransforms[i * 10 + 9]);
     }
+
+    // Ignore null terminator
 }

@@ -403,9 +403,11 @@ Animation state is volatile, it is the result of sampling animation data at some
 * Bind State
 * Rest State
 
-The two are defined seperateley. The bind state is whatever the pose the skeleton was in when the mesh got skinned to it. The Rest pose is the state of the hierarchy that all animations move. The bind and rest pose are often the same, but not always. Some file formats or 3DCC tools might not export the two poses as the same thing. 
+The two are defined seperateley. The **bind state** is whatever the pose the skeleton was in when the mesh was skinned to it. The **rest state** is the default / reference state of the hierarchy. The bind and rest pose are often the same, but not always. Some file formats or 3DCC tools might not export the two poses as the same thing. 
 
 The ```Serialize``` and ```Deserialize``` functions are intended to save and load the bind and rest poses. 
+
+TODO: Function signatores are now off here and with data. Fix that.
 
 ### Animation::State functions
 
@@ -441,6 +443,10 @@ The ```Serialize``` and ```Deserialize``` functions are intended to save and loa
 TODO
 
 # Blending
+
+TODO
+
+# Helpers
 
 TODO
 

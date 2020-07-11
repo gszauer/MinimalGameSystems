@@ -22,6 +22,9 @@ namespace Animation {
     const char* IgnoreUntilNumber(const char* target);
     char* WriteNewLine(char* target);
 
+    bool FloatCompare(float a, float b);
+    float FastInvSqrt(float number);
+
     void* Allocate(unsigned int bytes);
     void Free(void* memory);
 }

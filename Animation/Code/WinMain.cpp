@@ -332,7 +332,7 @@ unsigned int CPUSkinnedCharacterSample::SerializedSize() const {
 	total += sizeof(float) * mWeights.size();
 	total += sizeof(float) * mIndices.size();
 
-	total += mAniamtionData.SerializedSize(); // Animation data
+	//total += mAniamtionData.SerializedSize(); // Animation data
 	//total += mRestPose.SerializedSize();
 	//total += mBindPose.SerializedSize();
 	// TODO
