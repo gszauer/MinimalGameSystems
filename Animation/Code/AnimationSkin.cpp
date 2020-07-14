@@ -1,5 +1,14 @@
 #include "AnimationSkin.h"
 
+template Animation::Skin::Descriptor<float, 4>;
+template Animation::Skin::Descriptor<float, 3>;
+template Animation::Skin::Descriptor<float, 2>;
+template Animation::Skin::Descriptor<float, 1>;
+template Animation::Skin::Descriptor<unsigned int, 4>;
+template Animation::Skin::Descriptor<unsigned int, 3>;
+template Animation::Skin::Descriptor<unsigned int, 2>;
+template Animation::Skin::Descriptor<unsigned int, 1>;
+
 namespace Animation {
 	static void MultiplyMatrices(float* out, const float* a, const float* b) {
 		// Column 0
@@ -78,23 +87,25 @@ Animation::Skin::Descriptor<T, N>::Descriptor() {
 	mData = 0;
 	mCount = 0;
 	mOffset = 0;
-	mStride = 0;
+	mStride = sizeof(T) * N;
 }
 
 template<typename T, unsigned int N>
 Animation::Skin::Descriptor<T, N>::Descriptor(T* data, unsigned int count, unsigned int stride, unsigned int offset) {
-	mData = data;
-	mCount = 0;
-	mOffset = 0;
-	mStride = 0;
+	Set(data, count, stride, offset);
 }
 
 template<typename T, unsigned int N>
 void Animation::Skin::Descriptor<T, N>::Set(T* data, unsigned int count, unsigned int stride, unsigned int offset) {
 	mData = data;
-	mCount = count;
+	mCount = count / N;
 	mOffset = offset;
-	mStride = stride;
+	if (stride == 0) {
+		mStride = sizeof(T) * N;
+	}
+	else {
+		mStride = stride;
+	}
 }
 
 template<typename T, unsigned int N>
@@ -103,17 +114,17 @@ unsigned int Animation::Skin::Descriptor<T, N>::Size() const {
 }
 
 template<typename T, unsigned int N>
-const T& Animation::Skin::Descriptor<T, N>::operator[](unsigned int index) const {
+const T* Animation::Skin::Descriptor<T, N>::operator[](unsigned int index) const {
 	unsigned char* data = (unsigned char*)mData;
-	T* cast = (T*)&data[index * (sizeof(T) * N + mStride)];
-	return *cast;
+	T * cast = (T*)&data[index * mStride + mOffset];
+	return cast;
 }
 
 template<typename T, unsigned int N>
-T& Animation::Skin::Descriptor<T, N>::operator[](unsigned int index) {
+T* Animation::Skin::Descriptor<T, N>::operator[](unsigned int index) {
 	unsigned char* data = (unsigned char*)mData;
-	T* cast = (T*)&data[index * (sizeof(T) * N + mStride)];
-	return *cast;
+	T* cast = (T*)&data[index * mStride + mOffset];
+	return cast;
 }
 
 template<typename T, unsigned int N>
@@ -160,15 +171,15 @@ void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float
 	unsigned int numVerts = input.Size();
 
 	for (unsigned int i = 0; i < numVerts; ++i) {
-		const float* inputScalar = &input[i];
+		const float* inputScalar = input[i];
 		float vertex[4] = {
 			inputScalar[0],
 			inputScalar[1],
 			inputScalar[2],
 			w
 		};
-		const unsigned int* influence = &influences[i];
-		const float* weight = &weights[i];
+		const unsigned int* influence = influences[i];
+		const float* weight = weights[i];
 
 		float m0[16], m1[16], m2[16], m3[16], skin[16] = { 0 };
 
@@ -199,7 +210,7 @@ void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float
 		float result[4] = { 0 };
 		MultiplyMat4Vec4(result, skin, vertex);
 
-		float* outputScalar = &output[i];
+		float* outputScalar = output[i];
 		outputScalar[0] = result[0];
 		outputScalar[1] = result[1];
 		outputScalar[2] = result[2];
@@ -210,15 +221,15 @@ void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float
 	unsigned int numVerts = input.Size();
 
 	for (unsigned int i = 0; i < numVerts; ++i) {
-		const float* inputScalar = &input[i];
+		const float* inputScalar = input[i];
 		float vertex[4] = {
 			inputScalar[0],
 			inputScalar[1],
 			inputScalar[2],
 			w
 		};
-		const unsigned int* influence = &influences[i];
-		const float* weight = &weights[i];
+		const unsigned int* influence = influences[i];
+		const float* weight = weights[i];
 
 		float m0[16], m1[16], m2[16], m3[16], skin[16] = { 0 };
 
@@ -245,7 +256,7 @@ void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float
 		float result[4] = { 0 };
 		MultiplyMat4Vec4(result, skin, vertex);
 
-		float* outputScalar = &output[i];
+		float* outputScalar = output[i];
 		outputScalar[0] = result[0];
 		outputScalar[1] = result[1];
 		outputScalar[2] = result[2];

@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Samples">
+      <UniqueIdentifier>{ec19b438-e0d6-45f3-bd80-e1ccf0f606c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Samples">
+      <UniqueIdentifier>{a32a2e2f-50f0-460d-8711-caab86436225}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\AnimationBlend.h">
@@ -32,6 +38,15 @@
     </ClInclude>
     <ClInclude Include="Code\AnimationHelpers.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Samples\ISample.h">
+      <Filter>Header Files\Samples</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Samples\SkeletonSample.h">
+      <Filter>Header Files\Samples</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Samples\SkinnedSample.h">
+      <Filter>Header Files\Samples</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -55,6 +70,15 @@
     </ClCompile>
     <ClCompile Include="Code\AnimationHelpers.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\SkeletonSample.cpp">
+      <Filter>Source Files\Samples</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\ISample.cpp">
+      <Filter>Source Files\Samples</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\SkinnedSample.cpp">
+      <Filter>Source Files\Samples</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

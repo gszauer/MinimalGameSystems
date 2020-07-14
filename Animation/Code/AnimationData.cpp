@@ -30,6 +30,8 @@ Animation::Data& Animation::Data::operator=(const Data& other) {
 
 	SetRawData(other.mFrameData, other.mFrameDataSize, other.mTrackData, other.mTrackDataSize);
 	SetLabel(other.GetLabel());
+
+	return *this;
 }
 
 Animation::Data::~Data() {
@@ -92,7 +94,7 @@ void Animation::Data::SetLabel(const char* label) {
 	
 	const char* iterator;
 	for (iterator = label; *iterator; ++iterator);
-	unsigned int length = iterator - label;
+	unsigned int length = (unsigned int)(iterator - label);
 
 	if (length == 0) {
 		return;
@@ -107,6 +109,7 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 	float startTime = GetStartTime();
 	float endTime = GetEndtime();
 	
+	// Time is normalized to the animation duration, not an indevidual track
 	if (looping) {
 		float duration = GetDuration();
 		if (duration <= 0) {
@@ -136,17 +139,20 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 	// Loop trough all tracks
 	unsigned int trackStride = 4;
 	for (unsigned int i = 0; i < mTrackDataSize; i += trackStride) {
-		// Gather info to access the right frames
-		unsigned int offset = mTrackData[i + 2]; 
-		unsigned int size = mTrackData[i + 3];
+		unsigned int target = mTrackData[i + 0];
 		unsigned int frameStride = 3 * 3 + 1;
+		unsigned int frameSize = 3;
 		if (mTrackData[i + 1] == (unsigned int)Component::Rotation) {
 			frameStride = 3 * 4 + 1;
+			frameSize = 4;
 		}
-		unsigned int numFrames = size / frameStride;
+		unsigned int offset = mTrackData[i + 2]; 
+		unsigned int size = mTrackData[i + 3];
 		
-		// The joint that is being animated
-		unsigned int target = mTrackData[i];
+		unsigned int numFrames = size / frameSize;
+		if (size % frameSize != 0) { // TODO: Remove
+			int error = 1; // TODO: Remove
+		}
 
 		// Find current and next frames
 		float trackStartTime = mFrameData[offset];
@@ -158,14 +164,20 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 		// t = fmodf(time - startTime, endTime - startTime); i didn't want to use the standard library here, it's just an fmod
 		int trunc = (int)(fmodA / fmodB);
 		float trackTime = fmodA - ((float)trunc * fmodB); // Time normalized to this track, not the animation
+		
+		float lookForError = trackTime; // TODO: Remove
 		while (trackTime < fmodA) {
 			trackTime += fmodB - fmodA;
+			if (trackTime < lookForError) { // TODO: Remove
+				lookForError = 9.0f; // Just here to set a breakpoint
+			}
 		}
 
 		if (looping) {
-			for (unsigned int j = offset; j < offset + size; j += trackStride) {
+			// TODO: Linear search is not optimal here. Replace with binary search, since time only ever grows
+			for (unsigned int j = offset + size - 1; j >= offset; j -= frameStride) {
 				if (trackTime >= mFrameData[j]) {
-					thisFrame = j;
+					thisFrame = j / frameStride;
 					break;
 				}
 			}
@@ -204,7 +216,7 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 
 		// Interpolate between the two frames
 		float result[4] = {};
-		float* a = &mFrameData[thisFrame * frameStride + 1 + frameStride];
+		float* a = &mFrameData[thisFrame * frameStride + 1 + frameStride]; // TODO: Is this right? FrameStride or FrameSize? Also, cache?
 		float* b = &mFrameData[nextFrame * frameStride + 1 + frameStride];
 		for (unsigned int j = 0; j < componentSize; ++j) {
 			float outTangent = mFrameData[thisFrame * frameStride + 1 + j];
@@ -301,19 +313,19 @@ void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize,
 		}
 		mFrameData = 0;
 		mFrameDataSize = 0;
-		return;
 	}
-
-	if (frameSize != mFrameDataSize) {
-		if (mFrameData != 0) {
-			Animation::Free(mFrameData);
+	else {
+		if (frameSize != mFrameDataSize) {
+			if (mFrameData != 0) {
+				Animation::Free(mFrameData);
+			}
+			mFrameData = (float*)Animation::Allocate(sizeof(float) * frameSize);
+			mFrameDataSize = frameSize;
 		}
-		mFrameData = (float*)Animation::Allocate(sizeof(float) * frameSize);
-		mFrameDataSize = frameSize;
-	}
 
-	for (unsigned int i = 0; i < frameSize; ++i) {
-		mFrameData[i] = frameData[i];
+		for (unsigned int i = 0; i < frameSize; ++i) {
+			mFrameData[i] = frameData[i];
+		}
 	}
 
 	// Set track data
@@ -325,36 +337,41 @@ void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize,
 		mTrackDataSize = 0;
 		return;
 	}
-
-	if (trackSize != mTrackDataSize) {
-		if (mTrackData != 0) {
-			Animation::Free(mTrackData);
+	else {
+		if (trackSize != mTrackDataSize) {
+			if (mTrackData != 0) {
+				Animation::Free(mTrackData);
+			}
+			mTrackData = (unsigned int*)Animation::Allocate(sizeof(unsigned int) * trackSize);
+			mTrackDataSize = trackSize;
 		}
-		mTrackData = (unsigned int*)Animation::Allocate(sizeof(unsigned int) * trackSize);
-		mTrackDataSize = trackSize;
+
+		for (unsigned int i = 0; i < trackSize; ++i) {
+			mTrackData[i] = trackData[i];
+		}
 	}
 
-	for (unsigned int i = 0; i < trackSize; ++i) {
-		mTrackData[i] = trackData[i];
-	}
+	// Figure out start and end times
+	if (mFrameData != 0 && mTrackData != 0) {
+		// Find start and end times
+		mStartTime = mFrameData[0];
+		mEndTime = mFrameData[0];
 
-	// Find start and end times
-	mStartTime = mFrameData[0];
-	mEndTime = mFrameData[0];
-	unsigned int trackStride = 4;
-	// Loop trough all tracks
-	for (unsigned int i = 0; i < mTrackDataSize; i += trackStride) {
-		unsigned int offset = mTrackData[i + 2];
-		unsigned int size = mTrackData[i + 3];
+		unsigned int trackStride = 4;
+		// Loop trough all tracks
+		for (unsigned int i = 0; i < mTrackDataSize; i += trackStride) {
+			unsigned int offset = mTrackData[i + 2];
+			unsigned int size = mTrackData[i + 3];
 
-		float trackStartTime = mFrameData[offset];
-		float trackEndTime = mFrameData[offset + size - 1];
+			float trackStartTime = mFrameData[offset];
+			float trackEndTime = mFrameData[offset + size - 1];
 
-		if (trackStartTime < mStartTime) {
-			mStartTime = trackStartTime;
-		}
-		if (trackEndTime > mEndTime) {
-			mEndTime = trackEndTime;
+			if (trackStartTime < mStartTime) {
+				mStartTime = trackStartTime;
+			}
+			if (trackEndTime > mEndTime) {
+				mEndTime = trackEndTime;
+			}
 		}
 	}
 }

@@ -461,3 +461,17 @@ Where did the sample data come from
 What should the user see
 
 Link to WebGL sample
+
+# What went wrong
+
+* The data storage of ```Animation::Data``` is overly complex. Packing the data is hard to get right, I spent three (weekend) days writing and debugging a converter. Most of the difficuly is in the conversions between vectors of touples (```std::vector<vec3>```) and arrays of scalars (```float*```). 
+* ```Animation::Helpers``` was not planned. I didn't plan on including this module, but the shared code between state and data started to grow and they needed a common place. I like that this namespace contains functions that can be better implemented based on the context that the animation system is used in.
+* The serialized file format is hacky at best. I only created these functions to import existing data that can be used to test the system. A more robust, preferably binary format is needed.
+* Both ```Animation::Data``` and ```Animation::State``` need the ability to load from a standard format, then serialize to something faster to work with. 
+* The ```Animation::Data``` API for setting data requires intimate knowledge of teh data layout. This makes the class complicated and error prone. I have not been able to figure out a better API, primarily beause both Animation Clip and Animation Track data is stored in the same class.
+
+# What went right
+
+* While the internal data storage of the animation classes are complicated, using the classes is simple. I feel like the goal of having a low barrier to entry worked.
+* Since the users of the animation API typically don't work with track data, rolling track and clip data into one class (```Animation::Data```) greatly simplified the API.
+* Making ```Animation::Skin``` work with data views allows for mapping the skinning data to just about any input format. It's a cache nightmare, but the API is easy to use.

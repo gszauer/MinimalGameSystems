@@ -27,8 +27,8 @@ namespace Animation {
         // Each track data contains
         // unsigned int: id
         // unsigned int: component (position, rotation, scale)
-        // unsigned int: offset in frame data
-        // unsigned int: number of frames
+        // unsigned int: offset in frame data (assuming mFrameData is just an array of floats)
+        // unsigned int: number of frames (assuming mFrameData is just an array of floats)
         unsigned int* mTrackData;
         unsigned int mTrackDataSize;
 

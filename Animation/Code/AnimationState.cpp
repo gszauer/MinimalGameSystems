@@ -71,29 +71,29 @@ bool Animation::State::ToMatrixPalette(float* outArray, unsigned int arraySize) 
         return false;
     }
 
-    float position[3];
-    float rotation[4];
-    float scale[3];
+    float position[3] = { 0.0f };
+    float rotation[4] = { 0.0f };
+    float scale[3] = { 0.0f };
 
-    int i = 0;
-    for (int size = (int)mSize; i < size; ++i) {
-        int parent = mHierarchy[i];
-        if (parent > i) {
+    unsigned int i = 0;
+    for (unsigned int size = mSize; i < size; ++i) {
+        int parent = mHierarchy[i]; // TODO: Fast path is untested because of bad model. Export an optimized / re-ordered data set and try again with that.
+        if (parent > ((int)i)) {
             break;
         }
 
-        GetRelativePosition((unsigned int)i, position);
-        GetRelativeRotation((unsigned int)i, rotation);
-        GetRelativeScale((unsigned int)i, scale);
-        TransformToMatrix(&outArray[(unsigned int)i * 16], position, rotation, scale);
+        GetRelativePosition(i, position);
+        GetRelativeRotation(i, rotation);
+        GetRelativeScale(i, scale);
+        TransformToMatrix(&outArray[i * 16], position, rotation, scale);
         if (parent >= 0) {
-            MultiplyMatrices(&outArray[(unsigned int)i * 16], &outArray[(unsigned int)parent * 16], &outArray[(unsigned int)i * 16]);
+            MultiplyMatrices(&outArray[i * 16], &outArray[(unsigned int)parent * 16], &outArray[i * 16]);
         }
     }
 
-    for (int size = (int)mSize; i < size; ++i) {
-        GetAbsoluteTransform((unsigned int)i, position, rotation, scale);
-        TransformToMatrix(&outArray[(unsigned int)i * 16], position, rotation, scale);
+    for (unsigned int size = mSize; i < size; ++i) {
+        GetAbsoluteTransform(i, position, rotation, scale);
+        TransformToMatrix(&outArray[i * 16], position, rotation, scale);
     }
 
     return true;
@@ -183,7 +183,8 @@ void Animation::State::GetRelativeTransform(unsigned int index, float* outPos, f
 }
 
 void Animation::State::GetAbsoluteTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const {
-    float parentPos[3], parentRot[3], parentScl[3];
+    float parentPos[3], parentRot[4], parentScl[3];
+    // TODO: left off here have a thing to do
 
     GetRelativePosition(index, outPos);
     GetRelativeRotation(index, outRot);
