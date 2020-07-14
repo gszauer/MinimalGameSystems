@@ -105,12 +105,12 @@ void SkeletonSample::DrawSkeleton(const Animation::State& state, float* mvp, flo
 	float pPos[3] = { 0.0f };
 	unsigned int index = 0;
 
-	for (int i = 0, size = (int)mRestPose.Size(); i < size; ++i) {
-		int p = mRestPose.GetParent(i);
+	for (int i = 0, size = (int)state.Size(); i < size; ++i) {
+		int p = state.GetParent(i);
 		if (p < 0) { continue; }
 
-		mRestPose.GetAbsolutePosition(i, iPos);
-		mRestPose.GetAbsolutePosition(p, pPos);
+		state.GetAbsolutePosition(i, iPos);
+		state.GetAbsolutePosition(p, pPos);
 
 		mSkinned[index++] = iPos[0];
 		mSkinned[index++] = iPos[1];
@@ -148,7 +148,7 @@ void SkeletonSample::Initialize() {
 }
 
 void SkeletonSample::Update(float dt) {
-	// TODO: Copy state to mSkinned
+	mPlayTime = mAnimationData.Sample(mAnimatedPose, mPlayTime + dt, true);
 }
 
 void SkeletonSample::Render(float aspect) {
@@ -163,9 +163,9 @@ void SkeletonSample::Render(float aspect) {
 
 	LookAt(view, position, target, up);
 	Perspective(projection, 60.0f, aspect, 0.01f, 1000.0f);
-	//Animation::MultiplyMatrices(mvp, view, model);
-	//Animation::MultiplyMatrices(mvp, projection, mvp);
-	Animation::MultiplyMatrices(mvp, projection, view);
+	float tmp[16] = { 0.0f };
+	Animation::MultiplyMatrices(mvp, view, model);
+	Animation::MultiplyMatrices(mvp, projection, mvp);
 
 	float red[3] = { 1.0f, 0.0f, 0.0f };
 	float green[3] = { 0.0f, 1.0f, 0.0f };
