@@ -48,6 +48,12 @@
     <ClInclude Include="Code\Samples\SkinnedSample.h">
       <Filter>Header Files\Samples</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Samples\CurvesSample.h">
+      <Filter>Header Files\Samples</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\AnimationBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\AnimationBlend.cpp">
@@ -79,6 +85,12 @@
     </ClCompile>
     <ClCompile Include="Code\Samples\SkinnedSample.cpp">
       <Filter>Source Files\Samples</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\CurveSample.cpp">
+      <Filter>Source Files\Samples</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\AnimationBuilder.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

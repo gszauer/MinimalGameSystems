@@ -9,6 +9,7 @@ The readability of the logic for many of these functions suffers from trying to 
 * ```AnimationData[.h, .cpp]``` - **required** - Contains ```Animation::Data```, analogous to an animation clip.
 * ```AnimationState[.h, .cpp]``` - **required** - Contains ```Aniamtion::State```, analogous to an animated pose. 
 * ```AnimationHelpers[.h, .cpp]``` - **required** - Contains helper functions that can be used as is or replaced by more specialized implementations.
+* ```AnimationBuilder[.h, .cpp]``` - **optional** - Contains verbose classes and conversion functions that make authoring ```Animation::Data``` and ```Animation::State``` intuitive. Intended to be used by conversion tools, not the runtime.
 * ```AnimationBlend[.h, .cpp]``` - **optional** - Contains code to blend animations smoothly.
 * ```AnimationSkin[.h, .cpp]``` - **optional** - Contains code to skin meshes using ```Animation::State```.
 

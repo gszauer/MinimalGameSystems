@@ -371,7 +371,7 @@ bool Animation::FloatCompare(float a, float b) {
     return delta < 0.000001f && delta > -0.000001f;
 }
 
-float Animation::FastInvSqrt(float number) { // 1 / sqrt(number)
+float Animation::InvSqrt(float number) { // 1 / sqrt(number)
 #if 0
     long i;
     float x2, y;

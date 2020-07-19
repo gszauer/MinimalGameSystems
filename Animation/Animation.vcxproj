@@ -21,21 +21,25 @@
   <ItemGroup>
     <ClInclude Include="Code\AnimationBlend.h" />
     <ClInclude Include="Code\AnimationData.h" />
+    <ClInclude Include="Code\AnimationBuilder.h" />
     <ClInclude Include="Code\AnimationHelpers.h" />
     <ClInclude Include="Code\AnimationSkin.h" />
     <ClInclude Include="Code\AnimationState.h" />
     <ClInclude Include="Code\glad.h" />
+    <ClInclude Include="Code\Samples\CurvesSample.h" />
     <ClInclude Include="Code\Samples\ISample.h" />
     <ClInclude Include="Code\Samples\SkeletonSample.h" />
     <ClInclude Include="Code\Samples\SkinnedSample.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\AnimationBlend.cpp" />
+    <ClCompile Include="Code\AnimationBuilder.cpp" />
     <ClCompile Include="Code\AnimationData.cpp" />
     <ClCompile Include="Code\AnimationHelpers.cpp" />
     <ClCompile Include="Code\AnimationSkin.cpp" />
     <ClCompile Include="Code\AnimationState.cpp" />
     <ClCompile Include="Code\glad.c" />
+    <ClCompile Include="Code\Samples\CurveSample.cpp" />
     <ClCompile Include="Code\Samples\ISample.cpp" />
     <ClCompile Include="Code\Samples\SkeletonSample.cpp" />
     <ClCompile Include="Code\Samples\SkinnedSample.cpp" />

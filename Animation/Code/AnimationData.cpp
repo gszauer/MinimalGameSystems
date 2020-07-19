@@ -150,9 +150,6 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 		unsigned int size = mTrackData[i + 3];
 		
 		unsigned int numFrames = size / frameSize;
-		if (size % frameSize != 0) { // TODO: Remove
-			int error = 1; // TODO: Remove
-		}
 
 		// Find current and next frames
 		float trackStartTime = mFrameData[offset];
@@ -165,12 +162,8 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 		int trunc = (int)(fmodA / fmodB);
 		float trackTime = fmodA - ((float)trunc * fmodB); // Time normalized to this track, not the animation
 		
-		float lookForError = trackTime; // TODO: Remove
 		while (trackTime < fmodA) {
 			trackTime += fmodB - fmodA;
-			if (trackTime < lookForError) { // TODO: Remove
-				lookForError = 9.0f; // Just here to set a breakpoint
-			}
 		}
 
 		if (looping) {
@@ -216,18 +209,24 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 
 		// Interpolate between the two frames
 		float result[4] = {};
-		float* a = &mFrameData[thisFrame * frameStride + 1 + frameStride]; // TODO: Is this right? FrameStride or FrameSize? Also, cache?
-		float* b = &mFrameData[nextFrame * frameStride + 1 + frameStride];
-		for (unsigned int j = 0; j < componentSize; ++j) {
-			float outTangent = mFrameData[thisFrame * frameStride + 1 + j];
-			float inTangent = mFrameData[nextFrame * frameStride + frameStride + frameStride + 1 + j];
+		unsigned int thisFrameIndex = thisFrame * frameStride; // TODO: find and replace all instances of this
+		unsigned int nextFrameIndex = nextFrame * frameStride;
 
-			float y = mFrameData[nextFrame * frameStride + 1 + frameStride + j] - mFrameData[thisFrame * frameStride + 1 + frameStride + j]; // Delta on y axis (track value)
-			float x = mFrameData[nextFrame * frameStride] - mFrameData[thisFrame * frameStride]; // Delta on x axis (track time)
-			if (x < 0.0f) { x *= -1.0f; }
+		float* a = &mFrameData[thisFrameIndex + 1 + componentSize];
+		float* b = &mFrameData[nextFrameIndex + 1 + componentSize];
+
+		for (unsigned int j = 0; j < componentSize; ++j) {
+			float outTangent = mFrameData[thisFrameIndex + 1];
+			float inTangent = mFrameData[nextFrameIndex + 1 + componentSize * 2 + j];
+
+			float y = mFrameData[nextFrameIndex + 1 + componentSize + j] - mFrameData[thisFrameIndex + 1 + componentSize + j]; // Delta on y axis (track value)
+			float x = mFrameData[nextFrameIndex] - mFrameData[thisFrameIndex]; ; // Delta on x axis (track time)
+			if (x < 0.0f) { 
+				x *= -1.0f; 
+			}
 			float linearTangent = FloatCompare(x, 0)? 0.0f : y / x;
 
-			if (outTangent >= 10000000.0f || outTangent <= -10000000.0f || inTangent >= 10000000.0f || inTangent <= -10000000.0f) { // Constant Interpolation
+			if (outTangent >= 1000000.0f || outTangent <= -1000000.0f || inTangent >= 1000000.0f || inTangent <= -1000000.0f) { // Constant Interpolation
 				result[j] = a[j];
 			}
 			else if (FloatCompare(inTangent, linearTangent) && FloatCompare(outTangent, linearTangent)) { // Linear interpolation
@@ -279,7 +278,7 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 				result[3] = 1.0f;
 			}
 			else {
-				float inverseLength = FastInvSqrt(lenSq);
+				float inverseLength = InvSqrt(lenSq);
 				result[0] *= inverseLength;
 				result[1] *= inverseLength;
 				result[2] *= inverseLength;
@@ -303,8 +302,6 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 	return time;
 }
 
-#pragma warning(push)
-#pragma warning(disable:6385) // If you manage to overflow the track buffer the animation was huge
 void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize, const unsigned int* trackData, unsigned int trackSize) {
 	// Set frame data
 	if (frameData == 0 || frameSize == 0) {
@@ -319,7 +316,7 @@ void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize,
 			if (mFrameData != 0) {
 				Animation::Free(mFrameData);
 			}
-			mFrameData = (float*)Animation::Allocate(sizeof(float) * frameSize);
+			mFrameData = (float*)Animation::Allocate(((unsigned int)sizeof(float)) * frameSize);
 			mFrameDataSize = frameSize;
 		}
 
@@ -342,7 +339,7 @@ void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize,
 			if (mTrackData != 0) {
 				Animation::Free(mTrackData);
 			}
-			mTrackData = (unsigned int*)Animation::Allocate(sizeof(unsigned int) * trackSize);
+			mTrackData = (unsigned int*)Animation::Allocate(((unsigned int)sizeof(unsigned int)) * trackSize);
 			mTrackDataSize = trackSize;
 		}
 
@@ -375,7 +372,6 @@ void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize,
 		}
 	}
 }
-#pragma warning(pop)
 
 void Animation::Data::SerializeToString(char* output) const {
 	char* last = output;

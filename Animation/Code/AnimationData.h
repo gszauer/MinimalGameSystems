@@ -12,9 +12,6 @@ namespace Animation {
             Rotation = 2,
             Scale = 4,
         };
-        struct TrackID {
-            unsigned int index;
-        };
     protected:
         // Frame: x is 3 or 4 depending on component type (only support pos, rot and scale)
         // float time
@@ -42,9 +39,6 @@ namespace Animation {
         Data& operator=(const Data& other);
         ~Data();
 
-#if 0 // TODO: This is a more user friendly representation. Be sure to implement and test this path as well
-        void Resize(unsigned int numTracks, unsigned int numFrames);
-#endif
         void SetRawData(const float* frameData, unsigned int frameSize, const unsigned int* trackData, unsigned int trackSize);
 
         const float* GetFrameData() const;

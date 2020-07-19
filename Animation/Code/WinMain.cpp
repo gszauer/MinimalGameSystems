@@ -40,6 +40,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 #include "Samples/ISample.h"
 #include "Samples/SkinnedSample.h"
 #include "Samples/SkeletonSample.h"
+#include "Samples/CurvesSample.h"
 
 #include <vector>
 #include <fstream>
@@ -67,7 +68,8 @@ ISample* gCPUSkinnedSample = 0;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
 	//gCPUSkinnedSample = new SkinnedSample();
-	gCPUSkinnedSample = new SkeletonSample();
+	//gCPUSkinnedSample = new SkeletonSample();
+	gCPUSkinnedSample = new CurvesSample();
 	WNDCLASSEX wndclass;
 	wndclass.cbSize = sizeof(WNDCLASSEX);
 	wndclass.style = CS_HREDRAW | CS_VREDRAW;

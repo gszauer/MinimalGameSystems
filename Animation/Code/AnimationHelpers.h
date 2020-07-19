@@ -23,7 +23,7 @@ namespace Animation {
     char* WriteNewLine(char* target);
 
     bool FloatCompare(float a, float b);
-    float FastInvSqrt(float number);
+    float InvSqrt(float number);
 
     void* Allocate(unsigned int bytes);
     void Free(void* memory);
