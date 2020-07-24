@@ -10,6 +10,10 @@ Animation::Builder::Frame::Frame() {
 }
 
 Animation::Builder::Frame& Animation::Builder::Frame::operator=(const Frame& other) {
+	if (this == &other) {
+		return *this;
+	}
+
 	time = other.time;
 
 	in[0] = other.in[0];
@@ -26,6 +30,8 @@ Animation::Builder::Frame& Animation::Builder::Frame::operator=(const Frame& oth
 	out[1] = other.out[1];
 	out[2] = other.out[2];
 	out[3] = other.out[3];
+
+	return *this;
 }
 
 Animation::Builder::Track::Track() {
@@ -380,7 +386,7 @@ void Animation::Builder::Clip::Resize(unsigned int newSize) {
 	mTracks = newTracks;
 }
 
-Animation::Data Convert(Animation::Builder::Clip& clip) {
+Animation::Data Animation::Builder::Convert(Animation::Builder::Clip& clip) {
 	Animation::Data result;
 
 	const char* label = clip.GetName();
@@ -388,7 +394,7 @@ Animation::Data Convert(Animation::Builder::Clip& clip) {
 
 	unsigned int* trackData = 0;
 	unsigned int trackDataSize = 0;
-	unsigned int framePosition = 0;
+	unsigned int frameDataSize = 0;
 
 	trackDataSize = clip.Size() * 4;
 	trackData = (unsigned int*)Animation::Allocate(((unsigned int)sizeof(unsigned int)) * trackDataSize);
@@ -396,22 +402,266 @@ Animation::Data Convert(Animation::Builder::Clip& clip) {
 		Animation::Builder::Track& track = clip[i];
 		trackData[i * 4 + 0] = track.GetJointID();
 		trackData[i * 4 + 1] = (unsigned int)track.GetTarget();
-		trackData[i * 4 + 2] = framePosition;
+		trackData[i * 4 + 2] = frameDataSize;
 		trackData[i * 4 + 3] = track.Size() * (trackData[i * 4 + 1] == 2? 13 : 10);
-		framePosition += trackData[i * 4 + 3];
+		frameDataSize += trackData[i * 4 + 3];
 	}
 
-	float* frameData = 0;
-	unsigned int frameDataSize = 0;
+	float* frameData = (float*)Animation::Allocate(((unsigned int)sizeof(float)) * frameDataSize);
+	unsigned int writeIndex = 0;
 
-	// TODO: Fill in frames
+	for (unsigned int trackIndex = 0; trackIndex < clip.Size(); ++trackIndex) {
+		Animation::Builder::Track& track = clip[trackIndex];
+
+		for (unsigned int frameIndex = 0; frameIndex < track.Size(); ++frameIndex) {
+			Animation::Builder::Frame& frame = track[frameIndex];
+
+			frameData[writeIndex++] = frame.time;
+			frameData[writeIndex++] = frame.in[0];
+			frameData[writeIndex++] = frame.in[1];
+			frameData[writeIndex++] = frame.in[2];
+			if (track.GetTarget() == Animation::Data::Component::Rotation) {
+				frameData[writeIndex++] = frame.in[3];
+			}
+			frameData[writeIndex++] = frame.value[0];
+			frameData[writeIndex++] = frame.value[1];
+			frameData[writeIndex++] = frame.value[2];
+			if (track.GetTarget() == Animation::Data::Component::Rotation) {
+				frameData[writeIndex++] = frame.value[3];
+			}
+			frameData[writeIndex++] = frame.out[0];
+			frameData[writeIndex++] = frame.out[1];
+			frameData[writeIndex++] = frame.out[2];
+			if (track.GetTarget() == Animation::Data::Component::Rotation) {
+				frameData[writeIndex++] = frame.out[3];
+			}
+		}
+	}
 	
 	result.SetRawData(frameData, frameDataSize, trackData, trackDataSize);
 	return result;
 }
 
-Animation::Builder::Clip Convert(Animation::Data& data) {
-	Animation::Builder::Clip result;
-	// TODO
-	return result;
+#if 0
+Animation::Builder::Node::Node() {
+	position[0] = position[1] = position[2] = 0.0f;
+	rotation[0] = rotation[1] = rotation[2] = 0.0f;
+	rotation[3] = 1.0f;
+	scale[0] = scale[1] = scale[2] = 1.0f;
+
+	mParent = 0;
+	mChildren = 0;
+	mChildrenCapacity = 0;
+	mChildrenCapacity = 0;
 }
+
+Animation::Builder::Node::Node(Node* parent) {
+	position[0] = position[1] = position[2] = 0.0f;
+	rotation[0] = rotation[1] = rotation[2] = 0.0f;
+	rotation[3] = 1.0f;
+	scale[0] = scale[1] = scale[2] = 1.0f;
+
+	mParent = parent;
+	mChildren = 0;
+	mChildrenCapacity = 0;
+	mChildrenCapacity = 0;
+}
+
+Animation::Builder::Node::Node(Node* parent, float* pos, float* rot, float* scl) {
+	position[0] = pos[0];
+	position[1] = pos[1];
+	position[2] = pos[2];
+	rotation[0] = rot[0];
+	rotation[1] = rot[1];
+	rotation[2] = rot[2];
+	rotation[3] = rot[3];
+	scale[0] = scl[0];
+	scale[1] = scl[1];
+	scale[2] = scl[2];
+
+	mParent = parent;
+	mChildren = 0;
+	mChildrenCapacity = 0;
+	mChildrenCapacity = 0;
+}
+
+Animation::Builder::Node::Node(float* pos, float* rot, float* scl) {
+	position[0] = pos[0];
+	position[1] = pos[1];
+	position[2] = pos[2];
+	rotation[0] = rot[0];
+	rotation[1] = rot[1];
+	rotation[2] = rot[2];
+	rotation[3] = rot[3];
+	scale[0] = scl[0];
+	scale[1] = scl[1];
+	scale[2] = scl[2];
+
+	mParent = 0;
+	mChildren = 0;
+	mChildrenCapacity = 0;
+	mChildrenCapacity = 0;
+}
+
+Animation::Builder::Node::Node(const Node& other) {
+	position[0] = position[1] = position[2] = 0.0f;
+	rotation[0] = rotation[1] = rotation[2] = 0.0f;
+	rotation[3] = 1.0f;
+	scale[0] = scale[1] = scale[2] = 1.0f;
+
+	mParent = 0;
+	mChildren = 0;
+	mChildrenCapacity = 0;
+	mChildrenCapacity = 0;
+
+	*this = other;
+}
+
+Animation::Builder::Node& Animation::Builder::Node::operator=(const Node& other) {
+	if (this == &other) {
+		return *this;
+	}
+
+	if (mChildren != 0) {
+		Animation::Free(mChildren);
+		mChildren = 0;
+	}
+
+	position[0] = other.position[0];
+	position[1] = other.position[1];
+	position[2] = other.position[2];
+
+	rotation[0] = other.rotation[0];
+	rotation[1] = other.rotation[1];
+	rotation[2] = other.rotation[2];
+	rotation[3] = other.rotation[3];
+
+	scale[0] = other.scale[0];
+	scale[1] = other.scale[1];
+	scale[2] = other.scale[2];
+
+	mParent = other.mParent;
+
+	mChildrenCapacity = 0;
+	mChildrenCount = 0;
+	Reserve(other.mChildrenCapacity);
+	mChildrenCount = other.mChildrenCount;
+
+	for (unsigned int i = 0; i < mChildrenCount; ++i) {
+		mChildren[i] = other.mChildren[i];
+	}
+	for (unsigned int i = mChildrenCount; i < mChildrenCapacity; ++i) {
+		mChildren[i] = 0;
+	}
+
+	return *this;
+}
+
+Animation::Builder::Node::~Node() {
+	if (mChildren != 0) {
+		Animation::Free(mChildren);
+	}
+}
+
+Animation::Builder::Node* Animation::Builder::Node::GetParent() {
+	return mParent;
+}
+
+void Animation::Builder::Node::SetParent(Node* parent) {
+	mParent = parent;
+}
+
+unsigned int Animation::Builder::Node::Size() {
+	return mChildrenCount;
+}
+
+unsigned int Animation::Builder::Node::Capacity() {
+	return mChildrenCapacity;
+}
+
+void Animation::Builder::Node::Reserve(unsigned int numToReserve) {
+	if (mChildrenCapacity < numToReserve) {
+		Node** newChildren = (Node**)Animation::Allocate(sizeof(Node*) * numToReserve);
+
+		for (unsigned int i = 0; i < mChildrenCount; ++i) {
+			newChildren[i] = mChildren[i];
+		}
+		for (unsigned int i = mChildrenCount; i < numToReserve; ++i) {
+			newChildren[i] = 0;
+		}
+
+		if (mChildren != 0) {
+			Animation::Free(mChildren);
+		}
+		mChildren = newChildren;
+		mChildrenCapacity = numToReserve;
+	}
+}
+
+Animation::Builder::Node* Animation::Builder::Node::operator[](unsigned int index) {
+	return mChildren[index];
+}
+
+void Animation::Builder::Node::AddChild(Node* child) {
+	if (child->mParent != 0) {
+		child->mParent->RemoveChild(child);
+	}
+
+	if (mChildrenCount == mChildrenCapacity) {
+		Reserve(mChildrenCapacity + (mChildrenCapacity / 2) + 1);
+	}
+
+	mChildren[mChildrenCount++] = child;
+	child->mParent = this;
+}
+
+void Animation::Builder::Node::RemoveChild(Node* child) {
+	if (mChildren == 0 || mChildrenCount == 0) {
+		return;
+	}
+
+	unsigned int index = 0;
+	for (; index < mChildrenCount; ++index) {
+		if (mChildren[index] == child) {
+			break;
+		}
+	}
+
+	if (index >= mChildrenCount) {
+		return;
+	}
+
+	RemoveChild(index);
+}
+
+void Animation::Builder::Node::RemoveChild(unsigned int index) {
+	for (int i = (int)mChildrenCount - 1; i >= (int)index; --i) {
+		mChildren[i] = mChildren[i - 1];
+	}
+	mChildrenCount -= 1;
+}
+
+unsigned int Animation::Builder::Node::SizeOfGraph() {
+	unsigned int size = 1;
+
+	for (unsigned int childIndex = 0; childIndex < mChildrenCount; ++childIndex) {
+		size += mChildren[childIndex]->SizeOfGraph();
+	}
+
+	return size;
+}
+
+Animation::State Animation::Builder::Convert(Animation::Builder::Node* nodes, unsigned int numNodes) {
+	unsigned int totalNodes = 0;
+
+	for (unsigned int nodeIndex = 0; nodeIndex < numNodes; ++nodeIndex) {
+		Node& node = nodes[nodeIndex];
+		totalNodes += node.SizeOfGraph();
+	}
+
+	Animation::State result;
+	result.Resize(totalNodes);
+
+	Node** 
+}
+#endif

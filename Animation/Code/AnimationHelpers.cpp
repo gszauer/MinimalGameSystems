@@ -214,8 +214,6 @@ char* Animation::WriteInt(char* target, int v) {
     return WriteUInt(target, uv);
 }
 
-#include <cmath>
-
 char* Animation::WriteFloat(char* target, float v) {
     if (v < 0) {
         *target = '-';
@@ -390,7 +388,11 @@ float Animation::InvSqrt(float number) { // 1 / sqrt(number)
 #endif
 }
 
-void ScaleMatrix(float* out, const float* in, float s) {
+float Animation::FMod(float x, float y) {
+    return fmodf(x, y);
+}
+
+void Animation::ScaleMatrix(float* out, const float* in, float s) {
     out[0] = in[0] * s;
     out[1] = in[1] * s;
     out[2] = in[2] * s;
@@ -409,7 +411,7 @@ void ScaleMatrix(float* out, const float* in, float s) {
     out[15] = in[15] * s;
 }
 
-void AddMatrices(float* out, const float* a, const float* b) {
+void Animation::AddMatrices(float* out, const float* a, const float* b) {
     out[0] = a[0] + b[0];
     out[1] = a[1] + b[1];
     out[2] = a[2] + b[2];
@@ -428,7 +430,7 @@ void AddMatrices(float* out, const float* a, const float* b) {
     out[15] = a[15] + b[15];
 }
 
-void MultiplyMat4Vec4(float* out, const float* mat, const float* vec) {
+void Animation::MultiplyMat4Vec4(float* out, const float* mat, const float* vec) {
     out[0] = vec[0] * mat[0] + vec[1] * mat[4] + vec[2] * mat[8] + vec[3] * mat[12];
     out[1] = vec[0] * mat[1] + vec[1] * mat[5] + vec[2] * mat[9] + vec[3] * mat[13];
     out[2] = vec[0] * mat[2] + vec[1] * mat[6] + vec[2] * mat[10] + vec[3] * mat[14];

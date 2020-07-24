@@ -16,7 +16,11 @@ void CurvesSample::Initialize() {
 	frame2.value[0] = 1.0f; // x
 	frame2.value[1] = 1.0f; // y
 
+	//frame1.out[0] = 1.0f;
+	//frame2.in[0] = -1.0f;
+
 	Animation::Builder::Track track;
+	track.SetTarget(Animation::Data::Component::Position);
 	track.PushFrame(frame1);
 	track.PushFrame(frame2);
 	track.ForceLinear();
@@ -25,38 +29,46 @@ void CurvesSample::Initialize() {
 	clip.PushTrack(track);
 
 	mAnimationData = Animation::Builder::Convert(clip);
-	
+	Animation::State thisState, nextState;
+	thisState.Resize(1);
+	thisState.SetParent(0, -1);
+	nextState.Resize(1);
+	nextState.SetParent(0, -1);
+
 	// Record vertices to display
 	std::vector<float> verts;
 	PusV(verts, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
 	PusV(verts, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
 	PusV(verts, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 	PusV(verts, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-	PusV(verts, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-	PusV(verts, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f);
+	//PusV(verts, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+	//PusV(verts, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 
+	float thisPosition[3] = { 0.0f, 0.0f, 0.0f };
+	float nextPosition[3] = { 0.0f, 0.0f, 0.0f };
 	float color[3] = { 0.0f, 0.0f, 1.0f };
-	for (unsigned int i = 0; i < 200; ++i) {
-		float t = (float)i / 199.0f;
-		mAnimationData.Sample(mResultingState, t, true);
 
-		for (unsigned int j = 0; j < mResultingState.Size(); ++j) {
-			int parent = mResultingState.GetParent(j);
-			if (parent < 0) {
-				continue;
-			}
+	for (unsigned int i = 0; i < 200 - 1; ++i) {
+		float this_t = (float)i / 199.0f;
+		mAnimationData.Sample(thisState, this_t, true);
+		float next_t = (float)(i + 1) / 199.0f;
+		mAnimationData.Sample(nextState, next_t, true);
 
-			float selfPos[3] = { 0.0f, 0.0f, 0.0f };
-			mResultingState.GetAbsolutePosition(j, selfPos);
-			
-			float parentPos[3] = { 0.0f, 0.0f, 0.0f };
-			mResultingState.GetAbsolutePosition(parent, parentPos);
+		for (unsigned int j = 0; j < thisState.Size(); ++j) {
+			thisState.GetAbsolutePosition(j, thisPosition);
+			nextState.GetAbsolutePosition(j, nextPosition);
 
-			PusV(verts, selfPos, color);
-			PusV(verts, parentPos, color);
+			PusV(verts, thisPosition, color);
+			PusV(verts, nextPosition, color);
 		}
 	}
-	mNumVerts = verts.size() / 6;
+
+	mNumVerts = (unsigned int)verts.size() / 6;
+
+	mAnimationData.Sample(thisState, 0.0f, true);
+	mAnimationData.Sample(nextState, 0.9f, true);
+	thisState.GetAbsolutePosition(0, thisPosition);
+	nextState.GetAbsolutePosition(0, nextPosition);
 
 	// Setup OpenGL
 	glGenVertexArrays(1, &mCurveVAO);
@@ -119,11 +131,11 @@ void CurvesSample::Initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, mCurveVBO);
 	glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), &verts[0], GL_STATIC_DRAW);
 	
-	glEnableVertexAttribArray(mVertexAttrib);
-	glVertexAttribPointer(mVertexAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * mNumVerts, (GLvoid*)0);
+	glEnableVertexAttribArray(mVertexAttrib); // TODO: These are probably wrong Renderdoc says they are trash
+	glVertexAttribPointer(mVertexAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
 
 	glEnableVertexAttribArray(mColorAttrib);
-	glVertexAttribPointer(mColorAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * mNumVerts, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(mColorAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (GLvoid*)(sizeof(float) * 3));
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glUseProgram(0);

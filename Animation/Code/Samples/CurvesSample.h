@@ -6,7 +6,6 @@
 class CurvesSample : public ISample {
 protected:
 	Animation::Data mAnimationData;
-	Animation::State mResultingState;
 protected:
 	GLuint mCurveVAO = 0;
 	GLuint mCurveVBO = 0;

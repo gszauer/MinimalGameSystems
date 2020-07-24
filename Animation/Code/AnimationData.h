@@ -12,6 +12,13 @@ namespace Animation {
             Rotation = 2,
             Scale = 4,
         };
+        // TODO: Make a cached sample result, and a version of the sample function that utilizes it
+        struct SampleResult {
+            float time;
+            unsigned int index;
+
+            SampleResult();
+        };
     protected:
         // Frame: x is 3 or 4 depending on component type (only support pos, rot and scale)
         // float time
@@ -55,7 +62,7 @@ namespace Animation {
         const char* GetLabel() const;
         void SetLabel(const char* label);
 
-        float Sample(State& out, float time, bool looping) const;
+        float Sample(State& out, float time, bool looping) const; // TODO: Migrate to using sampleresult. Maybe make an optional function?
 
         void SerializeToString(char* output) const;
         void DeSerializeFromString(const char* input);

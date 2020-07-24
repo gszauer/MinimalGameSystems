@@ -2,6 +2,179 @@
 #include "AnimationState.h"
 #include "AnimationHelpers.h"
 
+namespace Animation {
+	namespace Internal {
+		class FrameView {
+		protected:
+			float* mBuffer;
+			unsigned int mComponentSize;
+			unsigned int mFrameSize;
+			unsigned int mNumFrames;
+		protected:
+			inline void StepVec3(float* out, unsigned int left, unsigned int right, float t) const; // TODO
+			inline void LinearVec3(float* out, unsigned int left, unsigned int right, float t) const {
+				const float* valueLeft = &mBuffer[left * mFrameSize + 1 + mComponentSize];
+				const float* valueRight = &mBuffer[right * mFrameSize + 1 + mComponentSize];
+
+				if (mComponentSize >= 1) {
+					out[0] = valueLeft[0] + (valueRight[0] - valueLeft[0]) * t;
+				}
+				if (mComponentSize >= 2) {
+					out[1] = valueLeft[1] + (valueRight[1] - valueLeft[1]) * t;
+				}
+				if (mComponentSize >= 3) {
+					out[2] = valueLeft[2] + (valueRight[2] - valueLeft[2]) * t;
+				}
+				if (mComponentSize >= 4) {
+					out[3] = valueLeft[3] + (valueRight[3] - valueLeft[3]) * t;
+				}
+			}
+			inline void CubicVec3(float* out, unsigned int left, unsigned int right, float t) const; // TODO
+
+			inline void StepQuat(float* out, unsigned int left, unsigned int right, float t) const; // TODO
+
+			inline void LinearQuat(float* out, unsigned int left, unsigned int right, float t) const {
+				// Neighborhood
+				const float* valueRight = &mBuffer[right * mFrameSize + 1 + mComponentSize];
+				float valueLeft[4] = { 0.0f };
+				float delta[4] = { 0.0f };
+
+				float neighborhood = 0.0f;
+				const float* originalLeft = &mBuffer[left * mFrameSize + 1 + mComponentSize];
+
+				if (mComponentSize >= 1) {
+					neighborhood = originalLeft[0] * originalLeft[0];
+					valueLeft[0] = originalLeft[0];
+					delta[0] = originalLeft[0] - valueRight[0];
+				}
+				if (mComponentSize >= 2) {
+					neighborhood = originalLeft[0] * originalLeft[0] + originalLeft[1] * originalLeft[1];
+					valueLeft[1] = originalLeft[1];
+					delta[1] = originalLeft[1] - valueRight[1];
+				}
+				if (mComponentSize >= 3) {
+					neighborhood = originalLeft[0] * originalLeft[0] + originalLeft[1] * originalLeft[1] + originalLeft[2] * originalLeft[2];
+					valueLeft[2] = originalLeft[2];
+					delta[2] = originalLeft[1] - valueRight[2];
+				}
+				if (mComponentSize >= 4) {
+					neighborhood = originalLeft[0] * originalLeft[0] + originalLeft[1] * originalLeft[1] + originalLeft[2] * originalLeft[2] + originalLeft[3] * originalLeft[3];
+					valueLeft[3] = originalLeft[3];
+					delta[3] = originalLeft[3] - valueRight[3];
+				}
+
+				if (neighborhood < 0.0f) {
+					valueLeft[0] = -valueLeft[0];
+					valueLeft[1] = -valueLeft[1];
+					valueLeft[2] = -valueLeft[2];
+					valueLeft[3] = -valueLeft[3];
+				}
+
+				// Iterplate
+				if (mComponentSize >= 1) {
+					out[0] = valueLeft[0] + (valueRight[0] - valueLeft[0]) * t;
+				}
+				if (mComponentSize >= 2) {
+					out[1] = valueLeft[1] + (valueRight[1] - valueLeft[1]) * t;
+				}
+				if (mComponentSize >= 3) {
+					out[2] = valueLeft[2] + (valueRight[2] - valueLeft[2]) * t;
+				}
+				if (mComponentSize >= 4) {
+					out[3] = valueLeft[3] + (valueRight[3] - valueLeft[3]) * t;
+				}
+
+				// Normalize
+				float lenSq = delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2] + delta[3] * delta[3];
+				if (lenSq > 0.0f) {
+					float invLen = Animation::InvSqrt(lenSq);
+					if (mComponentSize >= 1) {
+						out[0] *= invLen;
+					}
+					if (mComponentSize >= 2) {
+						out[1] *= invLen;
+					}
+					if (mComponentSize >= 3) {
+						out[2] *= invLen;
+					}
+					if (mComponentSize >= 4) {
+						out[3] *= invLen;
+					}
+				}
+			}
+			inline void CubicQuat(float* out, unsigned int left, unsigned int right, float t) const; // TODO
+		private:
+			FrameView();
+			FrameView(const FrameView&);
+			FrameView& operator=(const FrameView&);
+		public:
+			inline FrameView(float* buffer, unsigned int component, unsigned int size) {
+				mBuffer = buffer;
+				mComponentSize = component;
+				mNumFrames = size;
+
+				mFrameSize = 1; // time
+				mFrameSize += mComponentSize; // in
+				mFrameSize += mComponentSize; // value
+				mFrameSize += mComponentSize; // out
+			}
+
+			inline ~FrameView() { }
+
+			inline const float* operator[](unsigned int index) const {
+				return &mBuffer[index * mFrameSize];
+			}
+
+			inline float GetTime(unsigned int index) const {
+				return mBuffer[index * mFrameSize];
+			}
+
+			inline const float* GetIn(unsigned int index) const {
+				return &mBuffer[index * mFrameSize + 1];
+
+			}
+			
+			inline const float* GetValue(unsigned int index) const {
+				return &mBuffer[index * mFrameSize + 1 + mComponentSize];
+			}
+
+			inline const float* GetOut(unsigned int index) const {
+				return &mBuffer[index * mFrameSize + 1 + mComponentSize + mComponentSize];
+			}
+
+			inline unsigned int GetNumComponents() const {
+				return mComponentSize;
+			}
+
+			inline unsigned int GetNumFrames() const {
+				return mNumFrames;
+			}
+
+			inline const float* GetBuffer() const {
+				return mBuffer;
+			}
+
+			inline float GetStartTime() const {
+				return mBuffer[0];
+			}
+
+			inline float GetEndTime() const {
+				return mBuffer[mNumFrames * mFrameSize - mFrameSize];
+			}
+
+			inline void Vec3Interpolate(float* out, unsigned int left, unsigned int right, float t) const {
+				// TODO: Figure out proper interpolation
+				return LinearVec3(out, left, right, t);
+			}
+
+			inline void QuatInterpolate(float* out, unsigned int left, unsigned int right, float t) const {
+				// TODO: Figure out proper interpolation
+				return LinearQuat(out, left, right, t);
+			}
+		};
+	}
+}
+
 Animation::Data::Data() {
 	mFrameData = 0;
 	mFrameDataSize = 0;
@@ -116,12 +289,7 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 			return 0.0f;
 		}
 
-		// time = fmodf(time - startTime, endTime - startTime);
-		float fmodA = time - startTime;
-		float fmodB = endTime - startTime;
-		int truncated = (int)(fmodA / fmodB);
-		time = fmodA - ((float)truncated * fmodB);
-		// End fmod
+		time = startTime + Animation::FMod(time - startTime, endTime - startTime);
 
 		while (time < startTime) {
 			time += endTime - startTime;
@@ -138,39 +306,31 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 	
 	// Loop trough all tracks
 	unsigned int trackStride = 4;
-	for (unsigned int i = 0; i < mTrackDataSize; i += trackStride) {
-		unsigned int target = mTrackData[i + 0];
+	for (unsigned int trackIndex = 0; trackIndex < mTrackDataSize; trackIndex += trackStride) {
+		unsigned int targetJointId = mTrackData[trackIndex + 0];
 		unsigned int frameStride = 3 * 3 + 1;
 		unsigned int frameSize = 3;
-		if (mTrackData[i + 1] == (unsigned int)Component::Rotation) {
+		Animation::Data::Component trackComponent = (Animation::Data::Component)mTrackData[trackIndex + 1];
+		if (mTrackData[trackIndex + 1] == (unsigned int)Component::Rotation) {
 			frameStride = 3 * 4 + 1;
 			frameSize = 4;
 		}
-		unsigned int offset = mTrackData[i + 2]; 
-		unsigned int size = mTrackData[i + 3];
-		
-		unsigned int numFrames = size / frameSize;
+		unsigned int offset = mTrackData[trackIndex + 2];
+		unsigned int size = mTrackData[trackIndex + 3];
+		unsigned int numFrames = size / frameStride;
 
+		Animation::Internal::FrameView frameView(&mFrameData[offset], frameSize, numFrames);
+		
 		// Find current and next frames
-		float trackStartTime = mFrameData[offset];
-		float trackEndTime = mFrameData[offset + size - 1];
-		unsigned int thisFrame = 0;
-		
-		float fmodA = time - trackStartTime;
-		float fmodB = trackEndTime - trackStartTime;
-		// t = fmodf(time - startTime, endTime - startTime); i didn't want to use the standard library here, it's just an fmod
-		int trunc = (int)(fmodA / fmodB);
-		float trackTime = fmodA - ((float)trunc * fmodB); // Time normalized to this track, not the animation
-		
-		while (trackTime < fmodA) {
-			trackTime += fmodB - fmodA;
-		}
+		float trackStartTime = frameView.GetStartTime();
+		float trackEndTime = frameView.GetEndTime();
+		float trackTime = trackStartTime + Animation::FMod(time - trackStartTime, trackEndTime - trackStartTime);
 
-		if (looping) {
-			// TODO: Linear search is not optimal here. Replace with binary search, since time only ever grows
-			for (unsigned int j = offset + size - 1; j >= offset; j -= frameStride) {
-				if (trackTime >= mFrameData[j]) {
-					thisFrame = j / frameStride;
+		unsigned int thisFrame = 0;
+		if (looping) { // TODO: Linear search is not optimal here. Replace with binary search, since time only ever grows
+			for (int frameIndex = frameView.GetNumFrames() - 1; frameIndex >= 0; frameIndex -= 1) {
+				if (trackTime >= frameView.GetTime(frameIndex)) {
+					thisFrame = frameIndex;
 					break;
 				}
 			}
@@ -188,113 +348,24 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 		unsigned int nextFrame = thisFrame + 1;
 
 		// Find frame delta and interpolation t
-		float frameDelta = mFrameData[thisFrame * frameStride] - mFrameData[nextFrame * frameStride];
+		float frameDelta = frameView.GetTime(nextFrame) - frameView.GetTime(thisFrame);
 		float t = 0.0f;
 		if (frameDelta > 0.0f) {
-			t = (trackTime - mFrameData[thisFrame * frameStride]) / frameDelta;
+			t = (trackTime - frameView.GetTime(thisFrame)) / frameDelta;
 		}
 
-		const float* component = 0;
-		unsigned int componentSize = 3;
-		if (mTrackData[i + 1] == (unsigned int)Component::Position) {
-			component = out.GetRelativePosition(target);
+		float result[4] = { 0.0f };
+		if (trackComponent == Component::Position) {
+			frameView.Vec3Interpolate(result, thisFrame, nextFrame, t);
+			out.SetRelativePosition(targetJointId, result);
 		}
-		else if (mTrackData[i + 1] == (unsigned int)Component::Rotation) {
-			component = out.GetRelativeRotation(target);
-			componentSize = 4;
+		else if (trackComponent == Component::Rotation) {
+			frameView.QuatInterpolate(result, thisFrame, nextFrame, t);
+			out.SetRelativeRotation(targetJointId, result);
 		}
 		else {
-			component = out.GetRelativeScale(target);
-		}
-
-		// Interpolate between the two frames
-		float result[4] = {};
-		unsigned int thisFrameIndex = thisFrame * frameStride; // TODO: find and replace all instances of this
-		unsigned int nextFrameIndex = nextFrame * frameStride;
-
-		float* a = &mFrameData[thisFrameIndex + 1 + componentSize];
-		float* b = &mFrameData[nextFrameIndex + 1 + componentSize];
-
-		for (unsigned int j = 0; j < componentSize; ++j) {
-			float outTangent = mFrameData[thisFrameIndex + 1];
-			float inTangent = mFrameData[nextFrameIndex + 1 + componentSize * 2 + j];
-
-			float y = mFrameData[nextFrameIndex + 1 + componentSize + j] - mFrameData[thisFrameIndex + 1 + componentSize + j]; // Delta on y axis (track value)
-			float x = mFrameData[nextFrameIndex] - mFrameData[thisFrameIndex]; ; // Delta on x axis (track time)
-			if (x < 0.0f) { 
-				x *= -1.0f; 
-			}
-			float linearTangent = FloatCompare(x, 0)? 0.0f : y / x;
-
-			if (outTangent >= 1000000.0f || outTangent <= -1000000.0f || inTangent >= 1000000.0f || inTangent <= -1000000.0f) { // Constant Interpolation
-				result[j] = a[j];
-			}
-			else if (FloatCompare(inTangent, linearTangent) && FloatCompare(outTangent, linearTangent)) { // Linear interpolation
-				float from = a[j];
-				float to = b[j];
-
-				if (mTrackData[i + 1] == (unsigned int)Component::Rotation) {
-					if (a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3] < 0.0f) {
-						to = to * -1.0f; // Neighborhood
-					}
-				}
-				result[j] = from + (to - from) * t;
-			}
-			else { //  Cubic interpolation
-				float p1 = a[j];
-				float s1 = outTangent * frameDelta;
-
-				float p2 = b[j];
-				float s2 = inTangent * frameDelta;
-
-				if (mTrackData[i + 1] == (unsigned int)Component::Rotation) { // Quaternion neighborhood
-					if (a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3] < 0.0f) {
-						p2 = -p2;
-					}
-				}
-
-				// hermite
-				float tt = t * t;
-				float ttt = tt * t;
-
-				float h1 = 2.0f * ttt - 3.0f * tt + 1.0f;
-				float h2 = -2.0f * ttt + 3.0f * tt;
-				float h3 = ttt - 2.0f * tt + t;
-				float h4 = ttt - tt;
-
-				result[j] = p1 * h1 + p2 * h2 + s1 * h3 + s2 * h4;
-			}
-		}
-
-		// If this is a quaternion (rotation), it was lerped so far, not nlerped. Need to normalize.
-		// This normalization should take care of both linear and quadratic curves. Constants don't need it, but get it too.
-		if (mTrackData[i + 1] == (unsigned int)Component::Rotation) {
-			float lenSq = result[0] * result[0] + result[1] * result[1] + result[2] * result[2] + result[3] * result[3];
-
-			if (FloatCompare(lenSq, 0.0f)) { // Length of 0, invalid!
-				result[0] = 0.0f;
-				result[1] = 0.0f;
-				result[2] = 0.0f;
-				result[3] = 1.0f;
-			}
-			else {
-				float inverseLength = InvSqrt(lenSq);
-				result[0] *= inverseLength;
-				result[1] *= inverseLength;
-				result[2] *= inverseLength;
-				result[3] *= inverseLength;
-			}
-		}
-
-		// Set interpolation result back into output data
-		if (mTrackData[i + 1] == (unsigned int)Component::Position) {
-			out.SetRelativePosition(target, result);
-		}
-		else if (mTrackData[i + 1] == (unsigned int)Component::Rotation) {
-			out.SetRelativeRotation(target, result);
-		}
-		else { // Component::Scale
-			out.SetRelativeScale(target, result);
+			frameView.Vec3Interpolate(result, thisFrame, nextFrame, t);
+			out.SetRelativeScale(targetJointId, result);
 		}
 	}
 
@@ -357,11 +428,13 @@ void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize,
 		unsigned int trackStride = 4;
 		// Loop trough all tracks
 		for (unsigned int i = 0; i < mTrackDataSize; i += trackStride) {
+			unsigned int component = mTrackData[i + 1];
 			unsigned int offset = mTrackData[i + 2];
 			unsigned int size = mTrackData[i + 3];
 
 			float trackStartTime = mFrameData[offset];
-			float trackEndTime = mFrameData[offset + size - 1];
+			unsigned int frameDataStride = (component == (unsigned int)Animation::Data::Component::Rotation) ? 13 : 10;
+			float trackEndTime = mFrameData[offset + size - frameDataStride];
 
 			if (trackStartTime < mStartTime) {
 				mStartTime = trackStartTime;

@@ -2,8 +2,11 @@
 #define _H_ANIMATIONDATABUILDER_
 
 #include "AnimationData.h"
+#include "AnimationState.h"
 
 namespace Animation {
+	// TODO: Const-correct all of these!
+
 	namespace Builder {
 		struct Frame {
 			float time;
@@ -18,7 +21,7 @@ namespace Animation {
 		class Clip;
 
 		class Track {
-			friend class Clip;
+			friend class Clip; // TODO: Can / should i undo this?
 		protected:
 			unsigned int mJointID;
 			Animation::Data::Component mComponent;
@@ -73,12 +76,49 @@ namespace Animation {
 			void Reserve(unsigned int numToReserve);
 			void Resize(unsigned int newSize);
 
+			unsigned int GetNumUniqueTracks();
+
 			Track& operator[](unsigned int index);
 			void PushTrack(const Track& input);
 		};
 
+#if 0
+		class Node {
+		public:
+			float position[3];
+			float rotation[4];
+			float scale[3];
+		protected:
+			Node* mParent;
+			Node** mChildren;
+			unsigned int mChildrenCount;
+			unsigned int mChildrenCapacity;
+		public:
+			Node();
+			Node(Node* parent);
+			Node(float* pos, float* rot, float* scl);
+			Node(Node* parent, float* pos, float* rot, float* scl);
+			Node(const Node& other);
+			Node& operator=(const Node& other);
+			~Node();
+
+			Node* GetParent();
+			void SetParent(Node* parent);
+
+			unsigned int Size();
+			unsigned int Capacity();
+			void Reserve(unsigned int numToReserve);
+
+			Node* operator[](unsigned int index);
+			void AddChild(Node* child);
+			void RemoveChild(Node* child);
+			void RemoveChild(unsigned int index);
+
+			unsigned int SizeOfGraph();
+		};
+		Animation::State Convert(Animation::Builder::Node* nodes, unsigned int numNodes);
+#endif
 		Animation::Data Convert(Animation::Builder::Clip& clip);
-		Animation::Builder::Clip Convert(Animation::Data& data);
 	}
 }
 
