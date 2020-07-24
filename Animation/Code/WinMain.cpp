@@ -1,6 +1,6 @@
-#pragma warning(disable : 28251)
-#pragma warning(disable : 28159)
-#pragma warning(disable : 26451)
+//#pragma warning(disable : 28251)
+//#pragma warning(disable : 28159)
+//#pragma warning(disable : 26451)
 
 #define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN

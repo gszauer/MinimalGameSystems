@@ -16,14 +16,14 @@ void CurvesSample::Initialize() {
 	frame2.value[0] = 1.0f; // x
 	frame2.value[1] = 1.0f; // y
 
-	//frame1.out[0] = 1.0f;
-	//frame2.in[0] = -1.0f;
+	frame1.out[0] = 1.0f;
+	frame2.in[0] = 1.0f;
 
 	Animation::Builder::Track track;
 	track.SetTarget(Animation::Data::Component::Position);
 	track.PushFrame(frame1);
 	track.PushFrame(frame2);
-	track.ForceLinear();
+	//track.ForceLinear();
 
 	Animation::Builder::Clip clip;
 	clip.PushTrack(track);
@@ -50,9 +50,9 @@ void CurvesSample::Initialize() {
 
 	for (unsigned int i = 0; i < 200 - 1; ++i) {
 		float this_t = (float)i / 199.0f;
-		mAnimationData.Sample(thisState, this_t, true);
+		mAnimationData.Sample(thisState, this_t, false);
 		float next_t = (float)(i + 1) / 199.0f;
-		mAnimationData.Sample(nextState, next_t, true);
+		mAnimationData.Sample(nextState, next_t, false);
 
 		for (unsigned int j = 0; j < thisState.Size(); ++j) {
 			thisState.GetAbsolutePosition(j, thisPosition);
@@ -64,11 +64,6 @@ void CurvesSample::Initialize() {
 	}
 
 	mNumVerts = (unsigned int)verts.size() / 6;
-
-	mAnimationData.Sample(thisState, 0.0f, true);
-	mAnimationData.Sample(nextState, 0.9f, true);
-	thisState.GetAbsolutePosition(0, thisPosition);
-	nextState.GetAbsolutePosition(0, nextPosition);
 
 	// Setup OpenGL
 	glGenVertexArrays(1, &mCurveVAO);

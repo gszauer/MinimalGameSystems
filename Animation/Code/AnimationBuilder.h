@@ -51,7 +51,7 @@ namespace Animation {
 			Frame& operator[](unsigned int index);
 			void PushFrame(const Frame& input);
 
-			void ForceLinear();
+			void ForceLinear(); // TODO: This is bad. Need to fix it
 			void ForceStep();
 		};
 
@@ -76,7 +76,7 @@ namespace Animation {
 			void Reserve(unsigned int numToReserve);
 			void Resize(unsigned int newSize);
 
-			unsigned int GetNumUniqueTracks();
+			//unsigned int GetNumUniqueTracks();
 
 			Track& operator[](unsigned int index);
 			void PushTrack(const Track& input);
