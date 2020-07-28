@@ -140,30 +140,29 @@ namespace Animation {
 				// Neighborhood
 				const float* valueRight = &mBuffer[right * mFrameSize + 1 + mComponentSize];
 				float valueLeft[4] = { 0.0f };
-				float delta[4] = { 0.0f };
 
 				float neighborhood = 0.0f;
 				const float* originalLeft = &mBuffer[left * mFrameSize + 1 + mComponentSize];
 
 				if (mComponentSize >= 1) {
-					neighborhood = originalLeft[0] * originalLeft[0];
+					neighborhood = valueRight[0] * originalLeft[0];
 					valueLeft[0] = originalLeft[0];
-					delta[0] = originalLeft[0] - valueRight[0];
+					out[0] = 0.0f; // Reset out so the normalize below doesn't go crazy
 				}
 				if (mComponentSize >= 2) {
-					neighborhood = originalLeft[0] * originalLeft[0] + originalLeft[1] * originalLeft[1];
+					neighborhood = valueRight[0] * originalLeft[0] + valueRight[1] * originalLeft[1];
 					valueLeft[1] = originalLeft[1];
-					delta[1] = originalLeft[1] - valueRight[1];
+					out[1] = 0.0f;
 				}
 				if (mComponentSize >= 3) {
-					neighborhood = originalLeft[0] * originalLeft[0] + originalLeft[1] * originalLeft[1] + originalLeft[2] * originalLeft[2];
+					neighborhood = valueRight[0] * originalLeft[0] + valueRight[1] * originalLeft[1] + valueRight[2] * originalLeft[2];
 					valueLeft[2] = originalLeft[2];
-					delta[2] = originalLeft[1] - valueRight[2];
+					out[2] = 0.0f;
 				}
 				if (mComponentSize >= 4) {
-					neighborhood = originalLeft[0] * originalLeft[0] + originalLeft[1] * originalLeft[1] + originalLeft[2] * originalLeft[2] + originalLeft[3] * originalLeft[3];
+					neighborhood = valueRight[0] * originalLeft[0] + valueRight[1] * originalLeft[1] + valueRight[2] * originalLeft[2] + valueRight[3] * originalLeft[3];
 					valueLeft[3] = originalLeft[3];
-					delta[3] = originalLeft[3] - valueRight[3];
+					out[3] = 1.0f; // Rotation, quaternion
 				}
 
 				if (neighborhood < 0.0f) {
@@ -176,7 +175,7 @@ namespace Animation {
 				InterpolateFrames(out, t, leftTime, valueLeft, outTangentLeft, rightTime, valueRight, inTangentRight);
 
 				// Normalize
-				float lenSq = delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2] + delta[3] * delta[3];
+				float lenSq = out[0] * out[0] + out[1] * out[1] + out[2] * out[2] + out[3] * out[3];
 				if (lenSq > 0.0f) {
 					float invLen = Animation::InvSqrt(lenSq);
 					if (mComponentSize >= 1) {

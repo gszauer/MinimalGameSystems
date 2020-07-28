@@ -28,6 +28,7 @@
     <ClInclude Include="Code\glad.h" />
     <ClInclude Include="Code\Samples\CurvesSample.h" />
     <ClInclude Include="Code\Samples\ISample.h" />
+    <ClInclude Include="Code\Samples\microui.h" />
     <ClInclude Include="Code\Samples\SkeletonSample.h" />
     <ClInclude Include="Code\Samples\SkinnedSample.h" />
   </ItemGroup>
@@ -41,6 +42,7 @@
     <ClCompile Include="Code\glad.c" />
     <ClCompile Include="Code\Samples\CurveSample.cpp" />
     <ClCompile Include="Code\Samples\ISample.cpp" />
+    <ClCompile Include="Code\Samples\microui.c" />
     <ClCompile Include="Code\Samples\SkeletonSample.cpp" />
     <ClCompile Include="Code\Samples\SkinnedSample.cpp" />
     <ClCompile Include="Code\WinMain.cpp" />

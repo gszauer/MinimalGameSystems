@@ -54,6 +54,9 @@
     <ClInclude Include="Code\AnimationBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Samples\microui.h">
+      <Filter>Header Files\Samples</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\AnimationBlend.cpp">
@@ -91,6 +94,9 @@
     </ClCompile>
     <ClCompile Include="Code\AnimationBuilder.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\microui.c">
+      <Filter>Source Files\Samples</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

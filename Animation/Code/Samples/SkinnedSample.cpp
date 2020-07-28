@@ -288,15 +288,12 @@ void SkinnedSample::DrawAnimatedModel(float* viewProjection, float* model) {
 
 	glEnableVertexAttribArray(mCharacterAttribTexCoord);
 	glVertexAttribPointer(mCharacterAttribTexCoord, 2, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (GLvoid*)0);
-	//glVertexAttribPointer(, 4, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (GLvoid*)(2 * sizeof(float)));
-	//glVertexAttribIPointer(5, 4, GL_UNSIGNED_INT, 10 * sizeof(float), (GLvoid*)(6 * sizeof(float)));
 
 	glBindBuffer(GL_ARRAY_BUFFER, mCharacterDynamicVBO);
 	glBufferData(GL_ARRAY_BUFFER, mSkinned.size() * sizeof(float), &mSkinned[0], GL_STREAM_DRAW);
 
 	glEnableVertexAttribArray(mCharacterAttribPosition);
 	glVertexAttribPointer(mCharacterAttribPosition, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (GLvoid*)0);
-	//glVertexAttribPointer(mAttribNormal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (GLvoid*)(3 * sizeof(float)));
 
 	glUniformMatrix4fv(mCharacterUniformVP, 1, GL_FALSE, viewProjection);
 	glUniformMatrix4fv(mCharacterUniformModel, 1, GL_FALSE, model);

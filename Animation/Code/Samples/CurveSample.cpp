@@ -273,7 +273,7 @@ void CurvesSample::Initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, mCurveVBO);
 	glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), &verts[0], GL_STATIC_DRAW);
 	
-	glEnableVertexAttribArray(mVertexAttrib); // TODO: These are probably wrong Renderdoc says they are trash
+	glEnableVertexAttribArray(mVertexAttrib);
 	glVertexAttribPointer(mVertexAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
 
 	glEnableVertexAttribArray(mColorAttrib);
@@ -345,7 +345,7 @@ void PusV(std::vector<float>& target, float x, float y, float z, float r, float 
 }
 
 
-void Ortho(float* result, float l, float r, float b, float t, float n, float f) {
+void Ortho(float* result, float l, float r, float b, float t, float n, float f) { // TODO: Move this into AnimationHelpers
 	if (l == r || t == b || n == f) {
 		return;
 	}

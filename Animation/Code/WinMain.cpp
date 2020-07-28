@@ -41,6 +41,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 #include "Samples/SkinnedSample.h"
 #include "Samples/SkeletonSample.h"
 #include "Samples/CurvesSample.h"
+#include "Samples/microui.h"
 
 #include <vector>
 #include <fstream>
@@ -65,11 +66,14 @@ typedef int (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC) (void);
 
 //SkinnedSample* gCPUSkinnedSample = 0;
 ISample* gCPUSkinnedSample = 0;
+mu_Context* gUIContext = 0;
+
+void GUITest(mu_Context* ctx);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
+	//gCPUSkinnedSample = new CurvesSample();
+	gCPUSkinnedSample = new SkeletonSample();
 	//gCPUSkinnedSample = new SkinnedSample();
-	//gCPUSkinnedSample = new SkeletonSample();
-	gCPUSkinnedSample = new CurvesSample();
 	WNDCLASSEX wndclass;
 	wndclass.cbSize = sizeof(WNDCLASSEX);
 	wndclass.style = CS_HREDRAW | CS_VREDRAW;
@@ -158,6 +162,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 
 	ShowWindow(hwnd, SW_SHOW);
 	UpdateWindow(hwnd);
+	r_init(800, 600);
+	gUIContext = (mu_Context*)malloc(sizeof(mu_Context));
+	mu_init(gUIContext);
+
 	if (gCPUSkinnedSample != 0) {
 		gCPUSkinnedSample->Initialize();
 	}
@@ -194,6 +202,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 			float aspect = (float)clientWidth / (float)clientHeight;
 			gCPUSkinnedSample->Render(aspect);
 		}
+		{
+			RECT clientRect;
+			GetClientRect(hwnd, &clientRect);
+			clientWidth = clientRect.right - clientRect.left;
+			clientHeight = clientRect.bottom - clientRect.top;
+
+			// TODO: handle mu input
+			mu_begin(gUIContext, clientWidth, clientHeight);
+			GUITest(gUIContext);
+			mu_end(gUIContext);
+
+			mu_Command* cmd = NULL;
+			while (mu_next_command(gUIContext, &cmd)) {
+				switch (cmd->type) {
+					case MU_COMMAND_TEXT: r_draw_text(cmd->text.str, cmd->text.pos, cmd->text.color); break;
+					case MU_COMMAND_RECT: r_draw_rect(cmd->rect.rect, cmd->rect.color); break;
+					case MU_COMMAND_ICON: r_draw_icon(cmd->icon.id, cmd->icon.rect, cmd->icon.color); break;
+					case MU_COMMAND_CLIP: r_set_clip_rect(cmd->clip.rect); break;
+				}
+			}
+			r_present();
+		}
 		if (gCPUSkinnedSample != 0) {
 			SwapBuffers(hdc);
 			if (vsynch != 0) {
@@ -211,12 +241,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	return (int)msg.wParam;
 }
 
+#define LEFT_MOUSE_POS (short)((float)LOWORD(lParam))
+#define RIGHT_MOUSE_POS (short)((float)HIWORD(lParam))
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	switch (iMsg) {
 	case WM_CLOSE:
 		if (gCPUSkinnedSample != 0) {
 			gCPUSkinnedSample->Shutdown();
 			gCPUSkinnedSample = 0;
+
+			r_shutdown();
 
 			HDC hdc = GetDC(hwnd);
 			HGLRC hglrc = wglGetCurrentContext();
@@ -230,6 +265,30 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
+	case WM_LBUTTONDOWN:
+		mu_input_mousedown(gUIContext, LEFT_MOUSE_POS, RIGHT_MOUSE_POS, 1);
+		return 1;
+	case WM_LBUTTONUP:
+		mu_input_mouseup(gUIContext, LEFT_MOUSE_POS, RIGHT_MOUSE_POS, 1);
+		return 1;
+	case WM_RBUTTONDOWN:
+		mu_input_mousedown(gUIContext, LEFT_MOUSE_POS, RIGHT_MOUSE_POS, 0);
+		return 1;
+	case WM_RBUTTONUP:
+		mu_input_mouseup(gUIContext, LEFT_MOUSE_POS, RIGHT_MOUSE_POS, 0);
+		return 1;
+	case WM_MBUTTONDOWN:
+		mu_input_mousedown(gUIContext, LEFT_MOUSE_POS, RIGHT_MOUSE_POS, 2);
+		return 1;
+	case WM_MBUTTONUP:
+		mu_input_mouseup(gUIContext, LEFT_MOUSE_POS, RIGHT_MOUSE_POS, 2);
+		return 1;
+	case WM_MOUSEMOVE:
+		mu_input_mousemove(gUIContext, LEFT_MOUSE_POS, RIGHT_MOUSE_POS);
+		return 1;
+	case WM_MOUSEWHEEL:
+		mu_input_scroll(gUIContext,0, (short)HIWORD(wParam) / WHEEL_DELTA);
+		return 1;
 	case WM_PAINT:
 	case WM_ERASEBKGND:
 		return 0;
@@ -238,3 +297,55 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }
 
+void mu_input_scroll(mu_Context* ctx, int x, int y);
+void mu_input_keydown(mu_Context* ctx, int key);
+void mu_input_keyup(mu_Context* ctx, int key);
+void mu_input_text(mu_Context* ctx, const char* text);
+
+void GUITest(mu_Context* ctx) {
+	if (mu_begin_window(ctx, "Demo Window", mu_rect(40, 40, 300, 450))) {
+		mu_Container* win = mu_get_current_container(ctx);
+		win->rect.w = mu_max(win->rect.w, 240);
+		win->rect.h = mu_max(win->rect.h, 300);
+
+		/* window info */
+		if (mu_header(ctx, "Window Info")) {
+			mu_Container* win = mu_get_current_container(ctx);
+			char buf[64];
+			static int layout[] = { 54, -1 };
+			mu_layout_row(ctx, 2, layout, 0);
+			mu_label(ctx, "Position:");
+			sprintf(buf, "%d, %d", win->rect.x, win->rect.y); mu_label(ctx, buf);
+			mu_label(ctx, "Size:");
+			sprintf(buf, "%d, %d", win->rect.w, win->rect.h); mu_label(ctx, buf);
+		}
+
+		/* labels + buttons */
+		if (mu_header_ex(ctx, "Test Buttons", MU_OPT_EXPANDED)) {
+			static int layout[] = { 86, -110, -1 };
+			mu_layout_row(ctx, 3, layout, 0);
+			mu_label(ctx, "Test buttons 1:");
+			if (mu_button(ctx, "Button 1")) {
+				//write_log("Pressed button 1"); 
+				int x = 8;
+			}
+			if (mu_button(ctx, "Button 2")) {
+				//write_log("Pressed button 2"); 
+				int x = 8;
+			}
+			mu_label(ctx, "Test buttons 2:");
+			if (mu_button(ctx, "Button 3")) {
+				//write_log("Pressed button 3"); 
+				int x = 8;
+			}
+			if (mu_button(ctx, "Popup")) { mu_open_popup(ctx, "Test Popup"); }
+			if (mu_begin_popup(ctx, "Test Popup")) {
+				mu_button(ctx, "Hello");
+				mu_button(ctx, "World");
+				mu_end_popup(ctx);
+			}
+		}
+
+		mu_end_window(ctx);
+	}
+}

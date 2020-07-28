@@ -3,7 +3,7 @@
 
 #include "ISample.h"
 
-class SkeletonSample : public ISample { // TODO
+class SkeletonSample : public ISample {
 protected:
 	std::vector<float> mVertices;
 	std::vector<float> mSkinned;
@@ -33,4 +33,4 @@ public:
 	void Shutdown();
 };
 
-#endif // !_H_SKELETON_SAMPLE_
+#endif

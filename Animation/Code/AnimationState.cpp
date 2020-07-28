@@ -184,7 +184,6 @@ void Animation::State::GetRelativeTransform(unsigned int index, float* outPos, f
 
 void Animation::State::GetAbsoluteTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const {
     float parentPos[3], parentRot[4], parentScl[3];
-    // TODO: left off here have a thing to do
 
     GetRelativePosition(index, outPos);
     GetRelativeRotation(index, outRot);
