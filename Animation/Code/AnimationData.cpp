@@ -3,6 +3,8 @@
 #include "AnimationHelpers.h"
 
 namespace Animation {
+	int Data::StepLimit = 1000000.0f;
+
 	namespace Internal {
 		class FrameView {
 		protected:
@@ -31,18 +33,18 @@ namespace Animation {
 					float inTangent = inTangentRight[component];
 
 					bool stepOut = false;
-					if (outTangent > 0.0f && outTangent > 1000000.0f) {
+					if (outTangent > 0.0f && outTangent >= Animation::Data::StepLimit) {
 						stepOut = true;
 					}
-					if (outTangent < 0.0f && outTangent < -1000000.0f) {
+					if (outTangent < 0.0f && outTangent <= -Animation::Data::StepLimit) {
 						stepOut = true;
 					}
 					
 					bool stepIn = false;
-					if (inTangent > 0.0f && inTangent > 1000000.0f) {
+					if (inTangent > 0.0f && inTangent >= Animation::Data::StepLimit) {
 						stepIn = true;
 					}
-					if (inTangent < 0.0f && inTangent < -1000000.0f) {
+					if (inTangent < 0.0f && inTangent <= -Animation::Data::StepLimit) {
 						stepIn = true;
 					}
 
@@ -309,11 +311,13 @@ float Animation::Data::Sample(State& out, float clipCurrentTime, bool looping) c
 			return 0.0f;
 		}
 
-		clipCurrentTime = Animation::FMod(clipCurrentTime - clipStartTime, clipDuration);
-		if (clipCurrentTime < 0.0f) {
-			clipCurrentTime += clipEndTime - clipStartTime;
+		/*while (clipCurrentTime < clipStartTime) {
+			clipCurrentTime += clipDuration;
 		}
-		clipCurrentTime += clipStartTime;
+		while (clipCurrentTime >= clipEndTime) {
+			clipCurrentTime -= clipDuration;
+		}*/
+		clipCurrentTime = Animation::FMod(clipCurrentTime, clipDuration) + clipStartTime;
 	}
 	else {
 		if (clipCurrentTime < clipStartTime) {
@@ -344,14 +348,17 @@ float Animation::Data::Sample(State& out, float clipCurrentTime, bool looping) c
 		// Find current and next frames
 		float trackStartTime = frameView.GetStartTime();
 		float trackEndTime = frameView.GetEndTime();
+		float trackDuration = trackEndTime - trackStartTime;
 
 		float trackTime = clipCurrentTime;
 		if (looping) {
-			trackTime = Animation::FMod(clipCurrentTime - trackStartTime, trackEndTime - trackStartTime);
-			if (trackTime < 0.0f) {
-				trackTime += trackEndTime - trackStartTime;
+			/*while (trackTime < trackStartTime) {
+				trackTime += trackDuration;
 			}
-			trackTime += trackStartTime;
+			while (trackTime >= trackEndTime) {
+				trackTime -= trackDuration;
+			}*/
+			trackTime = Animation::FMod(trackTime, trackDuration) + trackStartTime;
 		}
 		else {
 			if (trackTime < trackStartTime) {
@@ -363,20 +370,19 @@ float Animation::Data::Sample(State& out, float clipCurrentTime, bool looping) c
 		}
 
 		unsigned int thisFrame = 0;
-		if (looping) { // TODO: Linear search is not optimal here. Replace with binary search, since time only ever grows
-			for (int frameIndex = frameView.GetNumFrames() - 1; frameIndex >= 0; frameIndex -= 1) {
-				if (trackTime >= frameView.GetTime(frameIndex)) {
-					thisFrame = frameIndex;
-					break;
-				}
+		// TODO: Linear search is not optimal here. Replace with binary search, since time only ever grows
+		for (int frameIndex = frameView.GetNumFrames() - 1; frameIndex >= 0; frameIndex -= 1) {
+			if (trackTime >= frameView.GetTime(frameIndex)) {
+				thisFrame = frameIndex;
+				break;
 			}
 		}
-		else {
-			if (clipCurrentTime < trackStartTime) {
+		if (!looping) {
+			if (clipCurrentTime <= trackStartTime) {
 				thisFrame = 0;
 				trackTime = trackStartTime;
 			}
-			if (clipCurrentTime > trackEndTime) {
+			if (clipCurrentTime >= trackEndTime) {
 				thisFrame = numFrames - 2; // -2 so thisFrame + 1 is a valid index
 				trackTime = trackEndTime;
 			}

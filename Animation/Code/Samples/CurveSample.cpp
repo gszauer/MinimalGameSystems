@@ -12,41 +12,157 @@ void CurvesSample::Initialize() {
 	// Build test animation data
 	Animation::Builder::Frame frame1;
 	Animation::Builder::Frame frame2;
-	frame2.time = 1.0f;
-	frame2.value[0] = 1.0f; // x
-	frame2.value[1] = 1.0f; // y
 
+	frame1.time = 0.0f;
+	frame1.in[0] = 1.0f;
+	frame1.value[0] = 0.0f;
 	frame1.out[0] = 1.0f;
+	frame1.in[1] = -1.0f;
+	frame1.value[1] = 1.0f;
+	frame1.out[1] = -5.157074f;
+	frame1.in[2] = Animation::Data::StepLimit * 2.0f;
+	frame1.value[2] = 0.5f;
+	frame1.out[2] = Animation::Data::StepLimit * 2.0f;
+
+	frame2.time = 1.0f;
 	frame2.in[0] = 1.0f;
+	frame2.value[0] = 1.0f;
+	frame2.out[0] = 1.0f;
+	frame2.in[1] = -1.088976f;
+	frame2.value[1] = 0.0f;
+	frame2.out[1] = -1.088976f;
+	frame2.in[2] = Animation::Data::StepLimit * 2.0f;
+	frame2.value[2] = 0.75f;
+	frame2.out[2] = Animation::Data::StepLimit * 2.0f;
 
 	Animation::Builder::Track track;
 	track.SetTarget(Animation::Data::Component::Position);
+	track.SetJointID(0);
 	track.PushFrame(frame1);
 	track.PushFrame(frame2);
-	//track.ForceLinear();
 
 	Animation::Builder::Clip clip;
 	clip.PushTrack(track);
 
+	frame1 = Animation::Builder::Frame();
+	frame2 = Animation::Builder::Frame();
+	Animation::Builder::Frame frame3;
+	track = Animation::Builder::Track();
+	track.SetJointID(1);
+
+	frame1.time = 0.25f;
+	frame1.in[0] = Animation::Data::StepLimit * 2.0f;
+	frame1.value[0] = 0.25f;
+	frame1.out[0] = Animation::Data::StepLimit * 2.0f;
+	frame1.in[1] = 0.0f;
+	frame1.value[1] = 0.5f;
+	frame1.out[1] = 0.0f;
+	frame1.in[2] = -4.0f;
+	frame1.value[2] = 0.0f;
+	frame1.out[2] = 4.0f;
+
+	frame2.time = 0.5f;
+	frame2.in[0] = Animation::Data::StepLimit * 2.0f;
+	frame2.value[0] = 0.5f;
+	frame2.out[0] = Animation::Data::StepLimit * 2.0f;
+	frame2.in[1] = 0.0f;
+	frame2.value[1] = 0.75f;
+	frame2.out[1] = 0.0f;
+	frame2.in[2] = 4.0f;
+	frame2.value[2] = 1.0f;
+	frame2.out[2] = -4.0f;
+
+	frame3.time = 0.75f;
+	frame3.in[0] = Animation::Data::StepLimit * 2.0f;
+	frame3.value[0] = 0.25f;
+	frame3.out[0] = Animation::Data::StepLimit * 2.0f;
+	frame3.in[1] = 0.0f;
+	frame3.value[1] = 0.5f;
+	frame3.out[1] = 0.0f;
+	frame3.in[2] = -4.0f;
+	frame3.value[2] = 0.0f;
+	frame3.out[2] = 4.0f;
+
+	track.SetTarget(Animation::Data::Component::Position);
+	track.PushFrame(frame1);
+	track.PushFrame(frame2);
+	track.PushFrame(frame3);
+
+	clip.PushTrack(track);
+
+	frame1 = Animation::Builder::Frame();
+	frame2 = Animation::Builder::Frame();
+	frame3 = Animation::Builder::Frame();
+	Animation::Builder::Frame frame4, frame5, frame6, frame7, frame0;
+	track = Animation::Builder::Track();
+	track.SetJointID(2);
+
+	frame0.time = 0.0f;
+	frame0.in[0] = 0.0f;
+	frame0.value[0] = 1.0f;
+	frame0.out[0] = -8.286444f;
+
+	frame1.time = 0.05976868f;
+	frame1.in[0] = -8.286444f;
+	frame1.value[0] = 0.5047302f;
+	frame1.out[0] = 5.0676f;
+
+	frame2.time = 0.1444702f;
+	frame2.in[0] = 5.0676f;
+	frame2.value[0] = 0.9339638f;
+	frame2.out[0] = -22.03639f;
+
+	frame3.time = 0.3136442f;
+	frame3.in[0] = 8.614264f;
+	frame3.value[0] = 0.4386729f;
+	frame3.out[0] = 11.181f;
+
+	frame4.time = 0.4447021f;
+	frame4.in[0] = -0.8708439f;
+	frame4.value[0] = 0.728775f;
+	frame4.out[0] = 0.0f;
+
+	frame5.time = 0.6016647f;
+	frame5.in[0] = Animation::Data::StepLimit;
+	frame5.value[0] = 0.2806604f;
+	frame5.out[0] = 0.0f;
+
+	frame6.time = 0.7348642f;
+	frame6.in[0] = Animation::Data::StepLimit;
+	frame6.value[0] = 0.7429142f;
+	frame6.out[0] = 0.0f;
+
+	frame7.time = 1.0f;
+	frame7.in[0] = 0.0f;
+	frame7.value[0] = 0.0f;
+	frame7.out[0] = 0.0f;
+
+	track.SetTarget(Animation::Data::Component::Position);
+	track.PushFrame(frame0);
+	track.PushFrame(frame1);
+	track.PushFrame(frame2);
+	track.PushFrame(frame3);
+	track.PushFrame(frame4);
+	track.PushFrame(frame5);
+	track.PushFrame(frame6);
+	track.PushFrame(frame7);
+
+	clip.PushTrack(track);
+
 	mAnimationData = Animation::Builder::Convert(clip);
 	Animation::State thisState, nextState;
-	thisState.Resize(1);
+	thisState.Resize(3);
 	thisState.SetParent(0, -1);
-	nextState.Resize(1);
-	nextState.SetParent(0, -1);
+	thisState.SetParent(1, -1);
+	thisState.SetParent(2, -1);
+	nextState = thisState;
 
 	// Record vertices to display
 	std::vector<float> verts;
-	PusV(verts, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
-	PusV(verts, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
-	PusV(verts, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-	PusV(verts, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-	//PusV(verts, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-	//PusV(verts, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+	
 
 	float thisPosition[3] = { 0.0f, 0.0f, 0.0f };
 	float nextPosition[3] = { 0.0f, 0.0f, 0.0f };
-	float color[3] = { 0.0f, 0.0f, 1.0f };
 
 	for (unsigned int i = 0; i < 200 - 1; ++i) {
 		float this_t = (float)i / 199.0f;
@@ -54,14 +170,45 @@ void CurvesSample::Initialize() {
 		float next_t = (float)(i + 1) / 199.0f;
 		mAnimationData.Sample(nextState, next_t, false);
 
-		for (unsigned int j = 0; j < thisState.Size(); ++j) {
-			thisState.GetAbsolutePosition(j, thisPosition);
-			nextState.GetAbsolutePosition(j, nextPosition);
+		thisState.GetAbsolutePosition(0, thisPosition);
+		nextState.GetAbsolutePosition(0, nextPosition);
+		PusV(verts, this_t * 0.5f, thisPosition[0] * 0.5f, 0.0f, 1.0f, 0.0f, 0.0f);
+		PusV(verts, next_t * 0.5f, nextPosition[0] * 0.5f, 0.0f, 1.0f, 0.0f, 0.0f);
+		PusV(verts, this_t * 0.5f, thisPosition[1] * 0.5f, 0.0f, 0.0f, 1.0f, 0.0f);
+		PusV(verts, next_t * 0.5f, nextPosition[1] * 0.5f, 0.0f, 0.0f, 1.0f, 0.0f);
+		PusV(verts, this_t * 0.5f, thisPosition[2] * 0.5f, 0.0f, 0.0f, 0.0f, 1.0f);
+		PusV(verts, next_t * 0.5f, nextPosition[2] * 0.5f, 0.0f, 0.0f, 0.0f, 1.0f);
 
-			PusV(verts, thisPosition, color);
-			PusV(verts, nextPosition, color);
-		}
+		thisState.GetAbsolutePosition(2, thisPosition);
+		nextState.GetAbsolutePosition(2, nextPosition);
+		PusV(verts, this_t * 0.5f + 0.5f, thisPosition[0] * 0.5f, 0.0f, 1.0f, 1.0f, 0.0f);
+		PusV(verts, next_t * 0.5f + 0.5f, nextPosition[0] * 0.5f, 0.0f, 1.0f, 1.0f, 0.0f);
+
+		mAnimationData.Sample(thisState, this_t, true);
+		mAnimationData.Sample(nextState, next_t, true);
+
+		thisState.GetAbsolutePosition(1, thisPosition);
+		nextState.GetAbsolutePosition(1, nextPosition);
+		PusV(verts, this_t * 0.5f, thisPosition[0] * 0.5f + 0.5f, 0.0f, 1.0f, 0.0f, 0.0f);
+		PusV(verts, next_t * 0.5f, nextPosition[0] * 0.5f + 0.5f, 0.0f, 1.0f, 0.0f, 0.0f);
+		PusV(verts, this_t * 0.5f, thisPosition[1] * 0.5f + 0.5f, 0.0f, 0.0f, 1.0f, 0.0f);
+		PusV(verts, next_t * 0.5f, nextPosition[1] * 0.5f + 0.5f, 0.0f, 0.0f, 1.0f, 0.0f);
+		PusV(verts, this_t * 0.5f, thisPosition[2] * 0.5f + 0.5f, 0.0f, 0.0f, 0.0f, 1.0f);
+		PusV(verts, next_t * 0.5f, nextPosition[2] * 0.5f + 0.5f, 0.0f, 0.0f, 0.0f, 1.0f);
 	}
+
+	PusV(verts, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+	PusV(verts, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+	PusV(verts, 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f);
+	PusV(verts, 1.0f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f);
+	PusV(verts, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+	PusV(verts, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+	PusV(verts, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+	PusV(verts, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+	PusV(verts, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+	PusV(verts, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+	PusV(verts, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+	PusV(verts, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
 
 	mNumVerts = (unsigned int)verts.size() / 6;
 

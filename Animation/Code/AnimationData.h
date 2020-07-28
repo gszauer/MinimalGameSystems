@@ -6,6 +6,7 @@ namespace Animation {
 
 	class Data {
     public:
+        static int StepLimit;
         enum class Component {
             Unset = 0,
             Position = 1,
