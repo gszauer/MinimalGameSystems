@@ -65,15 +65,23 @@ typedef BOOL(WINAPI* PFNWGLSWAPINTERVALEXTPROC) (int);
 typedef int (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC) (void);
 
 //SkinnedSample* gCPUSkinnedSample = 0;
-ISample* gCPUSkinnedSample = 0;
-mu_Context* gUIContext = 0;
+ISample* gCurveSample = 0;
+ISample* gSkeletonSample = 0;
+ISample* gSkinSample = 0;
+ISample* gBlendSample = 0;
 
-void GUITest(mu_Context* ctx);
+mu_Context* gUIContext = 0;
+int gShowCurveSample = 0;
+int gShowSkeletonSample = 1;
+int gShowSkinnedSample = 0;
+int gShowBlendingSample = 0;
+bool gRendererRunning = false;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
-	//gCPUSkinnedSample = new CurvesSample();
-	gCPUSkinnedSample = new SkeletonSample();
-	//gCPUSkinnedSample = new SkinnedSample();
+	gCurveSample = new CurvesSample();
+	gSkeletonSample = new SkeletonSample();
+	gSkinSample = new SkinnedSample();
+	gBlendSample = 0;
 	WNDCLASSEX wndclass;
 	wndclass.cbSize = sizeof(WNDCLASSEX);
 	wndclass.style = CS_HREDRAW | CS_VREDRAW;
@@ -163,11 +171,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	ShowWindow(hwnd, SW_SHOW);
 	UpdateWindow(hwnd);
 	r_init(800, 600);
+	gRendererRunning = true;
 	gUIContext = (mu_Context*)malloc(sizeof(mu_Context));
 	mu_init(gUIContext);
 
-	if (gCPUSkinnedSample != 0) {
-		gCPUSkinnedSample->Initialize();
+	if (gCurveSample != 0) {
+		gCurveSample->Initialize();
+	}
+	if (gSkeletonSample != 0) {
+		gSkeletonSample->Initialize();
+	}
+	if (gSkinSample != 0) {
+		gSkinSample->Initialize();
+	}
+	if (gBlendSample != 0) {
+		gBlendSample->Initialize();
 	}
 
 	glDisable(GL_DEPTH_TEST);
@@ -187,30 +205,58 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 		DWORD thisTick = GetTickCount();
 		float deltaTime = float(thisTick - lastTick) * 0.001f;
 		lastTick = thisTick;
-		if (gCPUSkinnedSample != 0) {
-			gCPUSkinnedSample->Update(deltaTime);
+		if (gCurveSample != 0 && gShowCurveSample) {
+			gCurveSample->Update(deltaTime);
 		}
-		if (gCPUSkinnedSample != 0) {
-			RECT clientRect;
-			GetClientRect(hwnd, &clientRect);
-			clientWidth = clientRect.right - clientRect.left;
-			clientHeight = clientRect.bottom - clientRect.top;
-			glViewport(0, 0, clientWidth, clientHeight);
-			glClearColor(0.5f, 0.6f, 0.7f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		if (gSkeletonSample != 0 && gShowSkeletonSample) {
+			gSkeletonSample->Update(deltaTime);
+		}
+		if (gSkinSample != 0 && gShowSkinnedSample) {
+			gSkinSample->Update(deltaTime);
+		}
+		if (gBlendSample != 0 && gShowBlendingSample) {
+			gBlendSample->Update(deltaTime);
+		}
+		RECT clientRect;
+		GetClientRect(hwnd, &clientRect);
+		clientWidth = clientRect.right - clientRect.left;
+		clientHeight = clientRect.bottom - clientRect.top;
+		glViewport(0, 0, clientWidth, clientHeight);
+		glClearColor(0.5f, 0.6f, 0.7f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		float aspect = (float)clientWidth / (float)clientHeight;
+		if (gCurveSample != 0 && gShowCurveSample) {
+			gCurveSample->Render(aspect);
+		}
+		if (gSkeletonSample != 0 && gShowSkeletonSample) {
+			gSkeletonSample->Render(aspect);
+		}
+		if (gSkinSample != 0 && gShowSkinnedSample) {
+			gSkinSample->Render(aspect);
+		}
+		if (gBlendSample != 0 && gShowBlendingSample) {
+			gBlendSample->Render(aspect);
+		}
 
-			float aspect = (float)clientWidth / (float)clientHeight;
-			gCPUSkinnedSample->Render(aspect);
-		}
 		{
-			RECT clientRect;
-			GetClientRect(hwnd, &clientRect);
-			clientWidth = clientRect.right - clientRect.left;
-			clientHeight = clientRect.bottom - clientRect.top;
-
 			// TODO: handle mu input
 			mu_begin(gUIContext, clientWidth, clientHeight);
-			GUITest(gUIContext);
+			
+			if (mu_begin_window_ex(gUIContext, "Animation Demo", mu_rect(clientWidth - 10 - 125, 10, 125, 130), MU_OPT_NOCLOSE)) {
+				mu_Container* win = mu_get_current_container(gUIContext);
+
+				{
+					static int layout[] = { -1 };
+					mu_layout_row(gUIContext, 1, layout, 0);
+					mu_checkbox(gUIContext, "Curve Sample", &gShowCurveSample);
+					mu_checkbox(gUIContext, "Skeleton Sample", &gShowSkeletonSample);
+					mu_checkbox(gUIContext, "Skinning Sample", &gShowSkinnedSample);
+					mu_checkbox(gUIContext, "Blending Sample", &gShowBlendingSample);
+				}
+
+				mu_end_window(gUIContext);
+			}
+
 			mu_end(gUIContext);
 
 			mu_Command* cmd = NULL;
@@ -224,18 +270,32 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 			}
 			r_present();
 		}
-		if (gCPUSkinnedSample != 0) {
-			SwapBuffers(hdc);
-			if (vsynch != 0) {
-				glFinish();
-			}
+
+		SwapBuffers(hdc);
+		if (vsynch != 0) {
+			glFinish();
 		}
 	} // End of game loop
 
-	if (gCPUSkinnedSample != 0) {
-		std::cout << "Expected application to be null on exit\n";
-		delete gCPUSkinnedSample;
-		gCPUSkinnedSample = 0;
+	if (gCurveSample != 0) {
+		std::cout << "Expected gCurveSample to be null on exit\n";
+		delete gCurveSample;
+		gCurveSample = 0;
+	}
+	if (gSkeletonSample != 0) {
+		std::cout << "Expected gSkeletonSample to be null on exit\n";
+		delete gSkeletonSample;
+		gSkeletonSample = 0;
+	}
+	if (gSkinSample != 0) {
+		std::cout << "Expected gSkinSample to be null on exit\n";
+		delete gSkinSample;
+		gSkinSample = 0;
+	}
+	if (gBlendSample != 0) {
+		std::cout << "Expected gBlendSample to be null on exit\n";
+		delete gBlendSample;
+		gBlendSample = 0;
 	}
 
 	return (int)msg.wParam;
@@ -247,10 +307,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	switch (iMsg) {
 	case WM_CLOSE:
-		if (gCPUSkinnedSample != 0) {
-			gCPUSkinnedSample->Shutdown();
-			gCPUSkinnedSample = 0;
+		if (gCurveSample != 0) {
+			gCurveSample->Shutdown();
+			gCurveSample = 0;
 
+		}
+		if (gSkeletonSample != 0) {
+			delete gSkeletonSample;
+			gSkeletonSample = 0;
+		}
+		if (gSkinSample != 0) {
+			delete gSkinSample;
+			gSkinSample = 0;
+		}
+		if (gBlendSample != 0) {
+			delete gBlendSample;
+			gBlendSample = 0;
+		}
+		if (gRendererRunning) {
 			r_shutdown();
 
 			HDC hdc = GetDC(hwnd);
@@ -260,11 +334,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 			wglDeleteContext(hglrc);
 			ReleaseDC(hwnd, hdc);
 			DestroyWindow(hwnd);
+			gRendererRunning = false;
 		}
-		break;
+		return 1;
 	case WM_DESTROY:
 		PostQuitMessage(0);
-		break;
+		return 1;
 	case WM_LBUTTONDOWN:
 		mu_input_mousedown(gUIContext, LEFT_MOUSE_POS, RIGHT_MOUSE_POS, 1);
 		return 1;
@@ -295,57 +370,4 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	}
 
 	return DefWindowProc(hwnd, iMsg, wParam, lParam);
-}
-
-void mu_input_scroll(mu_Context* ctx, int x, int y);
-void mu_input_keydown(mu_Context* ctx, int key);
-void mu_input_keyup(mu_Context* ctx, int key);
-void mu_input_text(mu_Context* ctx, const char* text);
-
-void GUITest(mu_Context* ctx) {
-	if (mu_begin_window(ctx, "Demo Window", mu_rect(40, 40, 300, 450))) {
-		mu_Container* win = mu_get_current_container(ctx);
-		win->rect.w = mu_max(win->rect.w, 240);
-		win->rect.h = mu_max(win->rect.h, 300);
-
-		/* window info */
-		if (mu_header(ctx, "Window Info")) {
-			mu_Container* win = mu_get_current_container(ctx);
-			char buf[64];
-			static int layout[] = { 54, -1 };
-			mu_layout_row(ctx, 2, layout, 0);
-			mu_label(ctx, "Position:");
-			sprintf(buf, "%d, %d", win->rect.x, win->rect.y); mu_label(ctx, buf);
-			mu_label(ctx, "Size:");
-			sprintf(buf, "%d, %d", win->rect.w, win->rect.h); mu_label(ctx, buf);
-		}
-
-		/* labels + buttons */
-		if (mu_header_ex(ctx, "Test Buttons", MU_OPT_EXPANDED)) {
-			static int layout[] = { 86, -110, -1 };
-			mu_layout_row(ctx, 3, layout, 0);
-			mu_label(ctx, "Test buttons 1:");
-			if (mu_button(ctx, "Button 1")) {
-				//write_log("Pressed button 1"); 
-				int x = 8;
-			}
-			if (mu_button(ctx, "Button 2")) {
-				//write_log("Pressed button 2"); 
-				int x = 8;
-			}
-			mu_label(ctx, "Test buttons 2:");
-			if (mu_button(ctx, "Button 3")) {
-				//write_log("Pressed button 3"); 
-				int x = 8;
-			}
-			if (mu_button(ctx, "Popup")) { mu_open_popup(ctx, "Test Popup"); }
-			if (mu_begin_popup(ctx, "Test Popup")) {
-				mu_button(ctx, "Hello");
-				mu_button(ctx, "World");
-				mu_end_popup(ctx);
-			}
-		}
-
-		mu_end_window(ctx);
-	}
 }

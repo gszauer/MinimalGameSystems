@@ -157,7 +157,7 @@ void SkeletonSample::Render(float aspect) {
 	float projection[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
 	float mvp[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
 
-	float position[3] = { 0.0f, 7.0f, -5.0f };
+	float position[3] = { 0.0f, 7.0f, 5.0f };
 	float target[3] = { 0.0f, 3.0f, 0.0f };
 	float up[3] = { 0.0f, 1.0f, 0.0f };
 

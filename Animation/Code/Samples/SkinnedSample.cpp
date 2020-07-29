@@ -322,17 +322,19 @@ void SkinnedSample::Render(float aspect) {
 	float model[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
 	float view[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
 	float projection[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-	float viewProjection[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
+	float mvp[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
 
-	float position[3] = { 0.0f, 7.0f, -5.0f };
+	float position[3] = { 0.0f, 7.0f, 5.0f };
 	float target[3] = { 0.0f, 3.0f, 0.0f };
 	float up[3] = { 0.0f, 1.0f, 0.0f };
 
 	LookAt(view, position, target, up);
 	Perspective(projection, 60.0f, aspect, 0.01f, 1000.0f);
-	Animation::MultiplyMatrices(viewProjection, projection, view);
+	float tmp[16] = { 0.0f };
+	Animation::MultiplyMatrices(mvp, view, model);
+	Animation::MultiplyMatrices(mvp, projection, mvp);
 
-	DrawAnimatedModel(viewProjection, model);
+	DrawAnimatedModel(mvp, model);
 }
 
 void SkinnedSample::Shutdown() {
