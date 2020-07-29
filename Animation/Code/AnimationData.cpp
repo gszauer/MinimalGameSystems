@@ -177,7 +177,7 @@ namespace Animation {
 				// Normalize
 				float lenSq = out[0] * out[0] + out[1] * out[1] + out[2] * out[2] + out[3] * out[3];
 				if (lenSq > 0.0f) {
-					float invLen = Animation::InvSqrt(lenSq);
+					float invLen = Animation::FastInvSqrt(lenSq);
 					if (mComponentSize >= 1) {
 						out[0] *= invLen;
 					}
@@ -316,7 +316,7 @@ float Animation::Data::Sample(State& out, float clipCurrentTime, bool looping) c
 		while (clipCurrentTime >= clipEndTime) {
 			clipCurrentTime -= clipDuration;
 		}*/
-		clipCurrentTime = Animation::FMod(clipCurrentTime, clipDuration) + clipStartTime;
+		clipCurrentTime = Animation::FMod(clipCurrentTime, clipDuration) + clipStartTime; // TODO: I don't get the logic here, why does this work???
 	}
 	else {
 		if (clipCurrentTime < clipStartTime) {

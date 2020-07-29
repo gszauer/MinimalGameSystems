@@ -81,6 +81,11 @@ void SkinnedSample::LoadAnimation() {
 	mPlayTime = 0.0f;
 	mInvBindPosePalette.resize(mBindPose.Size() * 16);
 	mAnimatedPosePalette.resize(mBindPose.Size() * 16);
+
+	mBindPose.ToMatrixPalette(&mInvBindPosePalette[0], mBindPose.Size() * 16);
+	for (int joint = 0; joint < mBindPose.Size(); ++joint) {
+		Animation::InvertMatrix(&mInvBindPosePalette[joint * 16], &mInvBindPosePalette[joint * 16]);
+	}
 }
 
 void SkinnedSample::InitDescriptors() {
@@ -234,11 +239,66 @@ void SkinnedSample::InitOpenGL() {
 
 	mCharacterUniformVP = glGetUniformLocation(mCharacterShader, "viewProjection");
 	mCharacterUniformModel = glGetUniformLocation(mCharacterShader, "model");
+	mCharacterUniformTexture = glGetUniformLocation(mCharacterShader, "tex0");
 	mCharacterAttribPosition = glGetAttribLocation(mCharacterShader, "position");
-	mCharacterAttribTexCoord = glGetAttribLocation(mCharacterShader, "texCoord;");
+	mCharacterAttribTexCoord = glGetAttribLocation(mCharacterShader, "texCoord");
 	mCharacterAttribNormal = glGetAttribLocation(mCharacterShader, "normal");
 
 	glUseProgram(0);
+
+	unsigned char texture[32 * 32 * 3] = { 0 };
+
+	char row_color[32][3] = {
+		{0xe7, 0xbd, 0x91},
+		{0xe7, 0xbd, 0x91},
+		{0xe7, 0xbd, 0x91},
+		{0xe7, 0xbd, 0x91},
+		{0xe7, 0xbd, 0x91},
+		{0xe7, 0xbd, 0x91},
+		{0x29, 0x29, 0x29},
+		{0x29, 0x29, 0x29},
+		{0x29, 0x29, 0x29},
+		{0x29, 0x29, 0x29},
+		{0x29, 0x29, 0x29},
+		{0xd1, 0xc2, 0x70},
+		{0xd1, 0xc2, 0x70},
+		{0xd1, 0xc2, 0x70},
+		{0xd1, 0xc2, 0x70},
+		{0xd1, 0xc2, 0x70},
+		{0xd1, 0xc2, 0x70},
+		{0xe7, 0x65, 0x5c},
+		{0xe7, 0x65, 0x5c},
+		{0xe7, 0x65, 0x5c},
+		{0xe7, 0x65, 0x5c},
+		{0xe7, 0x65, 0x5c},
+		{0xe7, 0x65, 0x5c},
+		{0x61, 0x87, 0xd3},
+		{0x61, 0x87, 0xd3},
+		{0x61, 0x87, 0xd3},
+		{0x61, 0x87, 0xd3},
+		{0x61, 0x87, 0xd3},
+		{0xf0, 0x47, 0x2f},
+		{0xf0, 0x47, 0x2f},
+		{0xf0, 0x47, 0x2f},
+		{0xf0, 0x47, 0x2f}
+	};
+
+	for (unsigned int row = 0; row < 32; ++row) {
+		for (unsigned int col = 0; col < 32; ++col) {
+			unsigned int index = ((row * 32)) + col;
+
+			texture[index * 3 + 0] = row_color[row][0];
+			texture[index * 3 + 1] = row_color[row][1];
+			texture[index * 3 + 2] = row_color[row][2];
+		}
+	}
+
+	glGenTextures(1, &mCharacterTexture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mCharacterTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 32, 32, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	mOpenGLInitialized = true;
 }
@@ -260,12 +320,45 @@ void SkinnedSample::Update(float dt) {
 
 	unsigned int numJoints = mAnimatedPose.Size();
 	mAnimatedPose.ToMatrixPalette(&mAnimatedPosePalette[0], numJoints * 16);
-	for (unsigned int i = 0; i < numJoints; ++i) {
-		Animation::MultiplyMatrices(&mAnimatedPosePalette[i * 16], &mAnimatedPosePalette[i * 16], &mInvBindPosePalette[i * 16]);
-	}
+	//for (unsigned int i = 0; i < numJoints; ++i) {
+		//Animation::MultiplyMatrices(&mAnimatedPosePalette[i * 16], &mAnimatedPosePalette[i * 16], &mInvBindPosePalette[i * 16]);
+	//}
 
 	//Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, &mAnimatedPosePalette[0], mReadInfluences, mReadWeights);
 	//Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, &mAnimatedPosePalette[0], mReadInfluences, mReadWeights);
+
+	for (unsigned int i = 0; i < mReadPositions.Size(); ++i) {
+		float vertex[4] = {
+			* (mReadPositions[i] + 0),
+			* (mReadPositions[i] + 1),
+			* (mReadPositions[i] + 2),
+			1.0f
+		};
+
+		float skin[16] = { 0.0f };
+		for (int j = 0; j < 4; ++j) {
+			unsigned int influence = *(mReadInfluences[i] + j);
+			float weight = (*(mReadWeights[i] + j));
+
+			float matrix[16] = { 0.0f };
+			Animation::MultiplyMatrices(matrix, &mAnimatedPosePalette[influence], &mInvBindPosePalette[influence]);
+
+			for (int k = 0; k < 16; ++k) {
+				skin[k] += matrix[k] * weight;
+			}
+		}
+
+		float result[4] = { 0.0f };
+		Animation::MultiplyMat4Vec4(result, skin, vertex);
+
+		*(mWritePositions[i] + 0) = result[0];
+		*(mWritePositions[i] + 1) = result[1];
+		*(mWritePositions[i] + 2) = result[2];
+
+		*(mWriteNormals[i] + 0) = *(mReadNormals[i] + 0);
+		*(mWriteNormals[i] + 1) = *(mReadNormals[i] + 1);
+		*(mWriteNormals[i] + 2) = *(mReadNormals[i] + 2);
+	}
 #else
 	for (unsigned int i = 0; i < mReadPositions.Size(); ++i) {
 		*(mWritePositions[i] + 0) = *(mReadPositions[i] + 0);
@@ -284,8 +377,12 @@ void SkinnedSample::DrawAnimatedModel(float* viewProjection, float* model) {
 
 	glUseProgram(mCharacterShader);
 
-	glBindBuffer(GL_ARRAY_BUFFER, mCharacterStaticVBO);
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mCharacterTexture); // mCharacterTexture to GL_TEXTURE0
+	glUniform1i(mCharacterUniformTexture, 0); // Bind GL_TEXTURE0 to mCharacterUniformTexture
+
+	glBindBuffer(GL_ARRAY_BUFFER, mCharacterStaticVBO);
 	glEnableVertexAttribArray(mCharacterAttribTexCoord);
 	glVertexAttribPointer(mCharacterAttribTexCoord, 2, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (GLvoid*)0);
 
@@ -294,6 +391,9 @@ void SkinnedSample::DrawAnimatedModel(float* viewProjection, float* model) {
 
 	glEnableVertexAttribArray(mCharacterAttribPosition);
 	glVertexAttribPointer(mCharacterAttribPosition, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (GLvoid*)0);
+
+	glEnableVertexAttribArray(mCharacterAttribNormal);
+	glVertexAttribPointer(mCharacterAttribNormal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (GLvoid*)(3 * sizeof(float)));
 
 	glUniformMatrix4fv(mCharacterUniformVP, 1, GL_FALSE, viewProjection);
 	glUniformMatrix4fv(mCharacterUniformModel, 1, GL_FALSE, model);
@@ -334,6 +434,7 @@ void SkinnedSample::Render(float aspect) {
 	Animation::MultiplyMatrices(mvp, view, model);
 	Animation::MultiplyMatrices(mvp, projection, mvp);
 
+	glEnable(GL_DEPTH_TEST);
 	DrawAnimatedModel(mvp, model);
 }
 
@@ -357,6 +458,7 @@ void SkinnedSample::Shutdown() {
 		return;
 	}
 
+	glDeleteTextures (1, &mCharacterTexture);
 	glDeleteBuffers(1, &mCharacterIBO);
 	glDeleteBuffers(1, &mCharacterStaticVBO);
 	glDeleteBuffers(1, &mCharacterDynamicVBO);

@@ -2389,8 +2389,12 @@ void r_present() {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
+    GLboolean  blend = glIsEnabled(GL_BLEND);
+    GLboolean  cullFace = glIsEnabled(GL_CULL_FACE);
+    GLboolean  depthTest = glIsEnabled(GL_DEPTH_TEST);
+    GLboolean  scissorTest = glIsEnabled(GL_SCISSOR_TEST);
     { // Set render states
-        glEnable(GL_BLEND); // TODO: Cache these
+        glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
@@ -2465,7 +2469,18 @@ void r_present() {
     }
 
     {
-        // TODO: Restore render states
+        if (!blend) {
+            glDisable(GL_BLEND);
+        }
+        if (cullFace) {
+            glEnable(GL_CULL_FACE);
+        }
+        if (depthTest) {
+            glEnable(GL_DEPTH_TEST);
+        }
+        if (!scissorTest) {
+            glDisable(GL_SCISSOR_TEST);
+        }
     }
 
     gUiBufferPosition = 0;

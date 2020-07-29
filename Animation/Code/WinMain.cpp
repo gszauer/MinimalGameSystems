@@ -72,8 +72,8 @@ ISample* gBlendSample = 0;
 
 mu_Context* gUIContext = 0;
 int gShowCurveSample = 0;
-int gShowSkeletonSample = 1;
-int gShowSkinnedSample = 0;
+int gShowSkeletonSample = 0;
+int gShowSkinnedSample = 1;
 int gShowBlendingSample = 0;
 bool gRendererRunning = false;
 

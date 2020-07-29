@@ -35,10 +35,12 @@ protected: // OpenGL 3.3 stuff to draw the mesh to screen
 	GLuint mCharacterDynamicVBO = 0;
 	GLuint mCharacterIBO = 0;
 	GLuint mCharacterShader = 0;
+	GLuint mCharacterTexture = 0;
 	bool mOpenGLInitialized = false;
 protected:
 	GLint mCharacterUniformVP = 0;
 	GLint mCharacterUniformModel = 0;
+	GLint mCharacterUniformTexture = 0;
 	GLint mCharacterAttribPosition = 0;
 	GLint mCharacterAttribTexCoord = 0;
 	GLint mCharacterAttribNormal = 0;
