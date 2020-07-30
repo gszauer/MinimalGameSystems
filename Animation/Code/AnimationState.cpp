@@ -107,18 +107,6 @@ void Animation::State::SetParent(unsigned int index, int parent) {
     mHierarchy[index] = parent;
 }
 
-const float* Animation::State::GetRelativePosition(unsigned int index) const {
-    return &mTransforms[index * 10];
-}
-
-const float* Animation::State::GetRelativeRotation(unsigned int index) const {
-    return &mTransforms[index * 10 + 3];
-}
-
-const float* Animation::State::GetRelativeScale(unsigned int index) const {
-    return &mTransforms[index * 10 + 7];
-}
-
 void Animation::State::GetRelativePosition(unsigned int index, float* outVec3) const {
     float* position = &mTransforms[index * 10];
     outVec3[0] = position[0];
@@ -161,6 +149,17 @@ void Animation::State::SetRelativeRotation(unsigned int index, const float* rot)
     rotation[1] = rot[1];
     rotation[2] = rot[2];
     rotation[3] = rot[3];
+
+    float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];
+    if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
+        if (rotLenSq > 0.0f) {
+            float invRotLen = Animation::FastInvSqrt(rotLenSq);
+            rotation[0] *= rotLenSq;
+            rotation[1] *= rotLenSq;
+            rotation[2] *= rotLenSq;
+            rotation[3] *= rotLenSq;
+        }
+    }
 }
 
 void Animation::State::GetRelativeTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const {
@@ -200,6 +199,8 @@ void Animation::State::GetAbsoluteTransform(unsigned int index, float* outPos, f
             outPos, outRot, outScl
         );
     }
+
+    // TODO: Maybe normalize here if needed?
 }
 
 void Animation::State::GetAbsolutePosition(unsigned int index, float* outVec3) const {
@@ -296,6 +297,18 @@ void Animation::State::DeSerializeFromString(const char* input) {
         input = ReadFloat(input, mTransforms[i * 10 + 7]);
         input = ReadFloat(input, mTransforms[i * 10 + 8]);
         input = ReadFloat(input, mTransforms[i * 10 + 9]);
+
+        float* rot = &mTransforms[i * 10 + 3];
+        float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];
+        if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
+            if (rotLenSq > 0.0f) {
+                float invRotLen = Animation::FastInvSqrt(rotLenSq);
+                mTransforms[i * 10 + 3] *= rotLenSq;
+                mTransforms[i * 10 + 4] *= rotLenSq;
+                mTransforms[i * 10 + 5] *= rotLenSq;
+                mTransforms[i * 10 + 6] *= rotLenSq;
+            }
+        }
     }
 
     // Ignore null terminator

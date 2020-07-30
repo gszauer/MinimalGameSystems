@@ -9,7 +9,6 @@ namespace Animation {
     void CombineTransforms(float* outPos, float* outRot, float* outScale, const float* posA, const float* rotA, const float* sclA, const float* posB, const float* rotB, const float* sclB);
     void TransformToMatrix(float* outMatrix, const float* position, const float* rot, const float* scale);
     void MultiplyMatrices(float* out, const float* a, const float* b);
-    void FastInvertMatrix(float* out, const float* in);
     void InvertMatrix(float* out, const float* in);
 
     unsigned int UIntStringLength(unsigned int v);

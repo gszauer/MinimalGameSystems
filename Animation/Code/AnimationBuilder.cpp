@@ -438,6 +438,7 @@ Animation::Data Animation::Builder::Convert(Animation::Builder::Clip& clip) {
 		}
 	}
 	
+	// Rotations are normalized in the SetRawData function
 	result.SetRawData(frameData, frameDataSize, trackData, trackDataSize);
 	return result;
 }

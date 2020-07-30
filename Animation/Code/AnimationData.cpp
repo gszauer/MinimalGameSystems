@@ -137,59 +137,31 @@ namespace Animation {
 				float leftTime = mBuffer[left * mFrameSize];
 				float rightTime = mBuffer[right * mFrameSize];
 
-				// Neighborhood
-				const float* valueRight = &mBuffer[right * mFrameSize + 1 + mComponentSize];
-				float valueLeft[4] = { 0.0f };
-
-				float neighborhood = 0.0f;
 				const float* originalLeft = &mBuffer[left * mFrameSize + 1 + mComponentSize];
+				const float* originalRight = &mBuffer[right * mFrameSize + 1 + mComponentSize];
 
-				if (mComponentSize >= 1) {
-					neighborhood = valueRight[0] * originalLeft[0];
-					valueLeft[0] = originalLeft[0];
-					out[0] = 0.0f; // Reset out so the normalize below doesn't go crazy
-				}
-				if (mComponentSize >= 2) {
-					neighborhood = valueRight[0] * originalLeft[0] + valueRight[1] * originalLeft[1];
-					valueLeft[1] = originalLeft[1];
-					out[1] = 0.0f;
-				}
-				if (mComponentSize >= 3) {
-					neighborhood = valueRight[0] * originalLeft[0] + valueRight[1] * originalLeft[1] + valueRight[2] * originalLeft[2];
-					valueLeft[2] = originalLeft[2];
-					out[2] = 0.0f;
-				}
-				if (mComponentSize >= 4) {
-					neighborhood = valueRight[0] * originalLeft[0] + valueRight[1] * originalLeft[1] + valueRight[2] * originalLeft[2] + valueRight[3] * originalLeft[3];
-					valueLeft[3] = originalLeft[3];
-					out[3] = 1.0f; // Rotation, quaternion
-				}
+				float valueLeft[4] = { originalLeft[0], originalLeft[1], originalLeft[2], originalLeft[3] };
+				float valueRight[4] = { originalRight[0], originalRight[1], originalRight[2], originalRight[3] };
+
+				float neighborhood = valueRight[0] * valueLeft[0] + valueRight[1] * valueLeft[1] + valueRight[2] * valueLeft[2] + valueRight[3] * valueLeft[3];
 
 				if (neighborhood < 0.0f) {
-					valueLeft[0] = -valueLeft[0];
-					valueLeft[1] = -valueLeft[1];
-					valueLeft[2] = -valueLeft[2];
-					valueLeft[3] = -valueLeft[3];
+					valueRight[0] = -valueRight[0];
+					valueRight[1] = -valueRight[1];
+					valueRight[2] = -valueRight[2];
+					valueRight[3] = -valueRight[3];
 				}
 
 				InterpolateFrames(out, t, leftTime, valueLeft, outTangentLeft, rightTime, valueRight, inTangentRight);
 
 				// Normalize
 				float lenSq = out[0] * out[0] + out[1] * out[1] + out[2] * out[2] + out[3] * out[3];
-				if (lenSq > 0.0f) {
+				if (lenSq > 0.0f) { // TODO: Probably don't always need to interpolate
 					float invLen = Animation::FastInvSqrt(lenSq);
-					if (mComponentSize >= 1) {
-						out[0] *= invLen;
-					}
-					if (mComponentSize >= 2) {
-						out[1] *= invLen;
-					}
-					if (mComponentSize >= 3) {
-						out[2] *= invLen;
-					}
-					if (mComponentSize >= 4) {
-						out[3] *= invLen;
-					}
+					out[0] *= invLen;
+					out[1] *= invLen;
+					out[2] *= invLen;
+					out[3] *= invLen;
 				}
 			}
 		};
@@ -485,6 +457,36 @@ void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize,
 			}
 		}
 	}
+
+	// Normalize vectors
+	if (mFrameData != 0 && mTrackData != 0) {
+		unsigned int trackStride = 4;
+		// Loop trough all tracks
+		for (unsigned int i = 0; i < mTrackDataSize; i += trackStride) {
+			unsigned int component = mTrackData[i + 1];
+			if (component == (unsigned int)Animation::Data::Component::Rotation) {
+				unsigned int offset = mTrackData[i + 2];
+				unsigned int size = mTrackData[i + 3];
+
+				unsigned int frameDataStride = 13;
+
+				for (int j = 0; j < size / frameDataStride; ++j) {
+					float* rot = &mFrameData[offset + (j * 13) + 1 + 4];
+
+					float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];
+					if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
+						if (rotLenSq > 0.0f) {
+							float invRotLen = Animation::FastInvSqrt(rotLenSq);
+							rot[i * 10 + 3] *= rotLenSq;
+							rot[i * 10 + 4] *= rotLenSq;
+							rot[i * 10 + 5] *= rotLenSq;
+							rot[i * 10 + 6] *= rotLenSq;
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void Animation::Data::SerializeToString(char* output) const {
@@ -602,5 +604,35 @@ void Animation::Data::DeSerializeFromString(const char* input) {
 	for (unsigned int i = 0; i < labelLength; ++i) {
 		mLabel[i] = *input;
 		input += 1;
+	}
+
+	// Normalize vectors
+	if (mFrameData != 0 && mTrackData != 0) {
+		unsigned int trackStride = 4;
+		// Loop trough all tracks
+		for (unsigned int i = 0; i < mTrackDataSize; i += trackStride) {
+			unsigned int component = mTrackData[i + 1];
+			if (component == (unsigned int)Animation::Data::Component::Rotation) {
+				unsigned int offset = mTrackData[i + 2];
+				unsigned int size = mTrackData[i + 3];
+
+				unsigned int frameDataStride = 13;
+
+				for (int j = 0; j < size / frameDataStride; ++j) {
+					float* rot = &mFrameData[offset + (j * 13) + 1 + 4];
+
+					float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];
+					if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
+						if (rotLenSq > 0.0f) {
+							float invRotLen = Animation::FastInvSqrt(rotLenSq);
+							rot[i * 10 + 3] *= rotLenSq;
+							rot[i * 10 + 4] *= rotLenSq;
+							rot[i * 10 + 5] *= rotLenSq;
+							rot[i * 10 + 6] *= rotLenSq;
+						}
+					}
+				}
+			}
+		}
 	}
 }

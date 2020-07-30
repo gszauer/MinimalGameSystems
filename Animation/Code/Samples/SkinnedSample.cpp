@@ -82,10 +82,19 @@ void SkinnedSample::LoadAnimation() {
 	mInvBindPosePalette.resize(mBindPose.Size() * 16);
 	mAnimatedPosePalette.resize(mBindPose.Size() * 16);
 
-	mBindPose.ToMatrixPalette(&mInvBindPosePalette[0], mBindPose.Size() * 16);
-	for (int joint = 0; joint < mBindPose.Size(); ++joint) {
-		Animation::InvertMatrix(&mInvBindPosePalette[joint * 16], &mInvBindPosePalette[joint * 16]);
+
+	input = ReadFileContents("Assets/inverseBindPose.txt");
+	unsigned int numMatrixElements = 0;
+	const char* reader = input;
+	reader = Animation::ReadUInt(reader, numMatrixElements);
+	unsigned int numMatrices = numMatrixElements / 16;
+
+	mInvBindPosePalette.resize(numMatrixElements);
+	for (int i = 0; i < numMatrixElements; ++i) {
+		mInvBindPosePalette[i] = 0.0f;
+		reader = Animation::ReadFloat(reader, mInvBindPosePalette[i]);
 	}
+	free(input);
 }
 
 void SkinnedSample::InitDescriptors() {
@@ -316,6 +325,54 @@ void SkinnedSample::Update(float dt) {
 	}
 
 #if 1
+	mAnimatedPose = mRestPose;
+	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime + dt, true);
+	mAnimatedPose.ToMatrixPalette(&mAnimatedPosePalette[0], mAnimatedPose.Size() * 16);
+
+	for (unsigned int i = 0; i < mVertices.size() / 3; ++i) {
+		float vertex[4] = {
+			mVertices[i * 3 + 0],
+			mVertices[i * 3 + 1],
+			mVertices[i * 3 + 2],
+			1.0f
+		};
+
+		float skin[16] = { 0.0f };
+		float total = 0.0f;
+		for (int j = 0; j < 4; ++j) {
+			unsigned int influence = mInfluences[i * 4 + j];
+			float weight = mWeights[i * 4 + j];
+			total += weight;
+
+			if (weight > 0.0f) {
+				//weight = 1.0f;
+				float matrix[16] = { 0.0f };
+				Animation::MultiplyMatrices(matrix, &mAnimatedPosePalette[influence * 16], &mInvBindPosePalette[influence * 16]);
+
+				for (int k = 0; k < 16; ++k) {
+					skin[k] += matrix[k] * weight;
+				}
+				//break;
+			}
+		}
+		if (!Animation::FloatCompare(total, 1.0f)) {
+			int debug = 7;
+		}
+
+		float result[4] = { 0.0f };
+		Animation::MultiplyMat4Vec4(result, skin, vertex);
+
+		mSkinned[i * 6 + 0] = result[0];
+		mSkinned[i * 6 + 1] = result[1];
+		mSkinned[i * 6 + 2] = result[2];
+
+		mSkinned[i * 6 + 3] = mNormals[i * 3 + 0];
+		mSkinned[i * 6 + 4] = mNormals[i * 3 + 0];
+		mSkinned[i * 6 + 5] = mNormals[i * 3 + 0];
+	}
+#endif
+
+#if 0
 	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime + dt, true);
 
 	unsigned int numJoints = mAnimatedPose.Size();
@@ -359,7 +416,9 @@ void SkinnedSample::Update(float dt) {
 		*(mWriteNormals[i] + 1) = *(mReadNormals[i] + 1);
 		*(mWriteNormals[i] + 2) = *(mReadNormals[i] + 2);
 	}
-#else
+#endif
+
+#if 0
 	for (unsigned int i = 0; i < mReadPositions.Size(); ++i) {
 		*(mWritePositions[i] + 0) = *(mReadPositions[i] + 0);
 		*(mWritePositions[i] + 1) = *(mReadPositions[i] + 1);

@@ -459,34 +459,6 @@ void Animation::InvertMatrix(float* out, const float* in) {
     }
 }
 
-void Animation::FastInvertMatrix(float* out, const float* in) {
-    float result[16] = { 0.0f };
-
-    result[0] = in[0];
-    result[5] = in[5];
-    result[10] = in[10];
-    result[15] = in[15];
-
-    result[3] = in[0];
-    result[7] = in[5];
-    result[11] = in[11];
-
-    result[1] = in[4];
-    result[4] = in[1];
-    result[2] = in[8];
-    result[8] = in[2];
-    result[6] = in[9];
-    result[9] = in[6];
-
-    result[12] = -(in[12] * result[0] + in[13] + result[4] + in[14] * result[8]);
-    result[13] = -(in[12] * result[1] + in[13] + result[5] + in[14] * result[9]);
-    result[14] = -(in[12] * result[2] + in[13] + result[6] + in[14] * result[10]);
-
-    for (int i = 0; i < 16; ++i) {
-        out[i] = result[i];
-    }
-}
-
 
 void Animation::ScaleMatrix(float* out, const float* in, float s) {
     float result[16] = { 0.0f };

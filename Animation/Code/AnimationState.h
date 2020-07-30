@@ -22,10 +22,6 @@ namespace Animation {
         int GetParent(unsigned int index) const;
         void SetParent(unsigned int index, int parent);
 
-        const float* GetRelativePosition(unsigned int index) const;
-        const float* GetRelativeRotation(unsigned int index) const;
-        const float* GetRelativeScale(unsigned int index) const;
-
         void GetRelativePosition(unsigned int index, float* outVec3) const;
         void GetRelativeRotation(unsigned int index, float* outQuat) const;
         void GetRelativeScale(unsigned int index, float* outVec3) const;
