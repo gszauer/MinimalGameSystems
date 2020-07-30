@@ -336,6 +336,12 @@ void SkinnedSample::Update(float dt) {
 			mVertices[i * 3 + 2],
 			1.0f
 		};
+		float normal[4] = {
+			mNormals[i * 3 + 0],
+			mNormals[i * 3 + 1],
+			mNormals[i * 3 + 2],
+			0.0f
+		};
 
 		float skin[16] = { 0.0f };
 		float total = 0.0f;
@@ -345,14 +351,12 @@ void SkinnedSample::Update(float dt) {
 			total += weight;
 
 			if (weight > 0.0f) {
-				//weight = 1.0f;
 				float matrix[16] = { 0.0f };
 				Animation::MultiplyMatrices(matrix, &mAnimatedPosePalette[influence * 16], &mInvBindPosePalette[influence * 16]);
 
 				for (int k = 0; k < 16; ++k) {
 					skin[k] += matrix[k] * weight;
 				}
-				//break;
 			}
 		}
 		if (!Animation::FloatCompare(total, 1.0f)) {
@@ -360,15 +364,16 @@ void SkinnedSample::Update(float dt) {
 		}
 
 		float result[4] = { 0.0f };
+		
 		Animation::MultiplyMat4Vec4(result, skin, vertex);
-
 		mSkinned[i * 6 + 0] = result[0];
 		mSkinned[i * 6 + 1] = result[1];
 		mSkinned[i * 6 + 2] = result[2];
-
-		mSkinned[i * 6 + 3] = mNormals[i * 3 + 0];
-		mSkinned[i * 6 + 4] = mNormals[i * 3 + 0];
-		mSkinned[i * 6 + 5] = mNormals[i * 3 + 0];
+		
+		Animation::MultiplyMat4Vec4(result, skin, normal);
+		mSkinned[i * 6 + 3] = result[0];
+		mSkinned[i * 6 + 4] = result[1];
+		mSkinned[i * 6 + 5] = result[2];
 	}
 #endif
 
