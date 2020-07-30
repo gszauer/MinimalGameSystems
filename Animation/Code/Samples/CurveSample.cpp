@@ -310,12 +310,14 @@ void CurvesSample::Render(float aspect) {
 	float mvp[16] = { 0.0f };
 	Animation::MultiplyMatrices(mvp, projection, view);
 
+	glDisable(GL_DEPTH_TEST);
 	glBindVertexArray(mCurveVAO);
 	glUseProgram(mCurveShader);
 	glUniformMatrix4fv(mMVPUniform, 1, GL_FALSE, mvp);
 	glDrawArrays(GL_LINES, 0, mNumVerts);
 	glUseProgram(0);
 	glBindVertexArray(0);
+	glEnable(GL_DEPTH_TEST);
 }
 
 void CurvesSample::Shutdown() {

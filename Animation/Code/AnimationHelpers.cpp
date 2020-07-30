@@ -12,10 +12,10 @@ void Animation::CombineTransforms(float* outPos, float* outRot, float* outScale,
     resultScale[2] = sclA[2] * sclB[2];
 
     // quat * quat
-    resultRot[0] = rotB[0] * rotA[3] + rotB[1] * rotA[2] - rotB[2] * rotA[1] + rotB[3] * rotA[0];
-    resultRot[1] = -rotB[0] * rotA[2] + rotB[1] * rotA[3] + rotB[2] * rotA[0] + rotB[3] * rotA[1];
-    resultRot[2] = rotB[0] * rotA[1] - rotB[1] * rotA[0] + rotB[2] * rotA[3] + rotB[3] * rotA[2];
-    resultRot[3] = -rotB[0] * rotA[0] - rotB[1] * rotA[1] - rotB[2] * rotA[2] + rotB[3] * rotA[3];
+    resultRot[0] =  rotA[0] * rotB[3] + rotA[1] * rotB[2] - rotA[2] * rotB[1] + rotA[3] * rotB[0];
+    resultRot[1] = -rotA[0] * rotB[2] + rotA[1] * rotB[3] + rotA[2] * rotB[0] + rotA[3] * rotB[1];
+    resultRot[2] =  rotA[0] * rotB[1] - rotA[1] * rotB[0] + rotA[2] * rotB[3] + rotA[3] * rotB[2];
+    resultRot[3] = -rotA[0] * rotB[0] - rotA[1] * rotB[1] - rotA[2] * rotB[2] + rotA[3] * rotB[3];
 
     // vec * vec
     resultPos[0] = sclA[0] * posB[0];

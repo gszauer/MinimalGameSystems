@@ -64,8 +64,7 @@ typedef const char* (WINAPI* PFNWGLGETEXTENSIONSSTRINGEXTPROC) (void);
 typedef BOOL(WINAPI* PFNWGLSWAPINTERVALEXTPROC) (int);
 typedef int (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC) (void);
 
-//SkinnedSample* gCPUSkinnedSample = 0;
-ISample* gCurveSample = 0;
+ISample* gCurveSample = 0; // TODO: Move these into an array
 ISample* gSkeletonSample = 0;
 ISample* gSkinSample = 0;
 ISample* gBlendSample = 0;
@@ -228,11 +227,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 		if (gCurveSample != 0 && gShowCurveSample) {
 			gCurveSample->Render(aspect);
 		}
-		if (gSkeletonSample != 0 && gShowSkeletonSample) {
-			gSkeletonSample->Render(aspect);
-		}
 		if (gSkinSample != 0 && gShowSkinnedSample) {
 			gSkinSample->Render(aspect);
+		}
+		if (gSkeletonSample != 0 && gShowSkeletonSample) {
+			gSkeletonSample->Render(aspect);
 		}
 		if (gBlendSample != 0 && gShowBlendingSample) {
 			gBlendSample->Render(aspect);
