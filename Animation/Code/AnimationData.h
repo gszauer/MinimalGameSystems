@@ -13,12 +13,12 @@ namespace Animation {
             Rotation = 2,
             Scale = 4,
         };
-        // TODO: Make a cached sample result, and a version of the sample function that utilizes it
-        struct SampleResult {
+        struct Iterator {
             float time;
             unsigned int index;
 
-            SampleResult();
+            Iterator();
+            Iterator(float time);
         };
     protected:
         // Frame: x is 3 or 4 depending on component type (only support pos, rot and scale)
@@ -63,7 +63,10 @@ namespace Animation {
         const char* GetLabel() const;
         void SetLabel(const char* label);
 
-        float Sample(State& out, float time, bool looping) const; // TODO: Migrate to using sampleresult. Maybe make an optional function?
+        Iterator Begin();
+        float Sample(State& out, float time, bool looping) const;
+        Iterator Sample(State& out, const Iterator& iter, bool looping) const;
+
 
         void SerializeToString(char* output) const;
         void DeSerializeFromString(const char* input);

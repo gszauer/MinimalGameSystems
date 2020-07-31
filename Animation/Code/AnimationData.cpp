@@ -156,16 +156,28 @@ namespace Animation {
 
 				// Normalize
 				float lenSq = out[0] * out[0] + out[1] * out[1] + out[2] * out[2] + out[3] * out[3];
-				if (lenSq > 0.0f) { // TODO: Probably don't always need to interpolate
-					float invLen = Animation::FastInvSqrt(lenSq);
-					out[0] *= invLen;
-					out[1] *= invLen;
-					out[2] *= invLen;
-					out[3] *= invLen;
+				if (!Animation::FloatCompare(lenSq, 1.0f)) {
+					if (lenSq > 0.0f) {
+						float invLen = Animation::FastInvSqrt(lenSq);
+						out[0] *= invLen;
+						out[1] *= invLen;
+						out[2] *= invLen;
+						out[3] *= invLen;
+					}
 				}
 			}
 		};
 	}
+}
+
+Animation::Data::Iterator::Iterator() {
+	time = 0.0f;
+	index = 0;
+}
+
+Animation::Data::Iterator::Iterator(float t) {
+	time = t;
+	index = 0;
 }
 
 Animation::Data::Data() {
@@ -268,6 +280,10 @@ void Animation::Data::SetLabel(const char* label) {
 	mLabel = (char*)Animation::Allocate(sizeof(char) * (length + 1));
 	for (char* cpy = mLabel; *cpy = *label; ++label, ++cpy); // StrCpy
 	mLabel[length] = '\0';
+}
+
+Animation::Data::Iterator Animation::Data::Begin() {
+	return Iterator(mStartTime);
 }
 
 float Animation::Data::Sample(State& out, float clipCurrentTime, bool looping) const {

@@ -5,8 +5,6 @@
 #include "AnimationState.h"
 
 namespace Animation {
-	// TODO: Const-correct all of these!
-
 	namespace Builder {
 		struct Frame {
 			float time;
@@ -18,10 +16,7 @@ namespace Animation {
 			Frame& operator=(const Frame& other);
 		};
 
-		class Clip;
-
 		class Track {
-			friend class Clip; // TODO: Can / should i undo this?
 		protected:
 			unsigned int mJointID;
 			Animation::Data::Component mComponent;
@@ -36,22 +31,23 @@ namespace Animation {
 			Track(unsigned int jointID, Animation::Data::Component component);
 			~Track();
 
-			unsigned int GetJointID();
+			unsigned int GetJointID() const;
 			void SetJointID(unsigned int id);
 
-			Animation::Data::Component GetTarget();
+			Animation::Data::Component GetTarget() const;
 			void SetTarget(Animation::Data::Component target);
 
-			unsigned int Size();
-			unsigned int Capacity();
+			unsigned int Size() const;
+			unsigned int Capacity() const;
 
 			void Reserve(unsigned int numToReserve);
 			void Resize(unsigned int newSize);
 
 			Frame& operator[](unsigned int index);
+			const Frame& operator[](unsigned int index) const;
 			void PushFrame(const Frame& input);
 
-			void ForceLinear(); // TODO: This is bad. Need to fix it
+			void ForceLinear();
 			void ForceStep();
 		};
 
@@ -68,57 +64,20 @@ namespace Animation {
 			Clip& operator=(const Clip&);
 			~Clip();
 
-			const char* GetName();
+			const char* GetName() const;
 			void SetName(const char* newName);
 
-			unsigned int Size();
-			unsigned int Capacity();
+			unsigned int Size() const;
+			unsigned int Capacity() const;
 			void Reserve(unsigned int numToReserve);
 			void Resize(unsigned int newSize);
 
-			//unsigned int GetNumUniqueTracks();
-
 			Track& operator[](unsigned int index);
+			const Track& operator[](unsigned int index) const;
 			void PushTrack(const Track& input);
 		};
 
-#if 0
-		class Node {
-		public:
-			float position[3];
-			float rotation[4];
-			float scale[3];
-		protected:
-			Node* mParent;
-			Node** mChildren;
-			unsigned int mChildrenCount;
-			unsigned int mChildrenCapacity;
-		public:
-			Node();
-			Node(Node* parent);
-			Node(float* pos, float* rot, float* scl);
-			Node(Node* parent, float* pos, float* rot, float* scl);
-			Node(const Node& other);
-			Node& operator=(const Node& other);
-			~Node();
-
-			Node* GetParent();
-			void SetParent(Node* parent);
-
-			unsigned int Size();
-			unsigned int Capacity();
-			void Reserve(unsigned int numToReserve);
-
-			Node* operator[](unsigned int index);
-			void AddChild(Node* child);
-			void RemoveChild(Node* child);
-			void RemoveChild(unsigned int index);
-
-			unsigned int SizeOfGraph();
-		};
-		Animation::State Convert(Animation::Builder::Node* nodes, unsigned int numNodes);
-#endif
-		Animation::Data Convert(Animation::Builder::Clip& clip);
+		Animation::Data Convert(const Animation::Builder::Clip& clip);
 	}
 }
 
