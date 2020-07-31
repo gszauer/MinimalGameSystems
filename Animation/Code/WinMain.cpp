@@ -312,14 +312,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 
 		}
 		if (gSkeletonSample != 0) {
+			gSkeletonSample->Shutdown();
 			delete gSkeletonSample;
 			gSkeletonSample = 0;
 		}
 		if (gSkinSample != 0) {
+			gSkinSample->Shutdown();
 			delete gSkinSample;
 			gSkinSample = 0;
 		}
 		if (gBlendSample != 0) {
+			gBlendSample->Shutdown();
 			delete gBlendSample;
 			gBlendSample = 0;
 		}
@@ -330,7 +333,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 			HGLRC hglrc = wglGetCurrentContext();
 
 			wglMakeCurrent(NULL, NULL);
-			wglDeleteContext(hglrc);
+			wglDeleteContext(hglrc); // TODO: If i do a decent amount of show hides and exit i can trigger a breakpoint here. Why?
 			ReleaseDC(hwnd, hdc);
 			DestroyWindow(hwnd);
 			gRendererRunning = false;

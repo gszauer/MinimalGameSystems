@@ -109,31 +109,17 @@ void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float
 		const unsigned int* influence = influences[i];
 		const float* weight = weights[i];
 
-		float m0[16], m1[16], m2[16], m3[16], skin[16] = { 0 };
+		float skin[16] = { 0 };
+		float matrix[16] = { 0 };
 
-		if (weight[0] >= 0.000001f) {
-			MultiplyMatrices(m0, &animationMatrixPalette[influence[0] * 16], &invBindPalette[influence[0] * 16]);
-			ScaleMatrix(m0, m0, weight[0]);
+		for (unsigned int j = 0; j < 4; ++j) {
+			if (weight[j] >= 0.000001f) {
+				Animation::MultiplyMatrices(matrix, &animationMatrixPalette[influence[j] * 16], &invBindPalette[influence[j] * 16]);
+				for (unsigned int k = 0; k < 16; ++k) {
+					skin[k] += matrix[k] * weight[j];
+				}
+			}
 		}
-
-		if (weight[1] >= 0.000001f) {
-			MultiplyMatrices(m1, &animationMatrixPalette[influence[1] * 16], &invBindPalette[influence[1] * 16]);
-			ScaleMatrix(m1, m1, weight[1]);
-		}
-
-		if (weight[2] >= 0.000001f) {
-			MultiplyMatrices(m2, &animationMatrixPalette[influence[2] * 16], &invBindPalette[influence[2] * 16]);
-			ScaleMatrix(m2, m2, weight[2]);
-		}
-
-		if (weight[3] >= 0.000001f) {
-			MultiplyMatrices(m3, &animationMatrixPalette[influence[3] * 16], &invBindPalette[influence[3] * 16]);
-			ScaleMatrix(m3, m3, weight[3]);
-		}
-
-		AddMatrices(skin, m0, m1);
-		AddMatrices(skin, skin, m2);
-		AddMatrices(skin, skin, m3);
 
 		float result[4] = { 0 };
 		MultiplyMat4Vec4(result, skin, vertex);
@@ -159,27 +145,16 @@ void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float
 		const unsigned int* influence = influences[i];
 		const float* weight = weights[i];
 
-		float m0[16], m1[16], m2[16], m3[16], skin[16] = { 0 };
+		float skin[16] = { 0.0f };
 
-		if (weight[0] >= 0.000001f) {
-			ScaleMatrix(m0, &skinMatrixPalette[influence[0] * 16], weight[0]);
+		for (unsigned int j = 0; j < 4; ++j) {
+			if (weight[j] >= 0.000001f) {
+				const float* matrix = &skinMatrixPalette[influence[j] * 16];
+				for (unsigned int k = 0; k < 16; ++k) {
+					skin[k] += matrix[k] * weight[j];
+				}
+			}
 		}
-
-		if (weight[1] >= 0.000001f) {
-			ScaleMatrix(m1, &skinMatrixPalette[influence[1] * 16], weight[1]);
-		}
-
-		if (weight[2] >= 0.000001f) {
-			ScaleMatrix(m2, &skinMatrixPalette[influence[2] * 16], weight[2]);
-		}
-
-		if (weight[3] >= 0.000001f) {
-			ScaleMatrix(m3, &skinMatrixPalette[influence[3] * 16], weight[3]);
-		}
-
-		AddMatrices(skin, m0, m1);
-		AddMatrices(skin, skin, m2);
-		AddMatrices(skin, skin, m3);
 
 		float result[4] = { 0 };
 		MultiplyMat4Vec4(result, skin, vertex);

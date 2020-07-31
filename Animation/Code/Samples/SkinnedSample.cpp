@@ -82,7 +82,7 @@ void SkinnedSample::LoadAnimation() {
 	mInvBindPosePalette.resize(mBindPose.Size() * 16);
 	mAnimatedPosePalette.resize(mBindPose.Size() * 16);
 
-
+	// TODO: Generate this, don't load. 
 	input = ReadFileContents("Assets/inverseBindPose.txt");
 	unsigned int numMatrixElements = 0;
 	const char* reader = input;
@@ -324,8 +324,7 @@ void SkinnedSample::Update(float dt) {
 		return;
 	}
 
-#if 1
-	mAnimatedPose = mRestPose;
+#if	0
 	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime + dt, true);
 	mAnimatedPose.ToMatrixPalette(&mAnimatedPosePalette[0], mAnimatedPose.Size() * 16);
 
@@ -348,7 +347,6 @@ void SkinnedSample::Update(float dt) {
 		for (int j = 0; j < 4; ++j) {
 			unsigned int influence = mInfluences[i * 4 + j];
 			float weight = mWeights[i * 4 + j];
-			total += weight;
 
 			if (weight > 0.0f) {
 				float matrix[16] = { 0.0f };
@@ -375,64 +373,22 @@ void SkinnedSample::Update(float dt) {
 		mSkinned[i * 6 + 4] = result[1];
 		mSkinned[i * 6 + 5] = result[2];
 	}
-#endif
-
-#if 0
+#else
 	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime + dt, true);
 
 	unsigned int numJoints = mAnimatedPose.Size();
 	mAnimatedPose.ToMatrixPalette(&mAnimatedPosePalette[0], numJoints * 16);
-	//for (unsigned int i = 0; i < numJoints; ++i) {
-		//Animation::MultiplyMatrices(&mAnimatedPosePalette[i * 16], &mAnimatedPosePalette[i * 16], &mInvBindPosePalette[i * 16]);
-	//}
 
-	//Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, &mAnimatedPosePalette[0], mReadInfluences, mReadWeights);
-	//Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, &mAnimatedPosePalette[0], mReadInfluences, mReadWeights);
-
-	for (unsigned int i = 0; i < mReadPositions.Size(); ++i) {
-		float vertex[4] = {
-			* (mReadPositions[i] + 0),
-			* (mReadPositions[i] + 1),
-			* (mReadPositions[i] + 2),
-			1.0f
-		};
-
-		float skin[16] = { 0.0f };
-		for (int j = 0; j < 4; ++j) {
-			unsigned int influence = *(mReadInfluences[i] + j);
-			float weight = (*(mReadWeights[i] + j));
-
-			float matrix[16] = { 0.0f };
-			Animation::MultiplyMatrices(matrix, &mAnimatedPosePalette[influence], &mInvBindPosePalette[influence]);
-
-			for (int k = 0; k < 16; ++k) {
-				skin[k] += matrix[k] * weight;
-			}
-		}
-
-		float result[4] = { 0.0f };
-		Animation::MultiplyMat4Vec4(result, skin, vertex);
-
-		*(mWritePositions[i] + 0) = result[0];
-		*(mWritePositions[i] + 1) = result[1];
-		*(mWritePositions[i] + 2) = result[2];
-
-		*(mWriteNormals[i] + 0) = *(mReadNormals[i] + 0);
-		*(mWriteNormals[i] + 1) = *(mReadNormals[i] + 1);
-		*(mWriteNormals[i] + 2) = *(mReadNormals[i] + 2);
+#if 1
+	for (unsigned int i = 0; i < numJoints; ++i) {
+		Animation::MultiplyMatrices(&mAnimatedPosePalette[i * 16], &mAnimatedPosePalette[i * 16], &mInvBindPosePalette[i * 16]);
 	}
+	Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, &mAnimatedPosePalette[0], mReadInfluences, mReadWeights);
+	Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, &mAnimatedPosePalette[0], mReadInfluences, mReadWeights);
+#else
+	Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, &mAnimatedPosePalette[0], &mInvBindPosePalette[0], mReadInfluences, mReadWeights);
+	Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, &mAnimatedPosePalette[0], &mInvBindPosePalette[0], mReadInfluences, mReadWeights);
 #endif
-
-#if 0
-	for (unsigned int i = 0; i < mReadPositions.Size(); ++i) {
-		*(mWritePositions[i] + 0) = *(mReadPositions[i] + 0);
-		*(mWritePositions[i] + 1) = *(mReadPositions[i] + 1);
-		*(mWritePositions[i] + 2) = *(mReadPositions[i] + 2);
-
-		*(mWriteNormals[i] + 0) = *(mReadNormals[i] + 0);
-		*(mWriteNormals[i] + 1) = *(mReadNormals[i] + 1);
-		*(mWriteNormals[i] + 2) = *(mReadNormals[i] + 2);
-	}
 #endif
 }
 
