@@ -25,8 +25,8 @@
     <ClInclude Include="Code\AnimationHelpers.h" />
     <ClInclude Include="Code\AnimationSkin.h" />
     <ClInclude Include="Code\AnimationState.h" />
-    <ClInclude Include="Code\glad.h" />
     <ClInclude Include="Code\Samples\CurvesSample.h" />
+    <ClInclude Include="Code\Samples\glad.h" />
     <ClInclude Include="Code\Samples\ISample.h" />
     <ClInclude Include="Code\Samples\microui.h" />
     <ClInclude Include="Code\Samples\SkeletonSample.h" />
@@ -39,13 +39,13 @@
     <ClCompile Include="Code\AnimationHelpers.cpp" />
     <ClCompile Include="Code\AnimationSkin.cpp" />
     <ClCompile Include="Code\AnimationState.cpp" />
-    <ClCompile Include="Code\glad.c" />
     <ClCompile Include="Code\Samples\CurveSample.cpp" />
+    <ClCompile Include="Code\Samples\glad.c" />
     <ClCompile Include="Code\Samples\ISample.cpp" />
     <ClCompile Include="Code\Samples\microui.c" />
     <ClCompile Include="Code\Samples\SkeletonSample.cpp" />
     <ClCompile Include="Code\Samples\SkinnedSample.cpp" />
-    <ClCompile Include="Code\WinMain.cpp" />
+    <ClCompile Include="Code\Samples\WinMain.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

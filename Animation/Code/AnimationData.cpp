@@ -158,7 +158,7 @@ namespace Animation {
 				float lenSq = out[0] * out[0] + out[1] * out[1] + out[2] * out[2] + out[3] * out[3];
 				if (!Animation::FloatCompare(lenSq, 1.0f)) {
 					if (lenSq > 0.0f) {
-						float invLen = Animation::FastInvSqrt(lenSq);
+						float invLen = Animation::InvSqrt(lenSq);
 						out[0] *= invLen;
 						out[1] *= invLen;
 						out[2] *= invLen;
@@ -282,7 +282,7 @@ void Animation::Data::SetLabel(const char* label) {
 	mLabel[length] = '\0';
 }
 
-Animation::Data::Iterator Animation::Data::Begin() {
+Animation::Data::Iterator Animation::Data::Begin() const {
 	return Iterator(mStartTime);
 }
 
@@ -290,21 +290,23 @@ float Animation::Data::Sample(State& out, float clipCurrentTime, bool looping) c
 	// Adjust time to fit valid range for clip
 	float clipStartTime = GetStartTime();
 	float clipEndTime = GetEndtime();
+	float clipDuration = GetDuration();
+	if (clipDuration <= 0) {
+		return 0.0f;
+	}
 	
 	// Time is normalized to the animation duration, not an indevidual track
 	if (looping) {
-		float clipDuration = GetDuration();
-		if (clipDuration <= 0) {
-			return 0.0f;
-		}
-
 		/*while (clipCurrentTime < clipStartTime) {
 			clipCurrentTime += clipDuration;
 		}
 		while (clipCurrentTime >= clipEndTime) {
 			clipCurrentTime -= clipDuration;
 		}*/
-		clipCurrentTime = Animation::FMod(clipCurrentTime, clipDuration) + clipStartTime; // TODO: I don't get the logic here, why does this work???
+		clipCurrentTime = Animation::FMod(clipCurrentTime - clipStartTime, clipDuration) + clipStartTime;
+		if (clipCurrentTime < clipStartTime) {
+			clipCurrentTime += clipDuration; 
+		};
 	}
 	else {
 		if (clipCurrentTime < clipStartTime) {
@@ -336,6 +338,9 @@ float Animation::Data::Sample(State& out, float clipCurrentTime, bool looping) c
 		float trackStartTime = frameView.GetStartTime();
 		float trackEndTime = frameView.GetEndTime();
 		float trackDuration = trackEndTime - trackStartTime;
+		if (trackDuration < 0.0f) { 
+			continue; // TODO: Is continue the right thing to do here?
+		}
 
 		float trackTime = clipCurrentTime;
 		if (looping) {
@@ -345,7 +350,10 @@ float Animation::Data::Sample(State& out, float clipCurrentTime, bool looping) c
 			while (trackTime >= trackEndTime) {
 				trackTime -= trackDuration;
 			}*/
-			trackTime = Animation::FMod(trackTime, trackDuration) + trackStartTime;
+			trackTime = Animation::FMod(trackTime - trackStartTime, trackDuration) + trackStartTime;
+			if (trackTime < trackStartTime) {
+				trackTime += trackDuration; 
+			}
 		}
 		else {
 			if (trackTime < trackStartTime) {
@@ -492,7 +500,7 @@ void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize,
 					float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];
 					if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
 						if (rotLenSq > 0.0f) {
-							float invRotLen = Animation::FastInvSqrt(rotLenSq);
+							float invRotLen = Animation::InvSqrt(rotLenSq);
 							rot[i * 10 + 3] *= rotLenSq;
 							rot[i * 10 + 4] *= rotLenSq;
 							rot[i * 10 + 5] *= rotLenSq;
@@ -550,23 +558,23 @@ void Animation::Data::SerializeToString(char* output) const {
 unsigned int Animation::Data::SerializedStringLength() const {
 	unsigned int size = 0;
 
-	size += UIntStringLength(mFrameDataSize) + 1;
+	size += StringLengthUInt(mFrameDataSize) + 1;
 	size += 1;
 
 	for (unsigned int i = 0; i < mFrameDataSize; ++i) {
-		size += FloatStringLength(mFrameData[i]) + 1;
+		size += StringLengthFloat(mFrameData[i]) + 1;
 	}
 	size += 1;
 
-	size += UIntStringLength(mTrackDataSize) + 1;
+	size += StringLengthUInt(mTrackDataSize) + 1;
 	size += 1;
 	for (unsigned int i = 0; i < mTrackDataSize; ++i) {
-		size += UIntStringLength(mTrackData[i]) + 1;
+		size += StringLengthUInt(mTrackData[i]) + 1;
 	}
 	size += 1;
 
-	size += FloatStringLength(mStartTime) + 1;
-	size += FloatStringLength(mEndTime) + 1;
+	size += StringLengthFloat(mStartTime) + 1;
+	size += StringLengthFloat(mEndTime) + 1;
 	size += 1;
 
 	unsigned int labelLength = 0;
@@ -577,7 +585,7 @@ unsigned int Animation::Data::SerializedStringLength() const {
 			it += 1;
 		}
 	}
-	size += UIntStringLength(labelLength) + 1;
+	size += StringLengthUInt(labelLength) + 1;
 
 	for (unsigned int i = 0; i < labelLength; ++i) {
 		size += 1;
@@ -640,7 +648,7 @@ void Animation::Data::DeSerializeFromString(const char* input) {
 					float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];
 					if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
 						if (rotLenSq > 0.0f) {
-							float invRotLen = Animation::FastInvSqrt(rotLenSq);
+							float invRotLen = Animation::InvSqrt(rotLenSq);
 							rot[i * 10 + 3] *= rotLenSq;
 							rot[i * 10 + 4] *= rotLenSq;
 							rot[i * 10 + 5] *= rotLenSq;

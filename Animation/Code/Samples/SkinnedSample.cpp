@@ -379,9 +379,9 @@ void SkinnedSample::Update(float dt) {
 	unsigned int numJoints = mAnimatedPose.Size();
 	mAnimatedPose.ToMatrixPalette(&mAnimatedPosePalette[0], numJoints * 16);
 
-#if 1
+#if 0
 	for (unsigned int i = 0; i < numJoints; ++i) {
-		Animation::MultiplyMatrices(&mAnimatedPosePalette[i * 16], &mAnimatedPosePalette[i * 16], &mInvBindPosePalette[i * 16]);
+		Animation::Internal::MultiplyMatrices(&mAnimatedPosePalette[i * 16], &mAnimatedPosePalette[i * 16], &mInvBindPosePalette[i * 16]);
 	}
 	Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, &mAnimatedPosePalette[0], mReadInfluences, mReadWeights);
 	Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, &mAnimatedPosePalette[0], mReadInfluences, mReadWeights);
@@ -451,8 +451,8 @@ void SkinnedSample::Render(float aspect) {
 	LookAt(view, position, target, up);
 	Perspective(projection, 60.0f, aspect, 0.01f, 1000.0f);
 	float tmp[16] = { 0.0f };
-	Animation::MultiplyMatrices(mvp, view, model);
-	Animation::MultiplyMatrices(mvp, projection, mvp);
+	Animation::Internal::MultiplyMatrices(mvp, view, model);
+	Animation::Internal::MultiplyMatrices(mvp, projection, mvp);
 
 	glEnable(GL_DEPTH_TEST);
 	DrawAnimatedModel(mvp, model);

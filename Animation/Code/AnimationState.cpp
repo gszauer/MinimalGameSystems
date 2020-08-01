@@ -85,15 +85,15 @@ bool Animation::State::ToMatrixPalette(float* outArray, unsigned int arraySize) 
         GetRelativePosition(i, position);
         GetRelativeRotation(i, rotation);
         GetRelativeScale(i, scale);
-        TransformToMatrix(&outArray[i * 16], position, rotation, scale);
+        Animation::Internal::TransformToMatrix(&outArray[i * 16], position, rotation, scale);
         if (parent >= 0) {
-            MultiplyMatrices(&outArray[i * 16], &outArray[(unsigned int)parent * 16], &outArray[i * 16]);
+            Animation::Internal::MultiplyMatrices(&outArray[i * 16], &outArray[(unsigned int)parent * 16], &outArray[i * 16]);
         }
     }
 
     for (unsigned int size = mSize; i < size; ++i) {
         GetAbsoluteTransform(i, position, rotation, scale);
-        TransformToMatrix(&outArray[i * 16], position, rotation, scale);
+        Animation::Internal::TransformToMatrix(&outArray[i * 16], position, rotation, scale);
     }
 
     return true;
@@ -153,7 +153,7 @@ void Animation::State::SetRelativeRotation(unsigned int index, const float* rot)
     float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];
     if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
         if (rotLenSq > 0.0f) {
-            float invRotLen = Animation::FastInvSqrt(rotLenSq);
+            float invRotLen = Animation::InvSqrt(rotLenSq);
             rotation[0] *= rotLenSq;
             rotation[1] *= rotLenSq;
             rotation[2] *= rotLenSq;
@@ -193,7 +193,7 @@ void Animation::State::GetAbsoluteTransform(unsigned int index, float* outPos, f
         GetRelativeRotation((unsigned int)parent, parentRot);
         GetRelativeScale((unsigned int)parent, parentScl);
 
-        CombineTransforms(
+        Animation::Internal::CombineTransforms(
             outPos, outRot, outScl,
             parentPos, parentRot, parentScl,
             outPos, outRot, outScl
@@ -228,24 +228,24 @@ unsigned int Animation::State::SerializedStringLength() const {
     unsigned int space = 1;
     unsigned int lineBreak = 1;
 
-    unsigned int stringLength = UIntStringLength(mSize) + space + lineBreak;
+    unsigned int stringLength = StringLengthUInt(mSize) + space + lineBreak;
 
     for (unsigned int i = 0; i < mSize; ++i) {
-        stringLength += IntStringLength(mHierarchy[i]) + space;
+        stringLength += StringLengthInt(mHierarchy[i]) + space;
     }
     stringLength += lineBreak;
 
     for (unsigned int i = 0; i < mSize; ++i) {
-        stringLength += FloatStringLength(mTransforms[i * 10 + 0]) + space;
-        stringLength += FloatStringLength(mTransforms[i * 10 + 1]) + space;
-        stringLength += FloatStringLength(mTransforms[i * 10 + 2]) + space;
-        stringLength += FloatStringLength(mTransforms[i * 10 + 3]) + space;
-        stringLength += FloatStringLength(mTransforms[i * 10 + 4]) + space;
-        stringLength += FloatStringLength(mTransforms[i * 10 + 5]) + space;
-        stringLength += FloatStringLength(mTransforms[i * 10 + 6]) + space;
-        stringLength += FloatStringLength(mTransforms[i * 10 + 7]) + space;
-        stringLength += FloatStringLength(mTransforms[i * 10 + 8]) + space;
-        stringLength += FloatStringLength(mTransforms[i * 10 + 9]) + space;
+        stringLength += StringLengthFloat(mTransforms[i * 10 + 0]) + space;
+        stringLength += StringLengthFloat(mTransforms[i * 10 + 1]) + space;
+        stringLength += StringLengthFloat(mTransforms[i * 10 + 2]) + space;
+        stringLength += StringLengthFloat(mTransforms[i * 10 + 3]) + space;
+        stringLength += StringLengthFloat(mTransforms[i * 10 + 4]) + space;
+        stringLength += StringLengthFloat(mTransforms[i * 10 + 5]) + space;
+        stringLength += StringLengthFloat(mTransforms[i * 10 + 6]) + space;
+        stringLength += StringLengthFloat(mTransforms[i * 10 + 7]) + space;
+        stringLength += StringLengthFloat(mTransforms[i * 10 + 8]) + space;
+        stringLength += StringLengthFloat(mTransforms[i * 10 + 9]) + space;
     }
     stringLength += lineBreak;
 
@@ -302,7 +302,7 @@ void Animation::State::DeSerializeFromString(const char* input) {
         float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];
         if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
             if (rotLenSq > 0.0f) {
-                float invRotLen = Animation::FastInvSqrt(rotLenSq);
+                float invRotLen = Animation::InvSqrt(rotLenSq);
                 mTransforms[i * 10 + 3] *= rotLenSq;
                 mTransforms[i * 10 + 4] *= rotLenSq;
                 mTransforms[i * 10 + 5] *= rotLenSq;

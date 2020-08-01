@@ -33,9 +33,6 @@
     <ClInclude Include="Code\AnimationState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\glad.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Code\AnimationHelpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -57,6 +54,9 @@
     <ClInclude Include="Code\Samples\microui.h">
       <Filter>Header Files\Samples</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Samples\glad.h">
+      <Filter>Header Files\Samples</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\AnimationBlend.cpp">
@@ -69,12 +69,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Code\AnimationState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\WinMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Code\AnimationHelpers.cpp">
@@ -96,6 +90,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Code\Samples\microui.c">
+      <Filter>Source Files\Samples</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\glad.c">
+      <Filter>Source Files\Samples</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\WinMain.cpp">
       <Filter>Source Files\Samples</Filter>
     </ClCompile>
   </ItemGroup>

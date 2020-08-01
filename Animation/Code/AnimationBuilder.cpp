@@ -205,7 +205,7 @@ void Animation::Builder::Track::ForceLinear() {
 
 			float lenSq = deltaX * deltaX + deltaY * deltaY;
 			if (!FloatCompare(lenSq, 0.0f)) {
-				float invLen = FastInvSqrt(lenSq);
+				float invLen = InvSqrt(lenSq);
 				deltaX *= invLen;
 				deltaY *= invLen;
 			}

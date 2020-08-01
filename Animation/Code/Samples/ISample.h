@@ -6,7 +6,7 @@
 #include "../AnimationHelpers.h"
 #include "../AnimationSkin.h"
 #include "../AnimationBlend.h"
-#include "../glad.h"
+#include "glad.h"
 #include <vector>
 
 class ISample {

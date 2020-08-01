@@ -1,5 +1,4 @@
 #include "CurvesSample.h"
-#include "../glad.h"
 #include <vector>
 #include <iostream>
 #include "../AnimationBuilder.h"
@@ -308,7 +307,7 @@ void CurvesSample::Render(float aspect) {
 	view[14] = -3.0f;
 
 	float mvp[16] = { 0.0f };
-	Animation::MultiplyMatrices(mvp, projection, view);
+	Animation::Internal::MultiplyMatrices(mvp, projection, view);
 
 	glDisable(GL_DEPTH_TEST);
 	glBindVertexArray(mCurveVAO);

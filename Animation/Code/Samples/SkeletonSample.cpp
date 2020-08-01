@@ -164,8 +164,8 @@ void SkeletonSample::Render(float aspect) {
 	LookAt(view, position, target, up);
 	Perspective(projection, 60.0f, aspect, 0.01f, 1000.0f);
 	float tmp[16] = { 0.0f };
-	Animation::MultiplyMatrices(mvp, view, model);
-	Animation::MultiplyMatrices(mvp, projection, mvp);
+	Animation::Internal::MultiplyMatrices(mvp, view, model);
+	Animation::Internal::MultiplyMatrices(mvp, projection, mvp);
 
 	float red[3] = { 1.0f, 0.0f, 0.0f };
 	float green[3] = { 0.0f, 1.0f, 0.0f };

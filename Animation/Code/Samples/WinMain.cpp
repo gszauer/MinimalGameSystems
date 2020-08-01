@@ -33,17 +33,17 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 #endif
 #pragma comment(lib, "opengl32.lib")
 
-#include "AnimationState.h"
-#include "AnimationData.h"
-#include "AnimationHelpers.h"
-#include "AnimationSkin.h"
-#include "AnimationBlend.h"
+#include "../AnimationState.h"
+#include "../AnimationData.h"
+#include "../AnimationHelpers.h"
+#include "../AnimationSkin.h"
+#include "../AnimationBlend.h"
 
-#include "Samples/ISample.h"
-#include "Samples/SkinnedSample.h"
-#include "Samples/SkeletonSample.h"
-#include "Samples/CurvesSample.h"
-#include "Samples/microui.h"
+#include "ISample.h"
+#include "SkinnedSample.h"
+#include "SkeletonSample.h"
+#include "CurvesSample.h"
+#include "microui.h"
 
 #include <vector>
 #include <fstream>
@@ -74,11 +74,78 @@ ISample* gBlendSample = 0;
 mu_Context* gUIContext = 0;
 int gShowCurveSample = 0;
 int gShowSkeletonSample = 0;
-int gShowSkinnedSample = 1;
+int gShowSkinnedSample = 0;
 int gShowBlendingSample = 0;
 bool gRendererRunning = false;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
+	float times[] = {
+		// Current time, start time, end time
+		-1.0f, 0.0f, 0.0f, // Invalid, start time == end time
+		0.0f, 0.0f, 0.0f, // Invalid, start time == end time
+		0.0f, 0.0f, 0.0f, // Invalid, start time == end time
+		0.0f, 0.0f, 0.0f, // Invalid, start time == end time
+		0.0f, 0.0f, 0.0f, // Invalid, start time == end time
+		5.0f, 0.0f, 0.0f, // Invalid, start time == end time
+		
+		-1.0f, 1.0f, 1.0f, // Invalid, start time == end time
+		0.25f, 1.0f, 1.0f, // Invalid, start time == end time
+		1.0f, 1.0f, 1.0f, // Invalid, start time == end time
+		1.0f, 1.0f, 1.0f, // Invalid, start time == end time
+		1.0f, 1.0f, 1.0f, // Invalid, start time == end time
+		5.0f, 1.0f, 1.0f, // Invalid, start time == end time
+		
+		-1.0f, 0.3f, 0.3f, // Invalid, start time == end time
+		0.3f, 0.3f, 0.3f, // Invalid, start time == end time
+		0.3f, 0.3f, 0.3f, // Invalid, start time == end time
+		0.3f, 0.3f, 0.3f, // Invalid, start time == end time
+		0.3f, 0.3f, 0.3f, // Invalid, start time == end time
+		5.0f, 0.3f, 0.3f, // Invalid, start time == end time
+		
+		-1.0f, 0.5f, 0.2f, // Invalid start time > end time
+		0.25f, 0.5f, 0.2f, // Invalid start time > end time
+		0.5f, 0.5f, 0.2f, // Invalid start time > end time
+		0.3f, 0.5f, 0.2f, // Invalid start time > end time
+		0.2f, 0.5f, 0.2f, // Invalid start time > end time
+		5.0f, 0.5f, 0.2f, // Invalid start time > end time
+		
+		-1.0f, 0.0f, 1.0f, // Valid
+		0.25f, 0.0f, 1.0f, // Valid
+		0.0f, 0.0f, 1.0f, // Valid
+		0.25f, 0.0f, 1.0f, // Valid
+		1.0f, 0.0f, 1.0f, // Valid
+		5.0f, 0.0f, 1.0f, // Valid
+		
+		-2.0f, -1.0f, 1.0f, // Valid
+		0.25f, -1.0f, 1.0f, // Valid
+		-1.0f, -1.0f, 1.0f, // Valid
+		-0.3f, -1.0f, 1.0f, // Valid
+		1.0f, -1.0f, 1.0f, // Valid
+		5.2f, -1.0f, 1.0f, // Valid
+		
+		-1.0f, 0.25f, 0.75f, // Valid
+		0.2f, 0.25f, 0.75f, // Valid
+		0.25f, 0.25f, 0.75f, // Valid
+		0.4f, 0.25f, 0.75f, // Valid
+		0.75f, 0.25f, 0.75f, // Valid
+		5.0f, 0.25f, 0.75f // Valid
+	};
+
+	for (int i = 0; i < 7 * 6; ++i) {
+		float currentTime = times[i * 3 + 0];
+		float startTime = times[i * 3 + 1];
+		float endTime = times[i * 3 + 2];
+		float duration = endTime - startTime;
+		float result = Animation::FMod(currentTime - startTime, duration) + startTime;
+		float c_result = fmodf(currentTime - startTime, duration) + startTime;
+		std::cout << "c: " << currentTime << ", s: " << startTime << ", e: " << endTime << ", FMod(" << (currentTime - startTime) << ", " << duration << ") + " << startTime << " = " << result << " | " << c_result << "\n";
+		if ((i + 1) % 6 == 0) { std::cout << "\n"; }
+		if ((i + 1) == (6 * 4)) {
+			std::cout << "\n\n\nValid below\n\n\n";
+		}
+	}
+
+
 	gCurveSample = new CurvesSample();
 	gSkeletonSample = new SkeletonSample();
 	gSkinSample = new SkinnedSample();

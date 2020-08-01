@@ -63,7 +63,7 @@ namespace Animation {
         const char* GetLabel() const;
         void SetLabel(const char* label);
 
-        Iterator Begin();
+        Iterator Begin() const;
         float Sample(State& out, float time, bool looping) const;
         Iterator Sample(State& out, const Iterator& iter, bool looping) const;
 

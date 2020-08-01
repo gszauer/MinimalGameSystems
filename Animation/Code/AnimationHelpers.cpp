@@ -1,7 +1,7 @@
 #include "AnimationHelpers.h"
 #include <cmath> // for sqrt. Can use fast inv sqrt as well
 
-void Animation::CombineTransforms(float* outPos, float* outRot, float* outScale, const float* posA, const float* rotA, const float* sclA, const float* posB, const float* rotB, const float* sclB) {
+void Animation::Internal::CombineTransforms(float* outPos, float* outRot, float* outScale, const float* posA, const float* rotA, const float* sclA, const float* posB, const float* rotB, const float* sclB) {
     float resultScale[3] = { 1.0f };
     float resultPos[3] = { 0.0f };
     float resultRot[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -45,7 +45,7 @@ void Animation::CombineTransforms(float* outPos, float* outRot, float* outScale,
     outRot[3] = resultRot[3];
 }
 
-void Animation::TransformToMatrix(float* outMatrix, const float* position, const float* rot, const float* scale) {
+void Animation::Internal::TransformToMatrix(float* outMatrix, const float* position, const float* rot, const float* scale) {
     // First, extract the rotation basis of the transform
     float v[3] = { 1.0f, 0.0f, 0.0f };
     float d1 = rot[0] * v[0] + rot[1] * v[1] + rot[2] * v[2];
@@ -107,7 +107,7 @@ void Animation::TransformToMatrix(float* outMatrix, const float* position, const
     outMatrix[15] = 1.0f;
 }
 
-void Animation::MultiplyMatrices(float* out, const float* a, const float* b) {
+void Animation::Internal::MultiplyMatrices(float* out, const float* a, const float* b) {
     float result[16] = { 0.0f };
 
     // Column 0
@@ -151,11 +151,11 @@ unsigned int Animation::CountDigits(unsigned int n) {
     return length;
 }
 
-unsigned int Animation::UIntStringLength(unsigned int v) {
+unsigned int Animation::StringLengthUInt(unsigned int v) {
     return CountDigits(v);
 }
 
-unsigned int Animation::IntStringLength(int v) {
+unsigned int Animation::StringLengthInt(int v) {
     unsigned int length = 0;
     if (v < 0) {
         length = 1;
@@ -166,7 +166,7 @@ unsigned int Animation::IntStringLength(int v) {
     return CountDigits(uv) + length;;
 }
 
-unsigned int Animation::FloatStringLength(float v) {
+unsigned int Animation::StringLengthFloat(float v) {
     // Floating point numbers will always have 5 decimal places, hard coding that
     unsigned int length = 0;
     if (v < 0.0f) {
@@ -381,7 +381,9 @@ bool Animation::FloatCompare(float a, float b) {
     return delta < 0.000001f && delta > -0.000001f;
 }
 
-float Animation::FastInvSqrt(float number) { // 1 / sqrt(number)
+float Animation::InvSqrt(float number) { 
+    // 1 / sqrt(number)
+    // TODO: Move back to hacky way of doing this
 #if 0
     long i;
     float x2, y;
@@ -401,7 +403,26 @@ float Animation::FastInvSqrt(float number) { // 1 / sqrt(number)
 }
 
 float Animation::FMod(float x, float y) {
-    return fmodf(x, y);
+    // fmod(x, y) = x - y * floor(x / y)
+
+    if (y == 0.0f) { // Avoid div by 0
+       return 0.0f;
+    }
+    
+    // This is naive, there is a real chance for overflow.
+    // Most game animations are not long enough to run into this problem.
+    // The quick fix is to use the std implementation of fmod instead
+    float floor_target = x / y;
+    if (floor_target < 0.0f) { // floor
+        floor_target = (int)(floor_target - 1);
+    }
+    else { 
+        floor_target = (int)(floor_target + 1);
+    }
+
+    float result = x - y * floor_target;
+
+    return result;
 }
 
 #define ANIMHELPER_M4_3X3MINOR(c0, c1, c2, r0, r1, r2) \
@@ -409,7 +430,7 @@ float Animation::FMod(float x, float y) {
      in[c1 * 4 + r0] * (in[c0 * 4 + r1] * in[c2 * 4 + r2] - in[c0 * 4 + r2] * in[c2 * 4 + r1]) + \
      in[c2 * 4 + r0] * (in[c0 * 4 + r1] * in[c1 * 4 + r2] - in[c0 * 4 + r2] * in[c1 * 4 + r1]))
 
-void Animation::InvertMatrix(float* out, const float* in) {
+void Animation::Internal::InvertMatrix(float* out, const float* in) {
     float determinant =   in[0] * ANIMHELPER_M4_3X3MINOR(1, 2, 3, 1, 2, 3)
                         - in[4] * ANIMHELPER_M4_3X3MINOR(0, 2, 3, 1, 2, 3)
                         + in[8] * ANIMHELPER_M4_3X3MINOR(0, 1, 3, 1, 2, 3)
@@ -459,57 +480,7 @@ void Animation::InvertMatrix(float* out, const float* in) {
     }
 }
 
-
-void Animation::ScaleMatrix(float* out, const float* in, float s) {
-    float result[16] = { 0.0f };
-   
-    result[0] = in[0] * s;
-    result[1] = in[1] * s;
-    result[2] = in[2] * s;
-    result[3] = in[3] * s;
-    result[4] = in[4] * s;
-    result[5] = in[5] * s;
-    result[6] = in[6] * s;
-    result[7] = in[7] * s;
-    result[8] = in[8] * s;
-    result[9] = in[9] * s;
-    result[10] = in[10] * s;
-    result[11] = in[11] * s;
-    result[12] = in[12] * s;
-    result[13] = in[13] * s;
-    result[14] = in[14] * s;
-    result[15] = in[15] * s;
-
-    for (int i = 0; i < 16; ++i) {
-        out[i] = result[i];
-    }
-}
-
-void Animation::AddMatrices(float* out, const float* a, const float* b) {
-    float result[16] = { 0.0f };
-    result[0] = a[0] + b[0];
-    result[1] = a[1] + b[1];
-    result[2] = a[2] + b[2];
-    result[3] = a[3] + b[3];
-    result[4] = a[4] + b[4];
-    result[5] = a[5] + b[5];
-    result[6] = a[6] + b[6];
-    result[7] = a[7] + b[7];
-    result[8] = a[8] + b[8];
-    result[9] = a[9] + b[9];
-    result[10] = a[10] + b[10];
-    result[11] = a[11] + b[11];
-    result[12] = a[12] + b[12];
-    result[13] = a[13] + b[13];
-    result[14] = a[14] + b[14];
-    result[15] = a[15] + b[15];
-
-    for (int i = 0; i < 16; ++i) {
-        out[i] = result[i];
-    }
-}
-
-void Animation::MultiplyMat4Vec4(float* out, const float* mat, const float* vec) {
+void Animation::Internal::MultiplyMat4Vec4(float* out, const float* mat, const float* vec) {
     float result[4] = { 0.0f };
     result[0] = vec[0] * mat[0] + vec[1] * mat[4] + vec[2] * mat[8] + vec[3] * mat[12];
     result[1] = vec[0] * mat[1] + vec[1] * mat[5] + vec[2] * mat[9] + vec[3] * mat[13];

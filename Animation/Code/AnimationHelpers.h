@@ -2,18 +2,21 @@
 #define _H_ANIMATIONHELPERS_
 
 namespace Animation {
-    namespace Helpers {
-        // TODO: Migrate all helper functions in this namespace
-        // TODO: Prune helper functions, not all of them are in use still
-    }
-    void CombineTransforms(float* outPos, float* outRot, float* outScale, const float* posA, const float* rotA, const float* sclA, const float* posB, const float* rotB, const float* sclB);
-    void TransformToMatrix(float* outMatrix, const float* position, const float* rot, const float* scale);
-    void MultiplyMatrices(float* out, const float* a, const float* b);
-    void InvertMatrix(float* out, const float* in);
+    namespace Internal {
+        void CombineTransforms(float* outPos, float* outRot, float* outScale, const float* posA, const float* rotA, const float* sclA, const float* posB, const float* rotB, const float* sclB); // TODO: Only called once in AnimationState.cpp, consider inlining
+        void TransformToMatrix(float* outMatrix, const float* position, const float* rot, const float* scale); // TODO: Only called in 2 places in AnimationState.cpp, consider inlining
+        void MultiplyMatrices(float* out, const float* a, const float* b); // TODO: This is mostly used in samples, move it to ISample and inline it
+        void InvertMatrix(float* out, const float* in); // TODO: This is only used for generating the inv-bind-pose. Inline it.
+        void MultiplyMat4Vec4(float* out, const float* mat, const float* vec); // TODO: Only used in AnimationSkin.cpp, consider inlining it
 
-    unsigned int UIntStringLength(unsigned int v);
-    unsigned int IntStringLength(int v);
-    unsigned int FloatStringLength(float v); // Will always have 5 decimals
+    }
+    
+    // TODO: These should not be global functions. Instead, create AnimationSerializer.h/cpp that will serialize and deserialize files.
+    // This will be optional.
+
+    unsigned int StringLengthUInt(unsigned int v);
+    unsigned int StringLengthInt(int v);
+    unsigned int StringLengthFloat(float v); // Will always have 5 decimals
     
     const char* ReadInt(const char* target, int& v);
     const char* ReadUInt(const char* target, unsigned int& v);
@@ -28,16 +31,11 @@ namespace Animation {
     char* WriteNewLine(char* target);
 
     bool FloatCompare(float a, float b);
-    float FastInvSqrt(float number);
+    float InvSqrt(float number);
     float FMod(float x, float y);
 
-    void* Allocate(unsigned int bytes);
+    void* Allocate(unsigned int bytes); // TODO: I can figure out how to drop the rest of this file, but not how to drop the Alloc/Free calls here. Maybe a global function pointer?!?
     void Free(void* memory);
-
-    void ScaleMatrix(float* out, const float* in, float s);
-    void AddMatrices(float* out, const float* a, const float* b);
-    void MultiplyMat4Vec4(float* out, const float* mat, const float* vec);
-	
 }
 
 #endif

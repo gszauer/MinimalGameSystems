@@ -114,7 +114,7 @@ void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float
 
 		for (unsigned int j = 0; j < 4; ++j) {
 			if (weight[j] >= 0.000001f) {
-				Animation::MultiplyMatrices(matrix, &animationMatrixPalette[influence[j] * 16], &invBindPalette[influence[j] * 16]);
+				Animation::Internal::MultiplyMatrices(matrix, &animationMatrixPalette[influence[j] * 16], &invBindPalette[influence[j] * 16]);
 				for (unsigned int k = 0; k < 16; ++k) {
 					skin[k] += matrix[k] * weight[j];
 				}
@@ -122,7 +122,7 @@ void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float
 		}
 
 		float result[4] = { 0 };
-		MultiplyMat4Vec4(result, skin, vertex);
+		Animation::Internal::MultiplyMat4Vec4(result, skin, vertex);
 
 		float* outputScalar = output[i];
 		outputScalar[0] = result[0];
@@ -157,7 +157,7 @@ void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float
 		}
 
 		float result[4] = { 0 };
-		MultiplyMat4Vec4(result, skin, vertex);
+		Animation::Internal::MultiplyMat4Vec4(result, skin, vertex);
 
 		float* outputScalar = output[i];
 		outputScalar[0] = result[0];

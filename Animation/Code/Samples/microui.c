@@ -2236,7 +2236,7 @@ static mu_Rect atlas[] = {
 
 ///// Renderer
 
-#include "../glad.h"
+#include "glad.h"
 
 #define BUFFER_SIZE 16384
 
