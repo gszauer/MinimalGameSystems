@@ -417,7 +417,7 @@ float Animation::FMod(float x, float y) {
         floor_target = (int)(floor_target - 1);
     }
     else { 
-        floor_target = (int)(floor_target + 1);
+        floor_target = (int)(floor_target);
     }
 
     float result = x - y * floor_target;

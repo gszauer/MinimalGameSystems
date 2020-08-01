@@ -374,7 +374,7 @@ void SkinnedSample::Update(float dt) {
 		mSkinned[i * 6 + 5] = result[2];
 	}
 #else
-	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime + dt, true);
+	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime - dt, true);
 
 	unsigned int numJoints = mAnimatedPose.Size();
 	mAnimatedPose.ToMatrixPalette(&mAnimatedPosePalette[0], numJoints * 16);
