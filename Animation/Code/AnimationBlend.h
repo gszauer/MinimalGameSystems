@@ -4,7 +4,7 @@
 namespace Animation {
 	class State;
 
-	bool LinearBlend(State& target, const State& a, const State& b, float t);
+	bool Blend(State& target, const State& a, const State& b, float t);
 }
 
 #endif

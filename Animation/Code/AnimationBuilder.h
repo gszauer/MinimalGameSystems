@@ -6,12 +6,14 @@
 
 namespace Animation {
 	namespace Builder {
+		static int StepTangent;
+
 		struct Frame {
 			float time;
 			float in[4];
 			float value[4];
 			float out[4];
-
+			
 			Frame();
 			Frame& operator=(const Frame& other);
 		};
@@ -46,6 +48,7 @@ namespace Animation {
 			Frame& operator[](unsigned int index);
 			const Frame& operator[](unsigned int index) const;
 			void PushFrame(const Frame& input);
+			void PushFrames(const Frame* frames, unsigned int numFrames);
 
 			void ForceLinear();
 			void ForceStep();

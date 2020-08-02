@@ -2525,7 +2525,7 @@ static void r_internal_push_quad(mu_Rect dst, mu_Rect src, mu_Color color) {
     memcpy(gUiColorBuff + color_idx + 8, &color, 4);
     memcpy(gUiColorBuff + color_idx + 12, &color, 4);
 
-    /* update index buffer */ // TODO: This index buffer is 100% useless!
+    /* update index buffer */
     gUiIndexBuff[index_idx + 0] = element_idx + 0;
     gUiIndexBuff[index_idx + 1] = element_idx + 1;
     gUiIndexBuff[index_idx + 2] = element_idx + 2;

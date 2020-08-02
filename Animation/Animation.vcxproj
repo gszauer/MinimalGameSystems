@@ -25,6 +25,7 @@
     <ClInclude Include="Code\AnimationHelpers.h" />
     <ClInclude Include="Code\AnimationSkin.h" />
     <ClInclude Include="Code\AnimationState.h" />
+    <ClInclude Include="Code\Samples\BlendSample.h" />
     <ClInclude Include="Code\Samples\CurvesSample.h" />
     <ClInclude Include="Code\Samples\glad.h" />
     <ClInclude Include="Code\Samples\ISample.h" />

@@ -57,6 +57,9 @@
     <ClInclude Include="Code\Samples\glad.h">
       <Filter>Header Files\Samples</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Samples\BlendSample.h">
+      <Filter>Header Files\Samples</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\AnimationBlend.cpp">

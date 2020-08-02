@@ -5,8 +5,8 @@
 
 class SkeletonSample : public ISample {
 protected:
-	std::vector<float> mVertices;
-	std::vector<float> mSkinned;
+	std::vector<vec3> m_Vertices;
+	std::vector<vec3> m_Skinned;
 protected:
 	Animation::Data mAnimationData;
 	Animation::State mBindPose;
@@ -25,7 +25,7 @@ private:
 	void CreateModel();
 	void LoadAnimation();
 	void InitOpenGL();
-	void DrawSkeleton(const Animation::State& state, float* mvp, float* color);
+	void DrawSkeleton(const Animation::State& state, const mat4& mvp, const vec3& color);
 public:
 	void Initialize();
 	void Update(float dt);

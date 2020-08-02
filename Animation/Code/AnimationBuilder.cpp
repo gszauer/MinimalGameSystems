@@ -1,6 +1,8 @@
 #include "AnimationBuilder.h"
 #include "AnimationHelpers.h"
 
+static int Animation::Builder::StepTangent = Animation::Data::StepLimit * 2.0f;
+
 Animation::Builder::Frame::Frame() {
 	time = 0.0f;
 	in[0] = in[1] = in[2] = in[3] = 0.0f;
@@ -189,6 +191,12 @@ void Animation::Builder::Track::PushFrame(const Frame& input) {
 	}
 
 	mFrameData[mFrameCount++] = input;
+}
+
+void Animation::Builder::Track::PushFrames(const Frame* frames, unsigned int numFrames) {
+	for (unsigned int i = 0; i < numFrames; ++i) {
+		PushFrame(frames[i]);
+	}
 }
 
 void Animation::Builder::Track::ForceLinear() {

@@ -14,16 +14,11 @@ void SkeletonSample::CreateModel() {
 		mRestPose.GetAbsolutePosition(i, iPos);
 		mRestPose.GetAbsolutePosition(p, pPos);
 
-		mVertices.push_back(iPos[0]);
-		mVertices.push_back(iPos[1]);
-		mVertices.push_back(iPos[2]);
-
-		mVertices.push_back(pPos[0]);
-		mVertices.push_back(pPos[1]);
-		mVertices.push_back(pPos[2]);
+		m_Vertices.push_back(vec3(iPos));
+		m_Vertices.push_back(vec3(pPos));
 	}
 
-	mSkinned = mVertices;
+	m_Skinned = m_Vertices;
 }
 
 void SkeletonSample::LoadAnimation() {
@@ -100,10 +95,10 @@ void SkeletonSample::InitOpenGL() {
 	glUseProgram(0);
 }
 
-void SkeletonSample::DrawSkeleton(const Animation::State& state, float* mvp, float* color) {
+void SkeletonSample::DrawSkeleton(const Animation::State& state, const mat4& mvp, const vec3& color) {
 	float iPos[3] = { 0.0f };
 	float pPos[3] = { 0.0f };
-	unsigned int index = 0;
+	unsigned int _index = 0;
 
 	for (int i = 0, size = (int)state.Size(); i < size; ++i) {
 		int p = state.GetParent(i);
@@ -112,13 +107,8 @@ void SkeletonSample::DrawSkeleton(const Animation::State& state, float* mvp, flo
 		state.GetAbsolutePosition(i, iPos);
 		state.GetAbsolutePosition(p, pPos);
 
-		mSkinned[index++] = iPos[0];
-		mSkinned[index++] = iPos[1];
-		mSkinned[index++] = iPos[2];
-
-		mSkinned[index++] = pPos[0];
-		mSkinned[index++] = pPos[1];
-		mSkinned[index++] = pPos[2];
+		m_Skinned[_index++] = vec3(iPos);
+		m_Skinned[_index++] = vec3(pPos);
 	}
 	
 	glBindVertexArray(mSkeletonVAO);
@@ -127,13 +117,13 @@ void SkeletonSample::DrawSkeleton(const Animation::State& state, float* mvp, flo
 	glBindBuffer(GL_ARRAY_BUFFER, mSkeletonVBO);
 
 	glEnableVertexAttribArray(mVertexAttrib);
-	glBufferData(GL_ARRAY_BUFFER, mSkinned.size() * sizeof(float), &mSkinned[0], GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, m_Skinned.size() * 3 * sizeof(float), &m_Skinned[0].v[0], GL_STREAM_DRAW);
 	glVertexAttribPointer(mVertexAttrib, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
-	glUniformMatrix4fv(mMVPUniform, 1, GL_FALSE, mvp);
-	glUniform3fv(mColorUniform, 1, color);
+	glUniformMatrix4fv(mMVPUniform, 1, GL_FALSE, mvp.v);
+	glUniform3fv(mColorUniform, 1, color.v);
 
-	unsigned int numVerts = (unsigned int)(mSkinned.size() / 3);
+	unsigned int numVerts = (unsigned int)m_Skinned.size();
 	glDrawArrays(GL_LINES, 0, numVerts);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -152,20 +142,13 @@ void SkeletonSample::Update(float dt) {
 }
 
 void SkeletonSample::Render(float aspect) {
-	float model[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -3.0f, 0.0f, 0.0f, 1.0f };
-	float view[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-	float projection[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-	float mvp[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
+	mat4 model, view, projection, mvp;
+	
+	model.position = vec4(-3.0f, 0.0f, 0.0f, 1.0f);
+	view = lookAt(vec3(0, 7, 5), vec3(0, 3, 0), vec3(0, 1,0 ));
+	projection = perspective(60.0f, aspect, 0.01f, 1000.0f);
 
-	float position[3] = { 0.0f, 7.0f, 5.0f };
-	float target[3] = { 0.0f, 3.0f, 0.0f };
-	float up[3] = { 0.0f, 1.0f, 0.0f };
-
-	LookAt(view, position, target, up);
-	Perspective(projection, 60.0f, aspect, 0.01f, 1000.0f);
-	float tmp[16] = { 0.0f };
-	Animation::Internal::MultiplyMatrices(mvp, view, model);
-	Animation::Internal::MultiplyMatrices(mvp, projection, mvp);
+	mvp = projection * view * model;
 
 	float red[3] = { 1.0f, 0.0f, 0.0f };
 	float green[3] = { 0.0f, 1.0f, 0.0f };

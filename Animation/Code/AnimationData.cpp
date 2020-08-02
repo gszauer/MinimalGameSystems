@@ -312,141 +312,147 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 	}
 	
 	// Loop trough all tracks
-	unsigned int trackStride = 4;
-	for (unsigned int trackIndex = 0; trackIndex < mTrackDataSize; trackIndex += trackStride) {
-		unsigned int targetJointId = mTrackData[trackIndex + 0];
-		unsigned int frameStride = 3 * 3 + 1;
-		unsigned int frameSize = 3;
-		Animation::Data::Component trackComponent = (Animation::Data::Component)mTrackData[trackIndex + 1];
-		if (mTrackData[trackIndex + 1] == (unsigned int)Component::Rotation) {
-			frameStride = 3 * 4 + 1;
-			frameSize = 4;
-		}
-		unsigned int offset = mTrackData[trackIndex + 2];
-		unsigned int size = mTrackData[trackIndex + 3];
-		unsigned int numFrames = size / frameStride;
-
-		Animation::Internal::FrameView frameView(&mFrameData[offset], frameSize, numFrames);
-		
-		// Find current and next frames
-		float trackStartTime = frameView.GetStartTime();
-		float trackEndTime = frameView.GetEndTime();
-		float trackDuration = trackEndTime - trackStartTime;
-		if (trackDuration < 0.0f) { 
-			continue; // TODO: Is continue the right thing to do here?
-		}
-
-		float trackTime = clipTime;
-		if (looping) {
-#if 0
-			while (trackTime < trackStartTime) { 
-				trackTime += trackDuration; 
-			}
-			while (trackTime >= trackEndTime) { 
-				trackTime -= trackDuration; 
-			}
-#else
-			trackTime = Animation::FMod(trackTime - trackStartTime, trackDuration) + trackStartTime;
-			if (trackTime < trackStartTime) {
-				trackTime += trackDuration; 
-			}
-#endif
-		}
-		else {
-			if (trackTime < trackStartTime) {
-				trackTime = trackStartTime;
-			}
-			if (trackTime > trackEndTime) {
-				trackTime = trackEndTime;
-			}
-		}
-
-		// Given a time, find the current and next frame indices
-		unsigned int thisFrame = 0;
-		unsigned int nextFrame = 0;
-		{
-#if 0
-			for (int frameIndex = frameView.GetNumFrames() - 1; frameIndex >= 0; frameIndex -= 1) {
-				if (trackTime >= frameView.GetTime(frameIndex)) {
-					thisFrame = frameIndex;
-					break;
-				}
-			}
-#else
-			//Since time only ever increases, use a binary search
-			int l = 0;
-			int r = (int)numFrames;
-			while (l <= r) {
-				int m = l + (r - l) / 2;
-				float thisFrameTime = *frameView[m];
-
-				// Found at last frame
-				if (m == numFrames - 1) {
-					if (trackTime >= thisFrameTime) {
-						thisFrame = numFrames - 1;
-						break;
-					}
-				}
-				else {
-					if (trackTime >= thisFrameTime && trackTime  <= *frameView[m + 1]) {
-						thisFrame = m;
-						break;
-					}
-
-				}
-
-				// target is greater, ignore left half
-				if (thisFrameTime < trackTime) {
-					l = m + 1;
-				}
-				// target is greater, ignore right half
-				else {
-					r = m - 1;
-				}
-			}
-#endif
-			if (!looping) {
-				if (clipTime <= trackStartTime) {
-					thisFrame = 0;
-					trackTime = trackStartTime;
-				}
-				if (clipTime >= trackEndTime) {
-					thisFrame = numFrames - 1; 
-					trackTime = trackEndTime;
-				}
-			}
-
-			// Keep nextFrame valid
-			if (thisFrame >= numFrames - 1) { 
-				thisFrame = numFrames - 2; // -2 so thisFrame + 1 is a valid index
-			}
-			nextFrame = thisFrame + 1;
-		}
-
-		// Find frame delta and interpolation t
-		float frameDelta = frameView.GetTime(nextFrame) - frameView.GetTime(thisFrame);
-		float t = 0.0f;
-		if (frameDelta > 0.0f) {
-			t = (trackTime - frameView.GetTime(thisFrame)) / frameDelta;
-		}
-
-		float result[4] = { 0.0f };
-		if (trackComponent == Component::Position) {
-			frameView.Vec3Interpolate(result, thisFrame, nextFrame, t);
-			out.SetRelativePosition(targetJointId, result);
-		}
-		else if (trackComponent == Component::Rotation) {
-			frameView.QuatInterpolate(result, thisFrame, nextFrame, t);
-			out.SetRelativeRotation(targetJointId, result);
-		}
-		else {
-			frameView.Vec3Interpolate(result, thisFrame, nextFrame, t);
-			out.SetRelativeScale(targetJointId, result);
-		}
+	unsigned int numTracks = mTrackDataSize / 4; // 4 = track stride
+	for (unsigned int trackIndex = 0; trackIndex < numTracks; ++trackIndex) {
+		SampleTrack(out, trackIndex, clipTime, looping);
 	}
 
 	// Return time relative to valid play range
 	return clipTime;
+}
+
+float Animation::Data::SampleTrack(State& out, unsigned int trackIndex, float time, bool looping) const {
+	trackIndex = trackIndex * 4; // 4 = track stride
+
+	unsigned int targetJointId = mTrackData[trackIndex + 0];
+	unsigned int frameStride = 3 * 3 + 1;
+	unsigned int frameSize = 3;
+	Animation::Data::Component trackComponent = (Animation::Data::Component)mTrackData[trackIndex + 1];
+	if (mTrackData[trackIndex + 1] == (unsigned int)Component::Rotation) {
+		frameStride = 3 * 4 + 1;
+		frameSize = 4;
+	}
+	unsigned int offset = mTrackData[trackIndex + 2];
+	unsigned int size = mTrackData[trackIndex + 3];
+	unsigned int numFrames = size / frameStride;
+
+	Animation::Internal::FrameView frameView(&mFrameData[offset], frameSize, numFrames);
+
+	// Find current and next frames
+	float trackStartTime = frameView.GetStartTime();
+	float trackEndTime = frameView.GetEndTime();
+	float trackDuration = trackEndTime - trackStartTime;
+	if (trackDuration < 0.0f) {
+		return 0.0f;
+	}
+
+	float trackTime = time;
+	if (looping) {
+#if 0
+		while (trackTime < trackStartTime) {
+			trackTime += trackDuration;
+		}
+		while (trackTime >= trackEndTime) {
+			trackTime -= trackDuration;
+		}
+#else
+		trackTime = Animation::FMod(trackTime - trackStartTime, trackDuration) + trackStartTime;
+		if (trackTime < trackStartTime) {
+			trackTime += trackDuration;
+		}
+#endif
+	}
+	else {
+		if (trackTime < trackStartTime) {
+			trackTime = trackStartTime;
+		}
+		if (trackTime > trackEndTime) {
+			trackTime = trackEndTime;
+		}
+	}
+
+	// Given a time, find the current and next frame indices
+	unsigned int thisFrame = 0;
+	unsigned int nextFrame = 0;
+	{
+#if 0
+		for (int frameIndex = frameView.GetNumFrames() - 1; frameIndex >= 0; frameIndex -= 1) {
+			if (trackTime >= frameView.GetTime(frameIndex)) {
+				thisFrame = frameIndex;
+				break;
+			}
+		}
+#else
+		//Since time only ever increases, use a binary search
+		int l = 0;
+		int r = (int)numFrames;
+		while (l <= r) {
+			int m = l + (r - l) / 2;
+			float thisFrameTime = *frameView[m];
+
+			// Found at last frame
+			if (m == numFrames - 1) {
+				if (trackTime >= thisFrameTime) {
+					thisFrame = numFrames - 1;
+					break;
+				}
+			}
+			else {
+				if (trackTime >= thisFrameTime && trackTime <= *frameView[m + 1]) {
+					thisFrame = m;
+					break;
+				}
+
+			}
+
+			// target is greater, ignore left half
+			if (thisFrameTime < trackTime) {
+				l = m + 1;
+			}
+			// target is greater, ignore right half
+			else {
+				r = m - 1;
+			}
+		}
+#endif
+		if (!looping) {
+			if (trackTime <= trackStartTime) {
+				thisFrame = 0;
+				trackTime = trackStartTime;
+			}
+			if (trackTime >= trackEndTime) {
+				thisFrame = numFrames - 1;
+				trackTime = trackEndTime;
+			}
+		}
+
+		// Keep nextFrame valid
+		if (thisFrame >= numFrames - 1) {
+			thisFrame = numFrames - 2; // -2 so thisFrame + 1 is a valid index
+		}
+		nextFrame = thisFrame + 1;
+	}
+
+	// Find frame delta and interpolation t
+	float frameDelta = frameView.GetTime(nextFrame) - frameView.GetTime(thisFrame);
+	float t = 0.0f;
+	if (frameDelta > 0.0f) {
+		t = (trackTime - frameView.GetTime(thisFrame)) / frameDelta;
+	}
+
+	float result[4] = { 0.0f };
+	if (trackComponent == Component::Position) {
+		frameView.Vec3Interpolate(result, thisFrame, nextFrame, t);
+		out.SetRelativePosition(targetJointId, result);
+	}
+	else if (trackComponent == Component::Rotation) {
+		frameView.QuatInterpolate(result, thisFrame, nextFrame, t);
+		out.SetRelativeRotation(targetJointId, result);
+	}
+	else {
+		frameView.Vec3Interpolate(result, thisFrame, nextFrame, t);
+		out.SetRelativeScale(targetJointId, result);
+	}
 }
 
 void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize, const unsigned int* trackData, unsigned int trackSize) {
