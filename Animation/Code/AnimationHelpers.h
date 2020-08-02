@@ -3,12 +3,10 @@
 
 namespace Animation {
     namespace Internal {
-        void CombineTransforms(float* outPos, float* outRot, float* outScale, const float* posA, const float* rotA, const float* sclA, const float* posB, const float* rotB, const float* sclB); // TODO: Only called once in AnimationState.cpp, consider inlining
         void TransformToMatrix(float* outMatrix, const float* position, const float* rot, const float* scale); // TODO: Only called in 2 places in AnimationState.cpp, consider inlining
         void MultiplyMatrices(float* out, const float* a, const float* b); // TODO: This is mostly used in samples, move it to ISample and inline it
         void InvertMatrix(float* out, const float* in); // TODO: This is only used for generating the inv-bind-pose. Inline it.
         void MultiplyMat4Vec4(float* out, const float* mat, const float* vec); // TODO: Only used in AnimationSkin.cpp, consider inlining it
-
     }
     
     // TODO: These should not be global functions. Instead, create AnimationSerializer.h/cpp that will serialize and deserialize files.

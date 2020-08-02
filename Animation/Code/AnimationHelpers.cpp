@@ -1,49 +1,5 @@
 #include "AnimationHelpers.h"
 
-void Animation::Internal::CombineTransforms(float* outPos, float* outRot, float* outScale, const float* posA, const float* rotA, const float* sclA, const float* posB, const float* rotB, const float* sclB) {
-    float resultScale[3] = { 1.0f };
-    float resultPos[3] = { 0.0f };
-    float resultRot[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-
-    // vec * vec
-    resultScale[0] = sclA[0] * sclB[0];
-    resultScale[1] = sclA[1] * sclB[1];
-    resultScale[2] = sclA[2] * sclB[2];
-
-    // quat * quat
-    resultRot[0] =  rotA[0] * rotB[3] + rotA[1] * rotB[2] - rotA[2] * rotB[1] + rotA[3] * rotB[0];
-    resultRot[1] = -rotA[0] * rotB[2] + rotA[1] * rotB[3] + rotA[2] * rotB[0] + rotA[3] * rotB[1];
-    resultRot[2] =  rotA[0] * rotB[1] - rotA[1] * rotB[0] + rotA[2] * rotB[3] + rotA[3] * rotB[2];
-    resultRot[3] = -rotA[0] * rotB[0] - rotA[1] * rotB[1] - rotA[2] * rotB[2] + rotA[3] * rotB[3];
-
-    // vec * vec
-    resultPos[0] = sclA[0] * posB[0];
-    resultPos[1] = sclA[1] * posB[1];
-    resultPos[2] = sclA[2] * posB[2];
-
-    // quat * vec
-    float v[3] = { resultPos[0], resultPos[1], resultPos[2] };
-    float d1 = rotA[0] * v[0] + rotA[1] * v[1] + rotA[2] * v[2];
-    float d2 = rotA[0] * rotA[0] + rotA[1] * rotA[1] + rotA[2] * rotA[2];
-
-    resultPos[0] = (rotA[0] * 2.0f * d1) + (v[0] * (rotA[3] * rotA[3] - d2)) + ((rotA[1] * v[2] - rotA[2] * v[1]) * 2.0f * rotA[3]);
-    resultPos[1] = (rotA[1] * 2.0f * d1) + (v[1] * (rotA[3] * rotA[3] - d2)) + ((rotA[2] * v[0] - rotA[0] * v[2]) * 2.0f * rotA[3]);
-    resultPos[2] = (rotA[2] * 2.0f * d1) + (v[2] * (rotA[3] * rotA[3] - d2)) + ((rotA[0] * v[1] - rotA[1] * v[0]) * 2.0f * rotA[3]);
-
-    // vec + vec
-    resultPos[0] = posA[0] + resultPos[0];
-    resultPos[1] = posA[1] + resultPos[1];
-    resultPos[2] = posA[2] + resultPos[2];
-
-    // Copy data out
-    for (int i = 0; i < 3; ++i) {
-        outScale[i] = resultScale[i];
-        outPos[i] = resultPos[i];
-        outRot[i] = resultRot[i];
-    }
-    outRot[3] = resultRot[3];
-}
-
 void Animation::Internal::TransformToMatrix(float* outMatrix, const float* position, const float* rot, const float* scale) {
     // First, extract the rotation basis of the transform
     float v[3] = { 1.0f, 0.0f, 0.0f };

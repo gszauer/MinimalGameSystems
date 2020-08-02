@@ -177,7 +177,6 @@ void Animation::State::GetRelativeTransform(unsigned int index, float* outPos, f
 
 void Animation::State::GetAbsoluteTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const {
     float parentPos[3], parentRot[4], parentScl[3];
-
     GetRelativePosition(index, outPos);
     GetRelativeRotation(index, outRot);
     GetRelativeScale(index, outScl);
@@ -187,11 +186,50 @@ void Animation::State::GetAbsoluteTransform(unsigned int index, float* outPos, f
         GetRelativeRotation((unsigned int)parent, parentRot);
         GetRelativeScale((unsigned int)parent, parentScl);
 
-        Animation::Internal::CombineTransforms(
-            outPos, outRot, outScl,
-            parentPos, parentRot, parentScl,
-            outPos, outRot, outScl
-        );
+        // Combine the two transforms, store result in out
+        {
+            float resultScale[3] = { 1.0f };
+            float resultPos[3] = { 0.0f };
+            float resultRot[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+            // vec * vec
+            resultScale[0] = parentScl[0] * outScl[0];
+            resultScale[1] = parentScl[1] * outScl[1];
+            resultScale[2] = parentScl[2] * outScl[2];
+
+            // quat * quat
+            resultRot[0] = parentRot[0] * outRot[3] + parentRot[1] * outRot[2] - parentRot[2] * outRot[1] + parentRot[3] * outRot[0];
+            resultRot[1] = -parentRot[0] * outRot[2] + parentRot[1] * outRot[3] + parentRot[2] * outRot[0] + parentRot[3] * outRot[1];
+            resultRot[2] = parentRot[0] * outRot[1] - parentRot[1] * outRot[0] + parentRot[2] * outRot[3] + parentRot[3] * outRot[2];
+            resultRot[3] = -parentRot[0] * outRot[0] - parentRot[1] * outRot[1] - parentRot[2] * outRot[2] + parentRot[3] * outRot[3];
+
+            // vec * vec
+            resultPos[0] = parentScl[0] * outPos[0];
+            resultPos[1] = parentScl[1] * outPos[1];
+            resultPos[2] = parentScl[2] * outPos[2];
+
+            // quat * vec
+            float v[3] = { resultPos[0], resultPos[1], resultPos[2] };
+            float d1 = parentRot[0] * v[0] + parentRot[1] * v[1] + parentRot[2] * v[2];
+            float d2 = parentRot[0] * parentRot[0] + parentRot[1] * parentRot[1] + parentRot[2] * parentRot[2];
+
+            resultPos[0] = (parentRot[0] * 2.0f * d1) + (v[0] * (parentRot[3] * parentRot[3] - d2)) + ((parentRot[1] * v[2] - parentRot[2] * v[1]) * 2.0f * parentRot[3]);
+            resultPos[1] = (parentRot[1] * 2.0f * d1) + (v[1] * (parentRot[3] * parentRot[3] - d2)) + ((parentRot[2] * v[0] - parentRot[0] * v[2]) * 2.0f * parentRot[3]);
+            resultPos[2] = (parentRot[2] * 2.0f * d1) + (v[2] * (parentRot[3] * parentRot[3] - d2)) + ((parentRot[0] * v[1] - parentRot[1] * v[0]) * 2.0f * parentRot[3]);
+
+            // vec + vec
+            resultPos[0] = parentPos[0] + resultPos[0];
+            resultPos[1] = parentPos[1] + resultPos[1];
+            resultPos[2] = parentPos[2] + resultPos[2];
+
+            // Copy data out
+            for (int i = 0; i < 3; ++i) {
+                outScl[i] = resultScale[i];
+                outPos[i] = resultPos[i];
+                outRot[i] = resultRot[i];
+            }
+            outRot[3] = resultRot[3];
+        }
     }
 
     // It might be a good idea to normalize the resulting rotation here, depending on the depth of the 
