@@ -57,7 +57,7 @@ namespace Animation {
         void SetLabel(const char* label);
 
         float Sample(State& out, float time, bool looping) const;
-        float SampleTrack(State& out, unsigned int trackIndex, float time, bool looping) const;
+        float SampleTrack(float* out, unsigned int trackIndex, float time, bool looping) const;
         
         void SerializeToString(char* output) const;
         void DeSerializeFromString(const char* input);

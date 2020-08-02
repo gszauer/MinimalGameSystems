@@ -314,14 +314,28 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 	// Loop trough all tracks
 	unsigned int numTracks = mTrackDataSize / 4; // 4 = track stride
 	for (unsigned int trackIndex = 0; trackIndex < numTracks; ++trackIndex) {
-		SampleTrack(out, trackIndex, clipTime, looping);
+		float result[4];
+		
+		SampleTrack(result, trackIndex, clipTime, looping);
+
+		unsigned int targetJointId = mTrackData[trackIndex + 0];
+		Animation::Data::Component trackComponent = (Animation::Data::Component)mTrackData[trackIndex + 1];
+		if (trackComponent == Component::Position) {
+			out.SetRelativePosition(targetJointId, result);
+		}
+		else if (trackComponent == Component::Rotation) {
+			out.SetRelativeRotation(targetJointId, result);
+		}
+		else {
+			out.SetRelativeScale(targetJointId, result);
+		}
 	}
 
 	// Return time relative to valid play range
 	return clipTime;
 }
 
-float Animation::Data::SampleTrack(State& out, unsigned int trackIndex, float time, bool looping) const {
+float Animation::Data::SampleTrack(float* out, unsigned int trackIndex, float time, bool looping) const {
 	trackIndex = trackIndex * 4; // 4 = track stride
 
 	unsigned int targetJointId = mTrackData[trackIndex + 0];
@@ -440,18 +454,14 @@ float Animation::Data::SampleTrack(State& out, unsigned int trackIndex, float ti
 		t = (trackTime - frameView.GetTime(thisFrame)) / frameDelta;
 	}
 
-	float result[4] = { 0.0f };
 	if (trackComponent == Component::Position) {
-		frameView.Vec3Interpolate(result, thisFrame, nextFrame, t);
-		out.SetRelativePosition(targetJointId, result);
+		frameView.Vec3Interpolate(out, thisFrame, nextFrame, t);
 	}
 	else if (trackComponent == Component::Rotation) {
-		frameView.QuatInterpolate(result, thisFrame, nextFrame, t);
-		out.SetRelativeRotation(targetJointId, result);
+		frameView.QuatInterpolate(out, thisFrame, nextFrame, t);
 	}
 	else {
-		frameView.Vec3Interpolate(result, thisFrame, nextFrame, t);
-		out.SetRelativeScale(targetJointId, result);
+		frameView.Vec3Interpolate(out, thisFrame, nextFrame, t);
 	}
 }
 

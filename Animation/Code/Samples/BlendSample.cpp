@@ -1,7 +1,23 @@
-#include "SkinnedSample.h"
+#include "BlendSample.h"
+#include "../AnimationBlend.h"
+#include "../AnimationBuilder.h"
 #include <iostream>
 
-void SkinnedSample::LoadModel() {
+namespace BlendSampleInternal {
+	static Animation::Builder::Frame MakeFrame(float time, float in, float value, float out) {
+		Animation::Builder::Frame result;
+
+		result.time = time;
+		result.in[0] = in;
+		result.value[0] = value;
+		result.out[0] = out;
+		return result;
+	}
+}
+
+using BlendSampleInternal::MakeFrame;
+
+void BlendSample::LoadModel() {
 	char* fileContent = ReadFileContents("Assets/womanMesh.txt");
 	const char* input = fileContent;
 
@@ -64,48 +80,54 @@ void SkinnedSample::LoadModel() {
 	mSkinned.resize(mVertices.size() + mNormals.size());
 }
 
-void SkinnedSample::LoadAnimation() {
+void BlendSample::LoadAnimation() {
 	char* input = ReadFileContents("Assets/bindState.txt");
 	mBindPose.DeSerializeFromString(input);
 	free(input);
 
 	input = ReadFileContents("Assets/restState.txt");
 	mRestPose.DeSerializeFromString(input);
-	mAnimatedPose = mRestPose;
+	mAnimatedPoseA = mRestPose;
+	mAnimatedPoseB = mRestPose;
+	mBlendedPose = mRestPose;
 	free(input);
 
 	input = ReadFileContents("Assets/walkingData.txt");
-	mAniamtionData.DeSerializeFromString(input);
+	mAniamtionDataA.DeSerializeFromString(input);
 	free(input);
 
-	mPlayTime = 0.0f;
+	input = ReadFileContents("Assets/runningData.txt");
+	mAniamtionDataB.DeSerializeFromString(input);
+	free(input);
+
+	mPlayTimeA = 0.0f;
+	mPlayTimeB = 0.0f;
+
 	m_InvBindPosePalette.resize(mBindPose.Size());
 	m_AnimatedPosePalette.resize(mBindPose.Size());
-	
+
 	mBindPose.ToMatrixPalette(m_InvBindPosePalette[0].v, mBindPose.Size() * 16);
 
-#if 1
 	for (unsigned int i = 0; i < mBindPose.Size(); ++i) {
 		Animation::Internal::InvertMatrix(m_InvBindPosePalette[i].v, m_InvBindPosePalette[i].v);
 	}
-#else
-	input = ReadFileContents("Assets/inverseBindPose.txt");
-	unsigned int numMatrixElements = 0;
-	const char* reader = input;
-	reader = Animation::ReadUInt(reader, numMatrixElements);
-	unsigned int numMatrices = numMatrixElements / 16;
 
-	m_InvBindPosePalette.resize(numMatrices);
-	float* write = m_InvBindPosePalette[0].v;
-	for (int i = 0; i < numMatrixElements; ++i) {
-		reader = Animation::ReadFloat(reader, *write);
-		write += 1;
-	}
-	free(input);
-#endif
+	Animation::Builder::Track blendTrack;
+	blendTrack.SetJointID(0);
+	blendTrack.SetTarget(Animation::Data::Component::Rotation);
+	blendTrack.PushFrame(MakeFrame(0, 0, 0, 0));
+	blendTrack.PushFrame(MakeFrame(0.4f, 0, 0, 0));
+	blendTrack.PushFrame(MakeFrame(0.6f, 0, 1.0f, 0));
+	blendTrack.PushFrame(MakeFrame(1.6f, 0, 1.0f, 0));
+	blendTrack.PushFrame(MakeFrame(2.0f, 0, 0, 0));
+	blendTrack.PushFrame(MakeFrame(0, 0, 0, 0));
+	Animation::Builder::Clip blendCurve;
+	blendCurve.SetName("Blend Time");
+	blendCurve.PushTrack(blendTrack);
+	mBlendCurve = Animation::Builder::Convert(blendCurve);
 }
 
-void SkinnedSample::InitDescriptors() {
+void BlendSample::InitDescriptors() {
 	mReadPositions.Set(mVertices[0].v, (unsigned int)mVertices.size() * 3, 0, 0);
 	mReadNormals.Set(mNormals[0].v, (unsigned int)mNormals.size() * 3, 0, 0);
 	mReadInfluences.Set(mInfluences[0].v, (unsigned int)mInfluences.size() * 4, 0, 0);
@@ -125,7 +147,7 @@ void SkinnedSample::InitDescriptors() {
 	}
 }
 
-void SkinnedSample::InitOpenGL() {
+void BlendSample::InitOpenGL() {
 	mOpenGLInitialized = false;
 
 	if (sizeof(unsigned int) != sizeof(float)) {
@@ -179,7 +201,7 @@ void SkinnedSample::InitOpenGL() {
 	glBindVertexArray(mCharacterVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mCharacterStaticVBO);
-	glBufferData(GL_ARRAY_BUFFER, bytes, &staticBufferData[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, bytes, &staticBufferData[0], GL_STATIC_DRAW); // TODO: Not here, but glBufferData should be replaced with bufferSubData somewhere (and in skinned and skel)
 
 	bytes = 0;
 	bytes += (GLsizei)(sizeof(float) * mVertices.size() * 3);
@@ -204,7 +226,7 @@ void SkinnedSample::InitOpenGL() {
 	mCharacterShader = CompileShaders(v_source, f_source);
 	free(v_source);
 	free(f_source);
-	
+
 	glUseProgram(mCharacterShader);
 
 	mCharacterUniformVP = glGetUniformLocation(mCharacterShader, "viewProjection");
@@ -239,81 +261,47 @@ void SkinnedSample::InitOpenGL() {
 	mOpenGLInitialized = true;
 }
 
-void SkinnedSample::Initialize() {
+void BlendSample::Initialize() {
 	LoadModel();
 	LoadAnimation();
 	InitOpenGL();
 	InitDescriptors();
 }
 
-void SkinnedSample::Update(float dt) {
+void BlendSample::Update(float dt) {
 	if (!mOpenGLInitialized) {
 		return;
 	}
 
-#if	0
-	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime + dt, true);
-	mAnimatedPose.ToMatrixPalette(m_AnimatedPosePalette[0].v, mAnimatedPose.Size());
+	mPlayTimeA = mAniamtionDataA.Sample(mAnimatedPoseA, mPlayTimeA + dt, true);
+	mPlayTimeB = mAniamtionDataB.Sample(mAnimatedPoseB, mPlayTimeB + dt, true);
 
-	for (unsigned int i = 0; i < m_Vertices.size(); ++i) {
-		vec4 vertex(m_Vertices[i].x, m_Vertices[i].y, m_Vertices[i].z, 1.0f);
-		vec4 normal(m_Normals[i].x, m_Normals[i].y, m_Normals[i].z, 0.0f);
+	float result[4] = { 0.0f };
+	mBlendTime = mBlendCurve.SampleTrack(result, mBlendTime, 0.0f, false);
+	result[0] = 0.0f;
+	Animation::Blend(mBlendedPose, mAnimatedPoseA, mAnimatedPoseB, result[0]);
 
-		mat4 skin;
-		skin.xx = skin.yy = skin.zz = skin.tw = 0.0f;
+	unsigned int numJoints = mBlendedPose.Size();
+	mBlendedPose.ToMatrixPalette(m_AnimatedPosePalette[0].v, numJoints);
 
-		for (int j = 0; j < 4; ++j) {
-			unsigned int influence = m_Influences[i].v[j];
-			float weight = m_Weights[i].v[j];
-
-			if (weight > 0.0f) {
-				float matrix[16] = { 0.0f };
-				Animation::Internal::MultiplyMatrices(matrix, m_AnimatedPosePalette[influence].v, m_InvBindPosePalette[influence].v);
-
-				for (int k = 0; k < 16; ++k) {
-					skin.v[k] += matrix[k] * weight;
-				}
-			}
-		}
-
-		float result[4] = { 0.0f };
-		Animation::Internal::MultiplyMat4Vec4(result, skin, vertex);
-		mSkinned[i * 2 + 0] = vec3(result[0], result[1], result[2]);
-		Animation::Internal::MultiplyMat4Vec4(result, skin, normal);
-		mSkinned[i * 2 + 1] = vec3(result[0], result[1], result[2]);
-	}
-#else
-	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime + dt, true);
-
-	unsigned int numJoints = mAnimatedPose.Size();
-	mAnimatedPose.ToMatrixPalette(m_AnimatedPosePalette[0].v, numJoints);
-
-#if 0
-	for (unsigned int i = 0; i < numJoints; ++i) {
-		Animation::Internal::MultiplyMatrices(m_AnimatedPosePalette[i].v, m_AnimatedPosePalette[i].v, m_InvBindPosePalette[i].v);
-	}
-	Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, m_AnimatedPosePalette[0].v, mReadInfluences, mReadWeights);
-	Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, m_AnimatedPosePalette[0].v, mReadInfluences, mReadWeights);
-#else
 	Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, m_AnimatedPosePalette[0].v, m_InvBindPosePalette[0].v, mReadInfluences, mReadWeights);
 	Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, m_AnimatedPosePalette[0].v, m_InvBindPosePalette[0].v, mReadInfluences, mReadWeights);
-#endif
-#endif
 }
 
-void SkinnedSample::Render(float aspect) {
+void BlendSample::Render(float aspect) {
 	if (!mOpenGLInitialized) {
 		return;
 	}
 
 	mat4 model, view, projection, mvp, viewProjection;
+	model.position = vec4(3, 0, 0, 1);
 	view = lookAt(vec3(0.0f, 7.0f, 5.0f), vec3(0.0f, 3.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 	projection = perspective(60.0f, aspect, 0.01f, 1000.0f);
 	mvp = projection * view * model;
 	viewProjection = projection * view;
 
 	glEnable(GL_DEPTH_TEST);
-	
+
 	glBindVertexArray(mCharacterVAO);
 
 	glUseProgram(mCharacterShader);
@@ -354,7 +342,7 @@ void SkinnedSample::Render(float aspect) {
 	glBindVertexArray(0);
 }
 
-void SkinnedSample::Shutdown() {
+void BlendSample::Shutdown() {
 	mVertices.clear();
 	mNormals.clear();
 	mSkinned.clear();
@@ -364,9 +352,12 @@ void SkinnedSample::Shutdown() {
 	mIndices.clear();
 	m_InvBindPosePalette.clear();
 	m_AnimatedPosePalette.clear();
-	mPlayTime = 0.0f;
-	mAniamtionData = Animation::Data();
-	mAnimatedPose = Animation::State();
+	mAniamtionDataA = Animation::Data();
+	mAniamtionDataB = Animation::Data();
+	mBlendCurve = Animation::Data();
+	mAnimatedPoseA = Animation::State();
+	mAnimatedPoseB = Animation::State();
+	mBlendedPose = Animation::State();
 	mRestPose = Animation::State();
 	mBindPose = Animation::State();
 
@@ -374,7 +365,7 @@ void SkinnedSample::Shutdown() {
 		return;
 	}
 
-	glDeleteTextures (1, &mCharacterTexture);
+	glDeleteTextures(1, &mCharacterTexture);
 	glDeleteBuffers(1, &mCharacterIBO);
 	glDeleteBuffers(1, &mCharacterStaticVBO);
 	glDeleteBuffers(1, &mCharacterDynamicVBO);

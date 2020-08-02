@@ -5,12 +5,12 @@
 
 class SkinnedSample : public ISample {
 protected: // Raw model data. mSkinned is a write buffer, it contains interleaved vertex and normal data
-	std::vector<vec3> m_Vertices;
-	std::vector<vec3> m_Normals;
-	std::vector<vec3> m_Skinned;
-	std::vector<vec2> m_TexCoords;
-	std::vector<uivec4> m_Influences;
-	std::vector<vec4> m_Weights;
+	std::vector<vec3> mVertices;
+	std::vector<vec3> mNormals;
+	std::vector<vec3> mSkinned;
+	std::vector<vec2> mTexCoords;
+	std::vector<uivec4> mInfluences;
+	std::vector<vec4> mWeights;
 	std::vector<unsigned int> mIndices;
 protected: // Animation data. the two vectors are flat matrix arrays, elements = num matrices * 16
 	Animation::Data mAniamtionData;
@@ -49,7 +49,6 @@ private:
 	void LoadAnimation();
 	void InitDescriptors();
 	void InitOpenGL();
-	void DrawAnimatedModel(const mat4& viewProjection, const mat4& model);
 public:
 	void Initialize();
 	void Update(float dt);

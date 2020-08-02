@@ -32,12 +32,20 @@ bool Animation::Blend(State& target, const State& a, const State& b, float t) {
 
 		a.GetRelativeRotation(joint, value_a);
 		b.GetRelativeRotation(joint, value_b);
+		float neighborhood = value_a[0] * value_b[0] + value_a[1] * value_b[1] + value_a[2] * value_b[2] + value_a[3] * value_b[3];
+		if (neighborhood < 0.0f) {
+			value_b[0] = -value_b[0];
+			value_b[1] = -value_b[1];
+			value_b[2] = -value_b[2];
+			value_b[3] = -value_b[3];
+		}
+
 		blend[0] = value_a[0] + (value_b[0] - value_a[0]) * t;
 		blend[1] = value_a[1] + (value_b[1] - value_a[1]) * t;
 		blend[2] = value_a[2] + (value_b[2] - value_a[2]) * t;
 		blend[3] = value_a[3] + (value_b[3] - value_a[3]) * t;
 		float lenSquared = blend[0] * blend[0] + blend[1] * blend[1] + blend[2] * blend[2] + blend[3] * blend[3];
-		if (!Animation::FloatCompare(lenSquared, 0.0f)) {
+		if (!Animation::FloatCompare(lenSquared, 1.0f)) {
 			float inverseLength = Animation::InvSqrt(lenSquared);
 			blend[0] *= inverseLength;
 			blend[1] *= inverseLength;

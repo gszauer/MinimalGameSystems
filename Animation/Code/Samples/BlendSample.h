@@ -1,32 +1,31 @@
 #ifndef _H_BLENDSAMPLE_
-#define _H_BLEND_SAMPLE_
-
+#define _H_BLENDSAMPLE_
 
 #include "ISample.h"
 
-// TODO: Migrate samples over to common data structures first
-
 class BlendSample : public ISample {
 protected: // Raw model data. mSkinned is a write buffer, it contains interleaved vertex and normal data
-	std::vector<float> mVertices;
-	std::vector<float> mNormals;
-	std::vector<float> mSkinned;
-	std::vector<float> mTexCoords;
-	std::vector<unsigned int> mInfluences;
-	std::vector<float> mWeights;
+	std::vector<vec3> mVertices;
+	std::vector<vec3> mNormals;
+	std::vector<vec3> mSkinned;
+	std::vector<vec2> mTexCoords;
+	std::vector<uivec4> mInfluences;
+	std::vector<vec4> mWeights;
 	std::vector<unsigned int> mIndices;
 protected: // Animation data. the two vectors are flat matrix arrays, elements = num matrices * 16
 	Animation::Data mAniamtionDataA;
-	Animation::State mAnimatedPoseA;
 	Animation::Data mAniamtionDataB;
+	Animation::Data mBlendCurve;
+	Animation::State mAnimatedPoseA;
 	Animation::State mAnimatedPoseB;
-	Animation::State mAnimatedPose;
+	Animation::State mBlendedPose;
 	Animation::State mRestPose;
 	Animation::State mBindPose;
-	float mPlayTime = 0.0f;
-	Animation::Data mBlendCurve;
-	std::vector<float> mInvBindPosePalette;
-	std::vector<float> mAnimatedPosePalette;
+	float mPlayTimeA = 0.0f;
+	float mPlayTimeB = 0.0f;
+	float mBlendTime = 0.0f;
+	std::vector<mat4> m_InvBindPosePalette;
+	std::vector<mat4> m_AnimatedPosePalette;
 protected: // The animation system works trough descriptors to allow for things like interleaved arrays
 	// Read positions points to mVertices, writePositions points to mSkinnedVertices. The actual animation
 	// API doesn't care how the underlying data is stored
@@ -56,7 +55,6 @@ private:
 	void LoadAnimation();
 	void InitDescriptors();
 	void InitOpenGL();
-	void DrawAnimatedModel(float* viewProjection, float* model);
 public:
 	void Initialize();
 	void Update(float dt);
@@ -64,4 +62,4 @@ public:
 	void Shutdown();
 };
 
-#endif // !_H_BLENDSAMPLE_
+#endif

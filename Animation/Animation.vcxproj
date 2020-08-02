@@ -40,6 +40,7 @@
     <ClCompile Include="Code\AnimationHelpers.cpp" />
     <ClCompile Include="Code\AnimationSkin.cpp" />
     <ClCompile Include="Code\AnimationState.cpp" />
+    <ClCompile Include="Code\Samples\BlendSample.cpp" />
     <ClCompile Include="Code\Samples\CurveSample.cpp" />
     <ClCompile Include="Code\Samples\glad.c" />
     <ClCompile Include="Code\Samples\ISample.cpp" />

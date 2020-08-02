@@ -41,6 +41,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 #include "SkinnedSample.h"
 #include "SkeletonSample.h"
 #include "CurvesSample.h"
+#include "BlendSample.h"
 #include "microui.h"
 
 #include <vector>
@@ -147,7 +148,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	gCurveSample = new CurvesSample();
 	gSkeletonSample = new SkeletonSample();
 	gSkinSample = new SkinnedSample();
-	gBlendSample = 0;
+	gBlendSample = new BlendSample();
 	WNDCLASSEX wndclass;
 	wndclass.cbSize = sizeof(WNDCLASSEX);
 	wndclass.style = CS_HREDRAW | CS_VREDRAW;

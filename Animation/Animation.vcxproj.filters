@@ -101,5 +101,8 @@
     <ClCompile Include="Code\Samples\WinMain.cpp">
       <Filter>Source Files\Samples</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Samples\BlendSample.cpp">
+      <Filter>Source Files\Samples</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
