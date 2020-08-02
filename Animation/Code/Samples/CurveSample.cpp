@@ -8,7 +8,7 @@ namespace CurveSampleInternal {
 		Animation::Builder::Frame result;
 
 		result.time = time;
-		
+
 		result.in[0] = in.x;
 		result.in[1] = in.y;
 		result.in[2] = in.z;
@@ -21,6 +21,16 @@ namespace CurveSampleInternal {
 		result.out[1] = out.y;
 		result.out[2] = out.z;
 
+		return result;
+	}
+
+	static Animation::Builder::Frame MakeFrame(float time, float in, float value, float out) {
+		Animation::Builder::Frame result;
+
+		result.time = time;
+		result.in[0] = in;
+		result.value[0] = value;
+		result.out[0] = out;
 		return result;
 	}
 }
@@ -42,39 +52,9 @@ void CurvesSample::Initialize() {
 	Animation::Builder::Clip clip;
 	clip.PushTrack(track);
 
-	// TODO: Convert to better frames
-	frame1.time = 0.25f;
-	frame1.in[0] = Animation::Builder::StepTangent;
-	frame1.value[0] = 0.25f;
-	frame1.out[0] = Animation::Builder::StepTangent;
-	frame1.in[1] = 0.0f;
-	frame1.value[1] = 0.5f;
-	frame1.out[1] = 0.0f;
-	frame1.in[2] = -4.0f;
-	frame1.value[2] = 0.0f;
-	frame1.out[2] = 4.0f;
-
-	frame2.time = 0.5f;
-	frame2.in[0] = Animation::Builder::StepTangent;
-	frame2.value[0] = 0.5f;
-	frame2.out[0] = Animation::Builder::StepTangent;
-	frame2.in[1] = 0.0f;
-	frame2.value[1] = 0.75f;
-	frame2.out[1] = 0.0f;
-	frame2.in[2] = 4.0f;
-	frame2.value[2] = 1.0f;
-	frame2.out[2] = -4.0f;
-
-	frame3.time = 0.75f;
-	frame3.in[0] = Animation::Builder::StepTangent;
-	frame3.value[0] = 0.25f;
-	frame3.out[0] = Animation::Builder::StepTangent;
-	frame3.in[1] = 0.0f;
-	frame3.value[1] = 0.5f;
-	frame3.out[1] = 0.0f;
-	frame3.in[2] = -4.0f;
-	frame3.value[2] = 0.0f;
-	frame3.out[2] = 4.0f;
+	frames[0] = MakeFrame(0.25f, vec3(StepTangent, 0.0f, -4.0f), vec3(0.25f, 0.5f, 0.0f), vec3(StepTangent, 0.0f, 4.0f));
+	frames[1] = MakeFrame(0.5f, vec3(StepTangent, 0.0f, 4.0f), vec3(0.5f, 0.75f, 1.0f), vec3(StepTangent, 0.0f, -4.0f));
+	frames[2] = MakeFrame(0.75f, vec3(StepTangent, 0.0f, -4.0f), vec3(0.25f, 0.5f, 0.0f), vec3(StepTangent, 0.0f, 4.0f));
 
 	track = Animation::Builder::Track();
 	track.SetTarget(Animation::Data::Component::Position);
@@ -83,62 +63,19 @@ void CurvesSample::Initialize() {
 
 	clip.PushTrack(track);
 
-	frame1 = Animation::Builder::Frame();
-	frame2 = Animation::Builder::Frame();
-	frame3 = Animation::Builder::Frame();
-	Animation::Builder::Frame frame4, frame5, frame6, frame7, frame0;
+	frames[0] = MakeFrame(0.0f, 0.0f, 1.0f, -8.286444f);
+	frames[1] = MakeFrame(0.05976868f, -8.286444f, 0.5047302f, 5.0676f);
+	frames[2] = MakeFrame(0.1444702f, 5.0676f, 0.9339638f, -22.03639f);
+	frames[3] = MakeFrame(0.3136442f, 8.614264f, 0.4386729f, 11.181f);
+	frames[4] = MakeFrame(0.4447021f, -0.8708439f, 0.728775f, 0.0f);
+	frames[5] = MakeFrame(0.6016647f, StepTangent, 0.2806604f, 0.0f);
+	frames[6] = MakeFrame(0.7348642f, StepTangent, 0.7429142f, 0.0f);
+	frames[7] = MakeFrame(1.0f, 0.0f, 0.0f, 0.0f);
+
 	track = Animation::Builder::Track();
-	track.SetJointID(2);
-
-	frame0.time = 0.0f;
-	frame0.in[0] = 0.0f;
-	frame0.value[0] = 1.0f;
-	frame0.out[0] = -8.286444f;
-
-	frame1.time = 0.05976868f;
-	frame1.in[0] = -8.286444f;
-	frame1.value[0] = 0.5047302f;
-	frame1.out[0] = 5.0676f;
-
-	frame2.time = 0.1444702f;
-	frame2.in[0] = 5.0676f;
-	frame2.value[0] = 0.9339638f;
-	frame2.out[0] = -22.03639f;
-
-	frame3.time = 0.3136442f;
-	frame3.in[0] = 8.614264f;
-	frame3.value[0] = 0.4386729f;
-	frame3.out[0] = 11.181f;
-
-	frame4.time = 0.4447021f;
-	frame4.in[0] = -0.8708439f;
-	frame4.value[0] = 0.728775f;
-	frame4.out[0] = 0.0f;
-
-	frame5.time = 0.6016647f;
-	frame5.in[0] = Animation::Data::StepLimit;
-	frame5.value[0] = 0.2806604f;
-	frame5.out[0] = 0.0f;
-
-	frame6.time = 0.7348642f;
-	frame6.in[0] = Animation::Data::StepLimit;
-	frame6.value[0] = 0.7429142f;
-	frame6.out[0] = 0.0f;
-
-	frame7.time = 1.0f;
-	frame7.in[0] = 0.0f;
-	frame7.value[0] = 0.0f;
-	frame7.out[0] = 0.0f;
-
 	track.SetTarget(Animation::Data::Component::Position);
-	track.PushFrame(frame0);
-	track.PushFrame(frame1);
-	track.PushFrame(frame2);
-	track.PushFrame(frame3);
-	track.PushFrame(frame4);
-	track.PushFrame(frame5);
-	track.PushFrame(frame6);
-	track.PushFrame(frame7);
+	track.SetJointID(2);
+	track.PushFrames(&frames[0], 8);
 
 	clip.PushTrack(track);
 
@@ -159,7 +96,7 @@ void CurvesSample::Initialize() {
 	vec3 green = vec3(0, 1, 0);
 	vec3 blue = vec3(0, 0, 1);
 	vec3 yellow = vec3(1, 1, 0);
-	vec3 magenta = vec3(0, 1, 1);
+	vec3 cyan = vec3(0, 1, 1);
 
 	for (unsigned int i = 0; i < 200 - 1; ++i) {
 		float this_t = (float)i / 199.0f;
@@ -188,6 +125,7 @@ void CurvesSample::Initialize() {
 
 		thisState.GetAbsolutePosition(2, thisPosition);
 		nextState.GetAbsolutePosition(2, nextPosition);
+
 		verts.push_back(vec3(this_t * 0.5f + 0.5f, thisPosition[0] * 0.5f, 0.0f));
 		verts.push_back(yellow);
 		verts.push_back(vec3(next_t * 0.5f + 0.5f, nextPosition[0] * 0.5f, 0.0f));
@@ -198,6 +136,7 @@ void CurvesSample::Initialize() {
 
 		thisState.GetAbsolutePosition(1, thisPosition);
 		nextState.GetAbsolutePosition(1, nextPosition);
+
 		verts.push_back(vec3(this_t * 0.5f, thisPosition[0] * 0.5f + 0.5f, 0.0f));
 		verts.push_back(red);
 		verts.push_back(vec3(next_t * 0.5f, nextPosition[0] * 0.5f + 0.5f, 0.0f));
@@ -213,30 +152,14 @@ void CurvesSample::Initialize() {
 	}
 
 	// Draw borders
-	verts.push_back(vec3(0.0f, 0.0f, 0.0f));
-	verts.push_back(magenta);
-	verts.push_back(vec3(1.0f, 0.0f, 0.0f));
-	verts.push_back(magenta);
 	verts.push_back(vec3(0.0f, 0.5f, 0.0f));
-	verts.push_back(magenta);
+	verts.push_back(cyan);
 	verts.push_back(vec3(1.0f, 0.5f, 0.0f));
-	verts.push_back(magenta);
-	verts.push_back(vec3(0.0f, 1.0f, 0.0f));
-	verts.push_back(magenta);
-	verts.push_back(vec3(1.0f, 1.0f, 0.0f));
-	verts.push_back(magenta);
-	verts.push_back(vec3(0.0f, 0.0f, 0.0f));
-	verts.push_back(magenta);
-	verts.push_back(vec3(0.0f, 1.0f, 0.0f));
-	verts.push_back(magenta);
+	verts.push_back(cyan);
 	verts.push_back(vec3(0.5f, 0.0f, 0.0f));
-	verts.push_back(magenta);
+	verts.push_back(cyan);
 	verts.push_back(vec3(0.5f, 1.0f, 0.0f));
-	verts.push_back(magenta);
-	verts.push_back(vec3(1.0f, 0.0f, 0.0f));
-	verts.push_back(magenta);
-	verts.push_back(vec3(1.0f, 1.0f, 0.0f));
-	verts.push_back(magenta);
+	verts.push_back(cyan);
 
 	mNumVerts = (unsigned int)verts.size() / 2;
 
@@ -271,9 +194,7 @@ void CurvesSample::Initialize() {
 	glBindVertexArray(0);
 }
 
-void CurvesSample::Update(float dt) {
-
-}
+void CurvesSample::Update(float dt) { }
 
 void CurvesSample::Render(float aspect) {
 	mat4 mvp, view, projection;

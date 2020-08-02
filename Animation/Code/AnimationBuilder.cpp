@@ -1,8 +1,11 @@
 #include "AnimationBuilder.h"
 #include "AnimationHelpers.h"
 
-static int Animation::Builder::StepTangent = Animation::Data::StepLimit * 2.0f;
-
+namespace Animation {
+	namespace Builder {
+		int StepTangent = Animation::Data::StepLimit * 2.0f;
+	}
+}
 Animation::Builder::Frame::Frame() {
 	time = 0.0f;
 	in[0] = in[1] = in[2] = in[3] = 0.0f;

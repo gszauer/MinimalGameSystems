@@ -6,7 +6,7 @@
 
 namespace Animation {
 	namespace Builder {
-		static int StepTangent;
+		extern int StepTangent;
 
 		struct Frame {
 			float time;
