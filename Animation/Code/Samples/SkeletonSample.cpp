@@ -22,7 +22,8 @@ void SkeletonSample::DrawSkeleton(const Animation::State& state, const mat4& mvp
 	glBindBuffer(GL_ARRAY_BUFFER, mSkeletonVBO);
 
 	glEnableVertexAttribArray(mVertexAttrib);
-	glBufferData(GL_ARRAY_BUFFER, m_Skinned.size() * 3 * sizeof(float), m_Skinned[0].v, GL_STREAM_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, m_Skinned.size() * 3 * sizeof(float), m_Skinned[0].v, GL_STREAM_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, m_Skinned.size() * 3 * sizeof(float), m_Skinned[0].v);
 	glVertexAttribPointer(mVertexAttrib, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
 	glUniformMatrix4fv(mMVPUniform, 1, GL_FALSE, mvp.v);
@@ -70,6 +71,10 @@ void SkeletonSample::Initialize() {
 
 	glGenVertexArrays(1, &mSkeletonVAO);
 	glGenBuffers(1, &mSkeletonVBO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mSkeletonVBO);
+	glBufferData(GL_ARRAY_BUFFER, m_Skinned.size() * 3 * sizeof(float), m_Skinned[0].v, GL_STREAM_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	char* v_shader = ReadFileContents("Assets/skel_vert.txt");
 	char* f_shader = ReadFileContents("Assets/skel_frag.txt");

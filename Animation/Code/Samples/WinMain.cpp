@@ -65,90 +65,22 @@ typedef const char* (WINAPI* PFNWGLGETEXTENSIONSSTRINGEXTPROC) (void);
 typedef BOOL(WINAPI* PFNWGLSWAPINTERVALEXTPROC) (int);
 typedef int (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC) (void);
 
-ISample* gCurveSample = 0; // TODO: Move these into an array
-ISample* gSkeletonSample = 0;
-ISample* gSkinSample = 0;
-ISample* gBlendSample = 0;
+struct Samples {
+	ISample* curve = 0;
+	ISample* skeleton = 0;
+	ISample* skin = 0;
+	ISample* blend = 0;
+	int showCurve = 1;
+	int showSkeleton = 1;
+	int showSkin = 1;
+	int showBlend = 1;
+	bool active = false;
+};
 
+Samples gSamples;
 mu_Context* gUIContext = 0;
-int gShowCurveSample = 1;
-int gShowSkeletonSample = 1;
-int gShowSkinnedSample = 1;
-int gShowBlendingSample = 1;
-bool gRendererRunning = false;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
-	float times[] = {
-		// Current time, start time, end time
-		-1.0f, 0.0f, 0.0f, // Invalid, start time == end time
-		0.0f, 0.0f, 0.0f, // Invalid, start time == end time
-		0.0f, 0.0f, 0.0f, // Invalid, start time == end time
-		0.0f, 0.0f, 0.0f, // Invalid, start time == end time
-		0.0f, 0.0f, 0.0f, // Invalid, start time == end time
-		5.0f, 0.0f, 0.0f, // Invalid, start time == end time
-		
-		-1.0f, 1.0f, 1.0f, // Invalid, start time == end time
-		0.25f, 1.0f, 1.0f, // Invalid, start time == end time
-		1.0f, 1.0f, 1.0f, // Invalid, start time == end time
-		1.0f, 1.0f, 1.0f, // Invalid, start time == end time
-		1.0f, 1.0f, 1.0f, // Invalid, start time == end time
-		5.0f, 1.0f, 1.0f, // Invalid, start time == end time
-		
-		-1.0f, 0.3f, 0.3f, // Invalid, start time == end time
-		0.3f, 0.3f, 0.3f, // Invalid, start time == end time
-		0.3f, 0.3f, 0.3f, // Invalid, start time == end time
-		0.3f, 0.3f, 0.3f, // Invalid, start time == end time
-		0.3f, 0.3f, 0.3f, // Invalid, start time == end time
-		5.0f, 0.3f, 0.3f, // Invalid, start time == end time
-		
-		-1.0f, 0.5f, 0.2f, // Invalid start time > end time
-		0.25f, 0.5f, 0.2f, // Invalid start time > end time
-		0.5f, 0.5f, 0.2f, // Invalid start time > end time
-		0.3f, 0.5f, 0.2f, // Invalid start time > end time
-		0.2f, 0.5f, 0.2f, // Invalid start time > end time
-		5.0f, 0.5f, 0.2f, // Invalid start time > end time
-		
-		-1.0f, 0.0f, 1.0f, // Valid
-		0.25f, 0.0f, 1.0f, // Valid
-		0.0f, 0.0f, 1.0f, // Valid
-		0.25f, 0.0f, 1.0f, // Valid
-		1.0f, 0.0f, 1.0f, // Valid
-		5.0f, 0.0f, 1.0f, // Valid
-		
-		-2.0f, -1.0f, 1.0f, // Valid
-		0.25f, -1.0f, 1.0f, // Valid
-		-1.0f, -1.0f, 1.0f, // Valid
-		-0.3f, -1.0f, 1.0f, // Valid
-		1.0f, -1.0f, 1.0f, // Valid
-		5.2f, -1.0f, 1.0f, // Valid
-		
-		-1.0f, 0.25f, 0.75f, // Valid
-		0.2f, 0.25f, 0.75f, // Valid
-		0.25f, 0.25f, 0.75f, // Valid
-		0.4f, 0.25f, 0.75f, // Valid
-		0.75f, 0.25f, 0.75f, // Valid
-		5.0f, 0.25f, 0.75f // Valid
-	};
-
-	for (int i = 0; i < 7 * 6; ++i) {
-		float currentTime = times[i * 3 + 0];
-		float startTime = times[i * 3 + 1];
-		float endTime = times[i * 3 + 2];
-		float duration = endTime - startTime;
-		float result = Animation::FMod(currentTime - startTime, duration) + startTime;
-		float c_result = fmodf(currentTime - startTime, duration) + startTime;
-		std::cout << "c: " << currentTime << ", s: " << startTime << ", e: " << endTime << ", FMod(" << (currentTime - startTime) << ", " << duration << ") + " << startTime << " = " << result << " | " << c_result << "\n";
-		if ((i + 1) % 6 == 0) { std::cout << "\n"; }
-		if ((i + 1) == (6 * 4)) {
-			std::cout << "\n\n\nValid below\n\n\n";
-		}
-	}
-
-
-	gCurveSample = new CurvesSample();
-	gSkeletonSample = new SkeletonSample();
-	gSkinSample = new SkinnedSample();
-	gBlendSample = new BlendSample();
 	WNDCLASSEX wndclass;
 	wndclass.cbSize = sizeof(WNDCLASSEX);
 	wndclass.style = CS_HREDRAW | CS_VREDRAW;
@@ -238,22 +170,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	ShowWindow(hwnd, SW_SHOW);
 	UpdateWindow(hwnd);
 	r_init(800, 600);
-	gRendererRunning = true;
+	gSamples.curve = new CurvesSample();
+	gSamples.curve->Initialize();
+	gSamples.skeleton = new SkeletonSample();
+	gSamples.skeleton->Initialize();
+	gSamples.skin = new SkinnedSample();
+	gSamples.skin->Initialize();
+	gSamples.blend = new BlendSample();
+	gSamples.blend->Initialize();
+	gSamples.active = true;
 	gUIContext = (mu_Context*)malloc(sizeof(mu_Context));
 	mu_init(gUIContext);
-
-	if (gCurveSample != 0) {
-		gCurveSample->Initialize();
-	}
-	if (gSkeletonSample != 0) {
-		gSkeletonSample->Initialize();
-	}
-	if (gSkinSample != 0) {
-		gSkinSample->Initialize();
-	}
-	if (gBlendSample != 0) {
-		gBlendSample->Initialize();
-	}
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
@@ -272,17 +199,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 		DWORD thisTick = GetTickCount();
 		float deltaTime = float(thisTick - lastTick) * 0.001f;
 		lastTick = thisTick;
-		if (gCurveSample != 0 && gShowCurveSample) {
-			gCurveSample->Update(deltaTime);
+		if (gSamples.active && gSamples.curve != 0 && gSamples.showCurve) {
+			gSamples.curve->Update(deltaTime);
 		}
-		if (gSkeletonSample != 0 && gShowSkeletonSample) {
-			gSkeletonSample->Update(deltaTime);
+		if (gSamples.active && gSamples.skeleton != 0 && gSamples.showSkeleton) {
+			gSamples.skeleton->Update(deltaTime);
 		}
-		if (gSkinSample != 0 && gShowSkinnedSample) {
-			gSkinSample->Update(deltaTime);
+		if (gSamples.active && gSamples.skin != 0 && gSamples.showSkin) {
+			gSamples.skin->Update(deltaTime);
 		}
-		if (gBlendSample != 0 && gShowBlendingSample) {
-			gBlendSample->Update(deltaTime);
+		if (gSamples.active && gSamples.blend != 0 && gSamples.showBlend) {
+			gSamples.blend->Update(deltaTime);
 		}
 		RECT clientRect;
 		GetClientRect(hwnd, &clientRect);
@@ -293,21 +220,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		float aspect = (float)clientWidth / (float)clientHeight;
 		
-		if (gSkinSample != 0 && gShowSkinnedSample) {
-			gSkinSample->Render(aspect);
+		if (gSamples.active && gSamples.skin != 0 && gSamples.showSkin) {
+			gSamples.skin->Render(aspect);
 		}
-		if (gSkeletonSample != 0 && gShowSkeletonSample) {
-			gSkeletonSample->Render(aspect);
+		if (gSamples.active && gSamples.skeleton != 0 && gSamples.showSkeleton) {
+			gSamples.skeleton->Render(aspect);
 		}
-		if (gBlendSample != 0 && gShowBlendingSample) {
-			gBlendSample->Render(aspect);
+		if (gSamples.active && gSamples.blend != 0 && gSamples.showBlend) {
+			gSamples.blend->Render(aspect);
 		}
-		if (gCurveSample != 0 && gShowCurveSample) {
-			gCurveSample->Render(aspect);
+		if (gSamples.active && gSamples.curve != 0 && gSamples.showCurve) {
+			gSamples.curve->Render(aspect);
 		}
 
-		{
-			// TODO: handle mu input
+		{ // ui
 			mu_begin(gUIContext, clientWidth, clientHeight);
 			
 			if (mu_begin_window_ex(gUIContext, "Animation Demo", mu_rect(clientWidth - 10 - 125, 10, 125, 130), MU_OPT_NOCLOSE)) {
@@ -316,10 +242,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 				{
 					static int layout[] = { -1 };
 					mu_layout_row(gUIContext, 1, layout, 0);
-					mu_checkbox(gUIContext, "Curve Sample", &gShowCurveSample);
-					mu_checkbox(gUIContext, "Skeleton Sample", &gShowSkeletonSample);
-					mu_checkbox(gUIContext, "Skinning Sample", &gShowSkinnedSample);
-					mu_checkbox(gUIContext, "Blending Sample", &gShowBlendingSample);
+					mu_checkbox(gUIContext, "Curve Sample", &gSamples.showCurve);
+					mu_checkbox(gUIContext, "Skeleton Sample", &gSamples.showSkeleton);
+					mu_checkbox(gUIContext, "Skinning Sample", &gSamples.showSkin);
+					mu_checkbox(gUIContext, "Blending Sample", &gSamples.showBlend);
 				}
 
 				mu_end_window(gUIContext);
@@ -345,27 +271,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 		}
 	} // End of game loop
 
-	if (gCurveSample != 0) {
-		std::cout << "Expected gCurveSample to be null on exit\n";
-		delete gCurveSample;
-		gCurveSample = 0;
-	}
-	if (gSkeletonSample != 0) {
-		std::cout << "Expected gSkeletonSample to be null on exit\n";
-		delete gSkeletonSample;
-		gSkeletonSample = 0;
-	}
-	if (gSkinSample != 0) {
-		std::cout << "Expected gSkinSample to be null on exit\n";
-		delete gSkinSample;
-		gSkinSample = 0;
-	}
-	if (gBlendSample != 0) {
-		std::cout << "Expected gBlendSample to be null on exit\n";
-		delete gBlendSample;
-		gBlendSample = 0;
-	}
-
 	return (int)msg.wParam;
 }
 
@@ -375,37 +280,42 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	switch (iMsg) {
 	case WM_CLOSE:
-		if (gCurveSample != 0) {
-			gCurveSample->Shutdown();
-			gCurveSample = 0;
+		if (gSamples.active) {
+			gSamples.active = false;
 
-		}
-		if (gSkeletonSample != 0) {
-			gSkeletonSample->Shutdown();
-			delete gSkeletonSample;
-			gSkeletonSample = 0;
-		}
-		if (gSkinSample != 0) {
-			gSkinSample->Shutdown();
-			delete gSkinSample;
-			gSkinSample = 0;
-		}
-		if (gBlendSample != 0) {
-			gBlendSample->Shutdown();
-			delete gBlendSample;
-			gBlendSample = 0;
-		}
-		if (gRendererRunning) {
+			if (gSamples.curve != 0) {
+				gSamples.curve->Shutdown();
+				delete gSamples.curve;
+				gSamples.curve = 0;
+			}
+
+			if (gSamples.skeleton != 0) {
+				gSamples.skeleton->Shutdown();
+				delete gSamples.skeleton;
+				gSamples.skeleton = 0;
+			}
+
+			if (gSamples.skin != 0) {
+				gSamples.skin->Shutdown();
+				delete gSamples.skin;
+				gSamples.skin = 0;
+			}
+
+			if (gSamples.blend != 0) {
+				gSamples.blend->Shutdown();
+				delete gSamples.blend;
+				gSamples.blend = 0;
+			}
+
 			r_shutdown();
 
 			HDC hdc = GetDC(hwnd);
 			HGLRC hglrc = wglGetCurrentContext();
 
 			wglMakeCurrent(NULL, NULL);
-			wglDeleteContext(hglrc); // TODO: If i do a decent amount of show hides and exit i can trigger a breakpoint here. Why?
+			wglDeleteContext(hglrc);
 			ReleaseDC(hwnd, hdc);
 			DestroyWindow(hwnd);
-			gRendererRunning = false;
 		}
 		return 1;
 	case WM_DESTROY:

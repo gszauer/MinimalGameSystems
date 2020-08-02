@@ -326,7 +326,8 @@ void SkinnedSample::Render(float aspect) {
 	glVertexAttribPointer(mCharacterAttribTexCoord, 2, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (GLvoid*)0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mCharacterDynamicVBO);
-	glBufferData(GL_ARRAY_BUFFER, mSkinned.size() * 6 * sizeof(float), mSkinned[0].v, GL_STREAM_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, mSkinned.size() * 3 * sizeof(float), mSkinned[0].v, GL_STREAM_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, mSkinned.size() * 3 * sizeof(float), mSkinned[0].v);
 
 	glEnableVertexAttribArray(mCharacterAttribPosition);
 	glVertexAttribPointer(mCharacterAttribPosition, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (GLvoid*)0);
