@@ -346,7 +346,7 @@ void PusV(std::vector<float>& target, float x, float y, float z, float r, float 
 }
 
 
-void Ortho(float* result, float l, float r, float b, float t, float n, float f) { // TODO: Move this into AnimationHelpers
+void Ortho(float* result, float l, float r, float b, float t, float n, float f) {
 	if (l == r || t == b || n == f) {
 		return;
 	}

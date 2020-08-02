@@ -1,5 +1,4 @@
 #include "AnimationHelpers.h"
-#include <cmath> // for sqrt. Can use fast inv sqrt as well
 
 void Animation::Internal::CombineTransforms(float* outPos, float* outRot, float* outScale, const float* posA, const float* rotA, const float* sclA, const float* posB, const float* rotB, const float* sclB) {
     float resultScale[3] = { 1.0f };
@@ -382,9 +381,7 @@ bool Animation::FloatCompare(float a, float b) {
 }
 
 float Animation::InvSqrt(float number) { 
-    // 1 / sqrt(number)
-    // TODO: Move back to hacky way of doing this
-#if 0
+#if 1
     long i;
     float x2, y;
     const float threehalfs = 1.5F;

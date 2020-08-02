@@ -81,8 +81,14 @@ void SkinnedSample::LoadAnimation() {
 	mPlayTime = 0.0f;
 	mInvBindPosePalette.resize(mBindPose.Size() * 16);
 	mAnimatedPosePalette.resize(mBindPose.Size() * 16);
+	
+	mBindPose.ToMatrixPalette(&mInvBindPosePalette[0], mBindPose.Size() * 16);
 
-	// TODO: Generate this, don't load. 
+#if 1
+	for (unsigned int i = 0; i < mBindPose.Size(); ++i) {
+		Animation::Internal::InvertMatrix(&mInvBindPosePalette[i * 16], &mInvBindPosePalette[i * 16]);
+	}
+#else
 	input = ReadFileContents("Assets/inverseBindPose.txt");
 	unsigned int numMatrixElements = 0;
 	const char* reader = input;
@@ -95,6 +101,7 @@ void SkinnedSample::LoadAnimation() {
 		reader = Animation::ReadFloat(reader, mInvBindPosePalette[i]);
 	}
 	free(input);
+#endif
 }
 
 void SkinnedSample::InitDescriptors() {
@@ -374,7 +381,7 @@ void SkinnedSample::Update(float dt) {
 		mSkinned[i * 6 + 5] = result[2];
 	}
 #else
-	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime - dt, true);
+	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime + dt, true);
 
 	unsigned int numJoints = mAnimatedPose.Size();
 	mAnimatedPose.ToMatrixPalette(&mAnimatedPosePalette[0], numJoints * 16);

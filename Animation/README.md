@@ -476,3 +476,9 @@ Link to WebGL sample
 * While the internal data storage of the animation classes are complicated, using the classes is simple. I feel like the goal of having a low barrier to entry worked.
 * Since the users of the animation API typically don't work with track data, rolling track and clip data into one class (```Animation::Data```) greatly simplified the API.
 * Making ```Animation::Skin``` work with data views allows for mapping the skinning data to just about any input format. It's a cache nightmare, but the API is easy to use.
+
+## Intended for characters
+
+What makes this a _character animation library_ and not a _generic animation_ library? This library makes the assumption that the target of animation data is a transform hierarchy. Tracks have targets expressed as enum values that only makes sens in the context of animating a hierarchy. Generally, when animating a hierarchy we're animating characters.
+
+A more general porpuse animation system would just be a collection of tracks. Each track would need a generic way to bind to a value, like a pointer to the tracks target. With a setup like this, it wouldn't matter what is being animated, tracks are bound to the generic attributes of a hierarchy and don't need context for what they are animating.

@@ -200,7 +200,8 @@ void Animation::State::GetAbsoluteTransform(unsigned int index, float* outPos, f
         );
     }
 
-    // TODO: Maybe normalize here if needed?
+    // It might be a good idea to normalize the resulting rotation here, depending on the depth of the 
+    // skeletons hierarchy
 }
 
 void Animation::State::GetAbsolutePosition(unsigned int index, float* outVec3) const {

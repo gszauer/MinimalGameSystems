@@ -170,16 +170,6 @@ namespace Animation {
 	}
 }
 
-Animation::Data::Iterator::Iterator() {
-	time = 0.0f;
-	index = 0;
-}
-
-Animation::Data::Iterator::Iterator(float t) {
-	time = t;
-	index = 0;
-}
-
 Animation::Data::Data() {
 	mFrameData = 0;
 	mFrameDataSize = 0;
@@ -282,11 +272,7 @@ void Animation::Data::SetLabel(const char* label) {
 	mLabel[length] = '\0';
 }
 
-Animation::Data::Iterator Animation::Data::Begin() const {
-	return Iterator(mStartTime);
-}
-
-float Animation::Data::Sample(State& out, float clipCurrentTime, bool looping) const {
+float Animation::Data::Sample(State& out, float time, bool looping) const {
 	// Adjust time to fit valid range for clip
 	float clipStartTime = GetStartTime();
 	float clipEndTime = GetEndtime();
@@ -295,25 +281,33 @@ float Animation::Data::Sample(State& out, float clipCurrentTime, bool looping) c
 		return 0.0f;
 	}
 	
-	// Time is normalized to the animation duration, not an indevidual track
-	if (looping) {
-		/*while (clipCurrentTime < clipStartTime) {
-			clipCurrentTime += clipDuration;
+	// Time is normalized to the animation duration, not an indevidual track 
+	// clipCurrentTime will be >= the smallest start time of all tracks AND
+	// clipCurrentTime will be <= the largest end time of all tracks
+	float clipTime = time;
+	{
+		if (looping) {
+#if 0
+			while (clipTime < clipStartTime) {
+				clipTime += clipDuration;
+			}
+			while (clipTime >= clipEndTime) {
+				clipTime -= clipDuration;
+			}
+#else
+			clipTime = Animation::FMod(clipTime - clipStartTime, clipDuration) + clipStartTime;
+			if (clipTime < clipStartTime) {
+				clipTime += clipDuration;
+			}
+#endif
 		}
-		while (clipCurrentTime >= clipEndTime) {
-			clipCurrentTime -= clipDuration;
-		}*/
-		clipCurrentTime = Animation::FMod(clipCurrentTime - clipStartTime, clipDuration) + clipStartTime;
-		if (clipCurrentTime < clipStartTime) {
-			clipCurrentTime += clipDuration; 
-		};
-	}
-	else {
-		if (clipCurrentTime < clipStartTime) {
-			clipCurrentTime = clipStartTime;
-		}
-		if (clipCurrentTime > clipEndTime) {
-			clipCurrentTime = clipEndTime;
+		else {
+			if (clipTime < clipStartTime) {
+				clipTime = clipStartTime;
+			}
+			if (clipTime > clipEndTime) {
+				clipTime = clipEndTime;
+			}
 		}
 	}
 	
@@ -342,18 +336,21 @@ float Animation::Data::Sample(State& out, float clipCurrentTime, bool looping) c
 			continue; // TODO: Is continue the right thing to do here?
 		}
 
-		float trackTime = clipCurrentTime;
+		float trackTime = clipTime;
 		if (looping) {
-			/*while (trackTime < trackStartTime) {
-				trackTime += trackDuration;
+#if 0
+			while (trackTime < trackStartTime) { 
+				trackTime += trackDuration; 
 			}
-			while (trackTime >= trackEndTime) {
-				trackTime -= trackDuration;
-			}*/
+			while (trackTime >= trackEndTime) { 
+				trackTime -= trackDuration; 
+			}
+#else
 			trackTime = Animation::FMod(trackTime - trackStartTime, trackDuration) + trackStartTime;
 			if (trackTime < trackStartTime) {
 				trackTime += trackDuration; 
 			}
+#endif
 		}
 		else {
 			if (trackTime < trackStartTime) {
@@ -364,25 +361,67 @@ float Animation::Data::Sample(State& out, float clipCurrentTime, bool looping) c
 			}
 		}
 
+		// Given a time, find the current and next frame indices
 		unsigned int thisFrame = 0;
-		// TODO: Linear search is not optimal here. Replace with binary search, since time only ever grows
-		for (int frameIndex = frameView.GetNumFrames() - 1; frameIndex >= 0; frameIndex -= 1) {
-			if (trackTime >= frameView.GetTime(frameIndex)) {
-				thisFrame = frameIndex;
-				break;
+		unsigned int nextFrame = 0;
+		{
+#if 0
+			for (int frameIndex = frameView.GetNumFrames() - 1; frameIndex >= 0; frameIndex -= 1) {
+				if (trackTime >= frameView.GetTime(frameIndex)) {
+					thisFrame = frameIndex;
+					break;
+				}
 			}
-		}
-		if (!looping) {
-			if (clipCurrentTime <= trackStartTime) {
-				thisFrame = 0;
-				trackTime = trackStartTime;
+#else
+			//Since time only ever increases, use a binary search
+			int l = 0;
+			int r = (int)numFrames;
+			while (l <= r) {
+				int m = l + (r - l) / 2;
+				float thisFrameTime = *frameView[m];
+
+				// Found at last frame
+				if (m == numFrames - 1) {
+					if (trackTime >= thisFrameTime) {
+						thisFrame = numFrames - 1;
+						break;
+					}
+				}
+				else {
+					if (trackTime >= thisFrameTime && trackTime  <= *frameView[m + 1]) {
+						thisFrame = m;
+						break;
+					}
+
+				}
+
+				// target is greater, ignore left half
+				if (thisFrameTime < trackTime) {
+					l = m + 1;
+				}
+				// target is greater, ignore right half
+				else {
+					r = m - 1;
+				}
 			}
-			if (clipCurrentTime >= trackEndTime) {
+#endif
+			if (!looping) {
+				if (clipTime <= trackStartTime) {
+					thisFrame = 0;
+					trackTime = trackStartTime;
+				}
+				if (clipTime >= trackEndTime) {
+					thisFrame = numFrames - 1; 
+					trackTime = trackEndTime;
+				}
+			}
+
+			// Keep nextFrame valid
+			if (thisFrame >= numFrames - 1) { 
 				thisFrame = numFrames - 2; // -2 so thisFrame + 1 is a valid index
-				trackTime = trackEndTime;
 			}
+			nextFrame = thisFrame + 1;
 		}
-		unsigned int nextFrame = thisFrame + 1;
 
 		// Find frame delta and interpolation t
 		float frameDelta = frameView.GetTime(nextFrame) - frameView.GetTime(thisFrame);
@@ -407,7 +446,7 @@ float Animation::Data::Sample(State& out, float clipCurrentTime, bool looping) c
 	}
 
 	// Return time relative to valid play range
-	return clipCurrentTime;
+	return clipTime;
 }
 
 void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize, const unsigned int* trackData, unsigned int trackSize) {

@@ -34,7 +34,7 @@ namespace Animation {
     float InvSqrt(float number);
     float FMod(float x, float y);
 
-    void* Allocate(unsigned int bytes); // TODO: I can figure out how to drop the rest of this file, but not how to drop the Alloc/Free calls here. Maybe a global function pointer?!?
+    void* Allocate(unsigned int bytes); // TODO: I can figure out how to drop the rest of this file, but not how to drop the Alloc/Free calls here. Maybe a global function pointer?!? Might have to make an allocator class
     void Free(void* memory);
 }
 

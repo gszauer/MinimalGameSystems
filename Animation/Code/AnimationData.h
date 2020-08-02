@@ -13,13 +13,6 @@ namespace Animation {
             Rotation = 2,
             Scale = 4,
         };
-        struct Iterator {
-            float time;
-            unsigned int index;
-
-            Iterator();
-            Iterator(float time);
-        };
     protected:
         // Frame: x is 3 or 4 depending on component type (only support pos, rot and scale)
         // float time
@@ -63,11 +56,8 @@ namespace Animation {
         const char* GetLabel() const;
         void SetLabel(const char* label);
 
-        Iterator Begin() const;
         float Sample(State& out, float time, bool looping) const;
-        Iterator Sample(State& out, const Iterator& iter, bool looping) const;
-
-
+        
         void SerializeToString(char* output) const;
         void DeSerializeFromString(const char* input);
         unsigned int SerializedStringLength() const;
