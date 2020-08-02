@@ -304,10 +304,10 @@ void Animation::State::DeSerializeFromString(const char* input) {
         if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
             if (rotLenSq > 0.0f) {
                 float invRotLen = Animation::InvSqrt(rotLenSq);
-                mTransforms[i * 10 + 3] *= rotLenSq;
-                mTransforms[i * 10 + 4] *= rotLenSq;
-                mTransforms[i * 10 + 5] *= rotLenSq;
-                mTransforms[i * 10 + 6] *= rotLenSq;
+               rot[0] *= rotLenSq;
+               rot[1] *= rotLenSq;
+               rot[2] *= rotLenSq;
+               rot[3] *= rotLenSq;
             }
         }
     }

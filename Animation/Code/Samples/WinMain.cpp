@@ -71,10 +71,10 @@ ISample* gSkinSample = 0;
 ISample* gBlendSample = 0;
 
 mu_Context* gUIContext = 0;
-int gShowCurveSample = 0;
-int gShowSkeletonSample = 0;
-int gShowSkinnedSample = 0;
-int gShowBlendingSample = 0;
+int gShowCurveSample = 1;
+int gShowSkeletonSample = 1;
+int gShowSkinnedSample = 1;
+int gShowBlendingSample = 1;
 bool gRendererRunning = false;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
@@ -292,9 +292,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 		glClearColor(0.5f, 0.6f, 0.7f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		float aspect = (float)clientWidth / (float)clientHeight;
-		if (gCurveSample != 0 && gShowCurveSample) {
-			gCurveSample->Render(aspect);
-		}
+		
 		if (gSkinSample != 0 && gShowSkinnedSample) {
 			gSkinSample->Render(aspect);
 		}
@@ -303,6 +301,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 		}
 		if (gBlendSample != 0 && gShowBlendingSample) {
 			gBlendSample->Render(aspect);
+		}
+		if (gCurveSample != 0 && gShowCurveSample) {
+			gCurveSample->Render(aspect);
 		}
 
 		{

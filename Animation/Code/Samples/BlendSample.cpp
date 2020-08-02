@@ -114,13 +114,13 @@ void BlendSample::LoadAnimation() {
 
 	Animation::Builder::Track blendTrack;
 	blendTrack.SetJointID(0);
-	blendTrack.SetTarget(Animation::Data::Component::Rotation);
+	blendTrack.SetTarget(Animation::Data::Component::Position);
 	blendTrack.PushFrame(MakeFrame(0, 0, 0, 0));
-	blendTrack.PushFrame(MakeFrame(0.4f, 0, 0, 0));
-	blendTrack.PushFrame(MakeFrame(0.6f, 0, 1.0f, 0));
-	blendTrack.PushFrame(MakeFrame(1.6f, 0, 1.0f, 0));
-	blendTrack.PushFrame(MakeFrame(2.0f, 0, 0, 0));
-	blendTrack.PushFrame(MakeFrame(0, 0, 0, 0));
+	blendTrack.PushFrame(MakeFrame(0.4f * 2.0f, 0, 0, 0));
+	blendTrack.PushFrame(MakeFrame(0.6f * 2.0f, 0, 1.0f, 0));
+	blendTrack.PushFrame(MakeFrame(1.4f * 2.0f, 0, 1.0f, 0));
+	blendTrack.PushFrame(MakeFrame(1.6f * 2.0f, 0, 0, 0));
+	blendTrack.PushFrame(MakeFrame(2 * 2.0f, 0, 0, 0));
 	Animation::Builder::Clip blendCurve;
 	blendCurve.SetName("Blend Time");
 	blendCurve.PushTrack(blendTrack);
@@ -277,8 +277,7 @@ void BlendSample::Update(float dt) {
 	mPlayTimeB = mAniamtionDataB.Sample(mAnimatedPoseB, mPlayTimeB + dt, true);
 
 	float result[4] = { 0.0f };
-	mBlendTime = mBlendCurve.SampleTrack(result, mBlendTime, 0.0f, false);
-	result[0] = 0.0f;
+	mBlendTime = mBlendCurve.SampleTrack(result, 0, mBlendTime + dt, true);
 	Animation::Blend(mBlendedPose, mAnimatedPoseA, mAnimatedPoseB, result[0]);
 
 	unsigned int numJoints = mBlendedPose.Size();
@@ -294,7 +293,7 @@ void BlendSample::Render(float aspect) {
 	}
 
 	mat4 model, view, projection, mvp, viewProjection;
-	model.position = vec4(3, 0, 0, 1);
+	model.position = vec4(-3, 0, 0, 1);
 	view = lookAt(vec3(0.0f, 7.0f, 5.0f), vec3(0.0f, 3.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 	projection = perspective(60.0f, aspect, 0.01f, 1000.0f);
 	mvp = projection * view * model;

@@ -47,6 +47,7 @@ namespace Animation {
         
         const unsigned int* GetTrackData() const;
         unsigned int TrackDataSize() const;
+        unsigned int GetNumTracks() const;
 
         float GetStartTime() const;
         float GetEndtime() const;

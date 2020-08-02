@@ -1,5 +1,6 @@
 #include "AnimationBuilder.h"
 #include "AnimationHelpers.h"
+#include <new>
 
 namespace Animation {
 	namespace Builder {
@@ -157,6 +158,7 @@ void Animation::Builder::Track::Resize(unsigned int newSize) {
 	}
 	else if (newSize < mFrameCount) {
 		newFrames = (Frame*)Animation::Allocate(sizeof(Frame) * newSize);
+
 		for (unsigned int i = 0; i < newSize; ++i) {
 			newFrames[i] = mFrameData[i];
 		}
@@ -166,6 +168,7 @@ void Animation::Builder::Track::Resize(unsigned int newSize) {
 	}
 	else { // newSize > mFrameCount
 		newFrames = (Frame*)Animation::Allocate(sizeof(Frame) * newSize);
+
 		for (unsigned int i = 0; i < mFrameCount; ++i) {
 			newFrames[i] = mFrameData[i];
 		}
@@ -277,6 +280,9 @@ Animation::Builder::Clip::~Clip() {
 	}
 
 	if (mTracks != 0) {
+		for (unsigned int i = 0; i < mTrackCount; ++i) {
+			mTracks[i].~Track();
+		}
 		Animation::Free(mTracks);
 	}
 }
@@ -351,6 +357,9 @@ void Animation::Builder::Clip::SetName(const char* newName) {
 void Animation::Builder::Clip::Reserve(unsigned int numToReserve) {
 	if (mTrackCapacity < numToReserve) {
 		Track* newTracks = (Track*)Animation::Allocate(sizeof(Track) * numToReserve);
+		for (unsigned int i = 0; i < numToReserve; ++i) {
+			new(&newTracks[i])Track(); // Need to call constructor for track
+		}
 
 		for (unsigned int i = 0; i < mTrackCount; ++i) {
 			newTracks[i] = mTracks[i];
@@ -360,6 +369,9 @@ void Animation::Builder::Clip::Reserve(unsigned int numToReserve) {
 		}
 
 		if (mTracks != 0) {
+			for (unsigned int i = 0; i < mTrackCount; ++i) {
+				mTracks[i].~Track();
+			}
 			Animation::Free(mTracks);
 		}
 		mTracks = newTracks;
@@ -371,6 +383,9 @@ void Animation::Builder::Clip::Resize(unsigned int newSize) {
 	Track* newTracks = 0;
 	if (newSize == 0) {
 		if (mTracks != 0) {
+			for (unsigned int i = 0; i < mTrackCount; ++i) {
+				mTracks[i].~Track();
+			}
 			Animation::Free(mTracks);
 		}
 	}
@@ -380,14 +395,23 @@ void Animation::Builder::Clip::Resize(unsigned int newSize) {
 	else if (newSize < mTrackCount) {
 		newTracks = (Track*)Animation::Allocate(sizeof(Track) * newSize);
 		for (unsigned int i = 0; i < newSize; ++i) {
+			new(&newTracks[i])Track(); // Need to call constructor for track
+		}
+		for (unsigned int i = 0; i < newSize; ++i) {
 			newTracks[i] = mTracks[i];
 		}
 		if (mTracks != 0) {
+			for (unsigned int i = 0; i < mTrackCount; ++i) {
+				mTracks[i].~Track();
+			}
 			Animation::Free(mTracks);
 		}
 	}
 	else { // newSize > mTrackCount
 		newTracks = (Track*)Animation::Allocate(sizeof(Track) * newSize);
+		for (unsigned int i = 0; i < newSize; ++i) {
+			new(&newTracks[i])Track(); // Need to call constructor for track
+		}
 		for (unsigned int i = 0; i < mTrackCount; ++i) {
 			newTracks[i] = mTracks[i];
 		}
@@ -395,6 +419,9 @@ void Animation::Builder::Clip::Resize(unsigned int newSize) {
 			newTracks[i] = Track();
 		}
 		if (mTracks != 0) {
+			for (unsigned int i = 0; i < mTrackCount; ++i) {
+				mTracks[i].~Track();
+			}
 			Animation::Free(mTracks);
 		}
 	}
@@ -456,5 +483,9 @@ Animation::Data Animation::Builder::Convert(const Animation::Builder::Clip& clip
 	
 	// Rotations are normalized in the SetRawData function
 	result.SetRawData(frameData, frameDataSize, trackData, trackDataSize);
+
+	Animation::Free(trackData);
+	Animation::Free(frameData);
+
 	return result;
 }

@@ -92,7 +92,7 @@ void SkeletonSample::Update(float dt) {
 void SkeletonSample::Render(float aspect) {
 	mat4 model, view, projection, mvp;
 	
-	model.position = vec4(-3.0f, 0.0f, 0.0f, 1.0f);
+	model.position = vec4(3.0f, 0.0f, 0.0f, 1.0f);
 	view = lookAt(vec3(0, 7, 5), vec3(0, 3, 0), vec3(0, 1,0 ));
 	projection = perspective(60.0f, aspect, 0.01f, 1000.0f);
 

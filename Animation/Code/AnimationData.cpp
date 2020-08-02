@@ -230,6 +230,10 @@ unsigned int Animation::Data::TrackDataSize() const {
 	return mTrackDataSize;
 }
 
+unsigned int Animation::Data::GetNumTracks() const {
+	return mTrackDataSize / 4;
+}
+
 float Animation::Data::GetStartTime() const {
 	return mStartTime;
 }
@@ -318,8 +322,8 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 		
 		SampleTrack(result, trackIndex, clipTime, looping);
 
-		unsigned int targetJointId = mTrackData[trackIndex + 0];
-		Animation::Data::Component trackComponent = (Animation::Data::Component)mTrackData[trackIndex + 1];
+		unsigned int targetJointId = mTrackData[trackIndex * 4 + 0];
+		Animation::Data::Component trackComponent = (Animation::Data::Component)mTrackData[trackIndex * 4 + 1];
 		if (trackComponent == Component::Position) {
 			out.SetRelativePosition(targetJointId, result);
 		}
@@ -356,7 +360,7 @@ float Animation::Data::SampleTrack(float* out, unsigned int trackIndex, float ti
 	float trackStartTime = frameView.GetStartTime();
 	float trackEndTime = frameView.GetEndTime();
 	float trackDuration = trackEndTime - trackStartTime;
-	if (trackDuration < 0.0f) {
+	if (trackDuration <= 0.0f) {
 		return 0.0f;
 	}
 
@@ -463,6 +467,8 @@ float Animation::Data::SampleTrack(float* out, unsigned int trackIndex, float ti
 	else {
 		frameView.Vec3Interpolate(out, thisFrame, nextFrame, t);
 	}
+
+	return trackTime;
 }
 
 void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize, const unsigned int* trackData, unsigned int trackSize) {
@@ -556,10 +562,10 @@ void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize,
 					if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
 						if (rotLenSq > 0.0f) {
 							float invRotLen = Animation::InvSqrt(rotLenSq);
-							rot[i * 10 + 3] *= rotLenSq;
-							rot[i * 10 + 4] *= rotLenSq;
-							rot[i * 10 + 5] *= rotLenSq;
-							rot[i * 10 + 6] *= rotLenSq;
+							rot[0] *= rotLenSq;
+							rot[1] *= rotLenSq;
+							rot[2] *= rotLenSq;
+							rot[3] *= rotLenSq;
 						}
 					}
 				}
@@ -678,12 +684,12 @@ void Animation::Data::DeSerializeFromString(const char* input) {
 	unsigned int labelLength = 0;
 	input = ReadUInt(input, labelLength);
 	mLabel = (char*)Allocate(sizeof(char) * labelLength + 1);
-	mLabel[labelLength] = '\0';
 
 	for (unsigned int i = 0; i < labelLength; ++i) {
 		mLabel[i] = *input;
 		input += 1;
 	}
+	mLabel[labelLength] = '\0';
 
 	// Normalize vectors
 	if (mFrameData != 0 && mTrackData != 0) {
@@ -704,10 +710,10 @@ void Animation::Data::DeSerializeFromString(const char* input) {
 					if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
 						if (rotLenSq > 0.0f) {
 							float invRotLen = Animation::InvSqrt(rotLenSq);
-							rot[i * 10 + 3] *= rotLenSq;
-							rot[i * 10 + 4] *= rotLenSq;
-							rot[i * 10 + 5] *= rotLenSq;
-							rot[i * 10 + 6] *= rotLenSq;
+							rot[0] *= rotLenSq;
+							rot[1] *= rotLenSq;
+							rot[2] *= rotLenSq;
+							rot[3] *= rotLenSq;
 						}
 					}
 				}
