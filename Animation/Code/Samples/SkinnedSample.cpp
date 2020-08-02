@@ -82,7 +82,7 @@ void SkinnedSample::LoadAnimation() {
 	m_InvBindPosePalette.resize(mBindPose.Size());
 	m_AnimatedPosePalette.resize(mBindPose.Size());
 	
-	mBindPose.ToMatrixPalette(m_InvBindPosePalette[0].v, mBindPose.Size() * 16);
+	Animation::ToMatrixPalette(m_InvBindPosePalette[0].v, mBindPose);
 
 #if 1
 	for (unsigned int i = 0; i < mBindPose.Size(); ++i) {
@@ -285,8 +285,7 @@ void SkinnedSample::Update(float dt) {
 #else
 	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime + dt, true);
 
-	unsigned int numJoints = mAnimatedPose.Size();
-	mAnimatedPose.ToMatrixPalette(m_AnimatedPosePalette[0].v, numJoints);
+	Animation::ToMatrixPalette(m_AnimatedPosePalette[0].v, mAnimatedPose);
 
 #if 0
 	for (unsigned int i = 0; i < numJoints; ++i) {

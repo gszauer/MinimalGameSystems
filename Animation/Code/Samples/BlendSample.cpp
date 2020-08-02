@@ -106,7 +106,7 @@ void BlendSample::LoadAnimation() {
 	m_InvBindPosePalette.resize(mBindPose.Size());
 	m_AnimatedPosePalette.resize(mBindPose.Size());
 
-	mBindPose.ToMatrixPalette(m_InvBindPosePalette[0].v, mBindPose.Size() * 16);
+	Animation::ToMatrixPalette(m_InvBindPosePalette[0].v, mBindPose);
 
 	for (unsigned int i = 0; i < mBindPose.Size(); ++i) {
 		Animation::Internal::InvertMatrix(m_InvBindPosePalette[i].v, m_InvBindPosePalette[i].v);
@@ -280,8 +280,7 @@ void BlendSample::Update(float dt) {
 	mBlendTime = mBlendCurve.SampleTrack(result, 0, mBlendTime + dt, true);
 	Animation::Blend(mBlendedPose, mAnimatedPoseA, mAnimatedPoseB, result[0]);
 
-	unsigned int numJoints = mBlendedPose.Size();
-	mBlendedPose.ToMatrixPalette(m_AnimatedPosePalette[0].v, numJoints);
+	Animation::ToMatrixPalette(m_AnimatedPosePalette[0].v, mBlendedPose);
 
 	Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, m_AnimatedPosePalette[0].v, m_InvBindPosePalette[0].v, mReadInfluences, mReadWeights);
 	Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, m_AnimatedPosePalette[0].v, m_InvBindPosePalette[0].v, mReadInfluences, mReadWeights);

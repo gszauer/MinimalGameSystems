@@ -66,37 +66,31 @@ void Animation::State::Resize(unsigned int size) {
     mSize = size;
 }
 
-bool Animation::State::ToMatrixPalette(float* outArray, unsigned int arraySize) const {
-    if ((arraySize == 0) || (outArray == 0) || (mSize * 16 < arraySize)) {
-        return false;
-    }
-
+void Animation::ToMatrixPalette(float* outArray, const State& state) {
     float position[3] = { 0.0f };
     float rotation[4] = { 0.0f };
     float scale[3] = { 0.0f };
 
     unsigned int i = 0;
-    for (unsigned int size = mSize; i < size; ++i) {
-        int parent = mHierarchy[i]; // TODO: Fast path is untested because of bad model. Export an optimized / re-ordered data set and try again with that.
+    for (unsigned int size = state.Size(); i < size; ++i) {
+        int parent = state.GetParent(i); // TODO: Fast path is untested because of bad model. Export an optimized / re-ordered data set and try again with that.
         if (parent > ((int)i)) {
             break;
         }
 
-        GetRelativePosition(i, position);
-        GetRelativeRotation(i, rotation);
-        GetRelativeScale(i, scale);
+        state.GetRelativePosition(i, position);
+        state.GetRelativeRotation(i, rotation);
+        state.GetRelativeScale(i, scale);
         Animation::Internal::TransformToMatrix(&outArray[i * 16], position, rotation, scale);
         if (parent >= 0) {
             Animation::Internal::MultiplyMatrices(&outArray[i * 16], &outArray[(unsigned int)parent * 16], &outArray[i * 16]);
         }
     }
 
-    for (unsigned int size = mSize; i < size; ++i) {
-        GetAbsoluteTransform(i, position, rotation, scale);
+    for (unsigned int size = state.Size(); i < size; ++i) {
+        state.GetAbsoluteTransform(i, position, rotation, scale);
         Animation::Internal::TransformToMatrix(&outArray[i * 16], position, rotation, scale);
     }
-
-    return true;
 }
 
 int Animation::State::GetParent(unsigned int index) const {
