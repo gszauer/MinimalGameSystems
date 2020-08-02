@@ -14,7 +14,7 @@ namespace Animation {
         State& operator=(const State& other);
         ~State();
 
-        bool ToMatrixPalette(float* outArray, unsigned int arraySize) const;
+        bool ToMatrixPalette(float* outArray, unsigned int arraySize) const; // TODO: This is not great. Maybe make it a non-member function?!?
 
         unsigned int Size() const;
         void Resize(unsigned int size);

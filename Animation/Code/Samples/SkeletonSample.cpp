@@ -22,7 +22,7 @@ void SkeletonSample::DrawSkeleton(const Animation::State& state, const mat4& mvp
 	glBindBuffer(GL_ARRAY_BUFFER, mSkeletonVBO);
 
 	glEnableVertexAttribArray(mVertexAttrib);
-	glBufferData(GL_ARRAY_BUFFER, m_Skinned.size() * 3 * sizeof(float), &m_Skinned[0].v[0], GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, m_Skinned.size() * 3 * sizeof(float), m_Skinned[0].v, GL_STREAM_DRAW);
 	glVertexAttribPointer(mVertexAttrib, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
 	glUniformMatrix4fv(mMVPUniform, 1, GL_FALSE, mvp.v);

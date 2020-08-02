@@ -13,44 +13,44 @@ void SkinnedSample::LoadModel() {
 	unsigned int idxSize = 0;
 
 	input = Animation::ReadUInt(input, posSize);
-	mVertices.resize(posSize * 3);
+	m_Vertices.resize(posSize);
 	for (unsigned int i = 0; i < posSize; ++i) {
-		input = Animation::ReadFloat(input, mVertices[i * 3 + 0]);
-		input = Animation::ReadFloat(input, mVertices[i * 3 + 1]);
-		input = Animation::ReadFloat(input, mVertices[i * 3 + 2]);
+		input = Animation::ReadFloat(input, m_Vertices[i].x);
+		input = Animation::ReadFloat(input, m_Vertices[i].y);
+		input = Animation::ReadFloat(input, m_Vertices[i].z);
 	}
 
 	input = Animation::ReadUInt(input, normSize);
-	mNormals.resize(normSize * 3);
+	m_Normals.resize(normSize);
 	for (unsigned int i = 0; i < normSize; ++i) {
-		input = Animation::ReadFloat(input, mNormals[i * 3 + 0]);
-		input = Animation::ReadFloat(input, mNormals[i * 3 + 1]);
-		input = Animation::ReadFloat(input, mNormals[i * 3 + 2]);
+		input = Animation::ReadFloat(input, m_Normals[i].x);
+		input = Animation::ReadFloat(input, m_Normals[i].y);
+		input = Animation::ReadFloat(input, m_Normals[i].z);
 	}
 
 	input = Animation::ReadUInt(input, texSize);
-	mTexCoords.resize(texSize * 2);
+	m_TexCoords.resize(texSize);
 	for (unsigned int i = 0; i < texSize; ++i) {
-		input = Animation::ReadFloat(input, mTexCoords[i * 2 + 0]);
-		input = Animation::ReadFloat(input, mTexCoords[i * 2 + 1]);
+		input = Animation::ReadFloat(input, m_TexCoords[i].x);
+		input = Animation::ReadFloat(input, m_TexCoords[i].y);
 	}
 
 	input = Animation::ReadUInt(input, weightSize);
-	mWeights.resize(weightSize * 4);
+	m_Weights.resize(weightSize);
 	for (unsigned int i = 0; i < weightSize; ++i) {
-		input = Animation::ReadFloat(input, mWeights[i * 4 + 0]);
-		input = Animation::ReadFloat(input, mWeights[i * 4 + 1]);
-		input = Animation::ReadFloat(input, mWeights[i * 4 + 2]);
-		input = Animation::ReadFloat(input, mWeights[i * 4 + 3]);
+		input = Animation::ReadFloat(input, m_Weights[i].x);
+		input = Animation::ReadFloat(input, m_Weights[i].y);
+		input = Animation::ReadFloat(input, m_Weights[i].z);
+		input = Animation::ReadFloat(input, m_Weights[i].w);
 	}
 
 	input = Animation::ReadUInt(input, infSize);
-	mInfluences.resize(infSize * 4);
+	m_Influences.resize(infSize);
 	for (unsigned int i = 0; i < infSize; ++i) {
-		input = Animation::ReadUInt(input, mInfluences[i * 4 + 0]);
-		input = Animation::ReadUInt(input, mInfluences[i * 4 + 1]);
-		input = Animation::ReadUInt(input, mInfluences[i * 4 + 2]);
-		input = Animation::ReadUInt(input, mInfluences[i * 4 + 3]);
+		input = Animation::ReadUInt(input, m_Influences[i].x);
+		input = Animation::ReadUInt(input, m_Influences[i].y);
+		input = Animation::ReadUInt(input, m_Influences[i].z);
+		input = Animation::ReadUInt(input, m_Influences[i].w);
 	}
 
 	input = Animation::ReadUInt(input, idxSize);
@@ -61,7 +61,7 @@ void SkinnedSample::LoadModel() {
 
 	free(fileContent);
 
-	mSkinned.resize(mVertices.size() + mNormals.size());
+	m_Skinned.resize(m_Vertices.size() + m_Normals.size());
 }
 
 void SkinnedSample::LoadAnimation() {
@@ -79,14 +79,14 @@ void SkinnedSample::LoadAnimation() {
 	free(input);
 
 	mPlayTime = 0.0f;
-	mInvBindPosePalette.resize(mBindPose.Size() * 16);
-	mAnimatedPosePalette.resize(mBindPose.Size() * 16);
+	m_InvBindPosePalette.resize(mBindPose.Size());
+	m_AnimatedPosePalette.resize(mBindPose.Size());
 	
-	mBindPose.ToMatrixPalette(&mInvBindPosePalette[0], mBindPose.Size() * 16);
+	mBindPose.ToMatrixPalette(m_InvBindPosePalette[0].v, mBindPose.Size() * 16);
 
-#if 1
+#if 0
 	for (unsigned int i = 0; i < mBindPose.Size(); ++i) {
-		Animation::Internal::InvertMatrix(&mInvBindPosePalette[i * 16], &mInvBindPosePalette[i * 16]);
+		Animation::Internal::InvertMatrix(m_InvBindPosePalette[i].v, m_InvBindPosePalette[i].v);
 	}
 #else
 	input = ReadFileContents("Assets/inverseBindPose.txt");
@@ -95,23 +95,24 @@ void SkinnedSample::LoadAnimation() {
 	reader = Animation::ReadUInt(reader, numMatrixElements);
 	unsigned int numMatrices = numMatrixElements / 16;
 
-	mInvBindPosePalette.resize(numMatrixElements);
+	m_InvBindPosePalette.resize(numMatrices);
+	float* write = m_InvBindPosePalette[0].v;
 	for (int i = 0; i < numMatrixElements; ++i) {
-		mInvBindPosePalette[i] = 0.0f;
-		reader = Animation::ReadFloat(reader, mInvBindPosePalette[i]);
+		reader = Animation::ReadFloat(reader, *write);
+		write += 1;
 	}
 	free(input);
 #endif
 }
 
 void SkinnedSample::InitDescriptors() {
-	mReadPositions.Set(&mVertices[0], (unsigned int)mVertices.size(), 0, 0);
-	mReadNormals.Set(&mNormals[0], (unsigned int)mNormals.size(), 0, 0);
-	mReadInfluences.Set(&mInfluences[0], (unsigned int)mInfluences.size(), 0, 0);
-	mReadWeights.Set(&mWeights[0], (unsigned int)mWeights.size(), 0, 0);
+	mReadPositions.Set(m_Vertices[0].v, (unsigned int)m_Vertices.size() * 3, 0, 0);
+	mReadNormals.Set(m_Normals[0].v, (unsigned int)m_Normals.size() * 3, 0, 0);
+	mReadInfluences.Set(m_Influences[0].v, (unsigned int)m_Influences.size() * 4, 0, 0);
+	mReadWeights.Set(m_Weights[0].v, (unsigned int)m_Weights.size() * 4, 0, 0);
 
-	mWritePositions.Set(&mSkinned[0], (unsigned int)mVertices.size(), 6 * sizeof(float), 0);
-	mWriteNormals.Set(&mSkinned[0], (unsigned int)mVertices.size(), 6 * sizeof(float), 3 * sizeof(float));
+	mWritePositions.Set(m_Skinned[0].v, (unsigned int)m_Vertices.size() * 3, 6 * sizeof(float), 0);
+	mWriteNormals.Set(m_Skinned[0].v, (unsigned int)m_Vertices.size() * 3, 6 * sizeof(float), 3 * sizeof(float));
 
 	for (unsigned int i = 0; i < mReadPositions.Size(); ++i) {
 		*(mWritePositions[i] + 0) = *(mReadPositions[i] + 0);
@@ -130,20 +131,20 @@ void SkinnedSample::InitOpenGL() {
 	if (sizeof(unsigned int) != sizeof(float)) {
 		return;
 	}
-	if (mVertices.size() == 0) {
+	if (m_Vertices.size() == 0) {
 		return;
 	}
-	unsigned int numVerts = (unsigned int)(mVertices.size() / 3);
-	if (numVerts != (unsigned int)(mNormals.size() / 3)) {
+	unsigned int numVerts = (unsigned int)m_Vertices.size();
+	if (numVerts != (unsigned int)m_Normals.size()) {
 		return;
 	}
-	if (numVerts != (unsigned int)(mInfluences.size() / 4)) {
+	if (numVerts != (unsigned int)m_Influences.size()) {
 		return;
 	}
-	if (numVerts != (unsigned int)(mWeights.size() / 4)) {
+	if (numVerts != (unsigned int)m_Weights.size()) {
 		return;
 	}
-	if (numVerts != (unsigned int)(mTexCoords.size() / 2)) {
+	if (numVerts != (unsigned int)m_TexCoords.size()) {
 		return;
 	}
 
@@ -154,25 +155,25 @@ void SkinnedSample::InitOpenGL() {
 
 	// Make interleaved static VBO
 	GLsizei bytes = 0;
-	bytes += (GLsizei)(sizeof(float) * mTexCoords.size());
-	bytes += (GLsizei)(sizeof(unsigned int) * mInfluences.size());
-	bytes += (GLsizei)(sizeof(float) * mWeights.size());
+	bytes += (GLsizei)(sizeof(float) * m_TexCoords.size() * 2);
+	bytes += (GLsizei)(sizeof(int) * m_Influences.size() * 4);
+	bytes += (GLsizei)(sizeof(float) * m_Weights.size() * 4);
 
 	std::vector<float> staticBufferData;
-	staticBufferData.resize(mTexCoords.size() + mInfluences.size() + mWeights.size());
+	staticBufferData.resize(m_TexCoords.size() * 2 + m_Influences.size() * 4 + m_Weights.size() * 4);
 
 	unsigned int current = 0;
 	for (unsigned int i = 0; i < numVerts; ++i) {
-		staticBufferData[current++] = mTexCoords[i * 2 + 0];
-		staticBufferData[current++] = mTexCoords[i * 2 + 1];
-		staticBufferData[current++] = (float)mInfluences[i * 3 + 0];
-		staticBufferData[current++] = (float)mInfluences[i * 3 + 1];
-		staticBufferData[current++] = (float)mInfluences[i * 3 + 2];
-		staticBufferData[current++] = (float)mInfluences[i * 3 + 3];
-		staticBufferData[current++] = mWeights[i * 3 + 0];
-		staticBufferData[current++] = mWeights[i * 3 + 1];
-		staticBufferData[current++] = mWeights[i * 3 + 2];
-		staticBufferData[current++] = mWeights[i * 3 + 3];
+		staticBufferData[current++] = m_TexCoords[i].x;
+		staticBufferData[current++] = m_TexCoords[i].y;
+		staticBufferData[current++] = (float)m_Influences[i].x;
+		staticBufferData[current++] = (float)m_Influences[i].y;
+		staticBufferData[current++] = (float)m_Influences[i].z;
+		staticBufferData[current++] = (float)m_Influences[i].w;
+		staticBufferData[current++] = m_Weights[i].x;
+		staticBufferData[current++] = m_Weights[i].y;
+		staticBufferData[current++] = m_Weights[i].z;
+		staticBufferData[current++] = m_Weights[i].w;
 	}
 
 	glBindVertexArray(mCharacterVAO);
@@ -181,12 +182,12 @@ void SkinnedSample::InitOpenGL() {
 	glBufferData(GL_ARRAY_BUFFER, bytes, &staticBufferData[0], GL_STATIC_DRAW);
 
 	bytes = 0;
-	bytes += (GLsizei)(sizeof(float) * mVertices.size());
-	bytes += (GLsizei)(sizeof(float) * mNormals.size());
-	mSkinned.resize(mVertices.size() + mNormals.size());
+	bytes += (GLsizei)(sizeof(float) * m_Vertices.size() * 3);
+	bytes += (GLsizei)(sizeof(float) * m_Normals.size() * 3);
+	m_Skinned.resize(m_Vertices.size() + m_Normals.size());
 
 	glBindBuffer(GL_ARRAY_BUFFER, mCharacterDynamicVBO);
-	glBufferData(GL_ARRAY_BUFFER, bytes, &mSkinned[0], GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, bytes, &m_Skinned[0].v, GL_STREAM_DRAW);
 
 	if (mIndices.size() > 0) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mCharacterIBO);
@@ -197,61 +198,14 @@ void SkinnedSample::InitOpenGL() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	mCharacterShader = glCreateProgram();
+
+	char* v_source = ReadFileContents("Assets/char_vert.txt");
+	char* f_source = ReadFileContents("Assets/char_frag.txt");
+	mCharacterShader = CompileShaders(v_source, f_source);
+	free(v_source);
+	free(f_source);
+	
 	glUseProgram(mCharacterShader);
-
-	// Compile vertex shader
-	const char* v_source = ReadFileContents("Assets/char_vert.txt");
-	GLuint v_shader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(v_shader, 1, &v_source, NULL);
-	glCompileShader(v_shader);
-	int success = 0;
-	glGetShaderiv(v_shader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		char infoLog[512];
-		glGetShaderInfoLog(v_shader, 512, NULL, infoLog);
-		std::cout << "ERROR: Vertex compilation failed.\n";
-		std::cout << "\t" << infoLog << "\n";
-		glDeleteShader(v_shader);
-		return;
-	};
-	//free((void*)v_source);
-
-	// Compile fragment shader
-	const char* f_source = ReadFileContents("Assets/char_frag.txt");
-	unsigned int f_shader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(f_shader, 1, &f_source, NULL);
-	glCompileShader(f_shader);
-	success = 0;
-	glGetShaderiv(f_shader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		char infoLog[512];
-		glGetShaderInfoLog(f_shader, 512, NULL, infoLog);
-		std::cout << "ERROR: Fragment compilation failed.\n";
-		std::cout << "\t" << infoLog << "\n";
-		glDeleteShader(f_shader);
-		return;
-	};
-	//free((void*)f_source);
-
-
-	// Link shaders
-	glAttachShader(mCharacterShader, v_shader);
-	glAttachShader(mCharacterShader, f_shader);
-	glLinkProgram(mCharacterShader);
-	success = 0;
-	glGetProgramiv(mCharacterShader, GL_LINK_STATUS, &success);
-	if (!success) {
-		char infoLog[512];
-		glGetProgramInfoLog(mCharacterShader, 512, NULL, infoLog);
-		std::cout << "ERROR: Shader linking failed.\n";
-		std::cout << "\t" << infoLog << "\n";
-		glDeleteShader(v_shader);
-		glDeleteShader(f_shader);
-		return;
-	}
-	glDeleteShader(v_shader);
-	glDeleteShader(f_shader);
 
 	mCharacterUniformVP = glGetUniformLocation(mCharacterShader, "viewProjection");
 	mCharacterUniformModel = glGetUniformLocation(mCharacterShader, "model");
@@ -262,42 +216,8 @@ void SkinnedSample::InitOpenGL() {
 
 	glUseProgram(0);
 
+	const char row_color[32][3] = { {0xe7, 0xbd, 0x91}, {0xe7, 0xbd, 0x91}, {0xe7, 0xbd, 0x91}, {0xe7, 0xbd, 0x91}, {0xe7, 0xbd, 0x91}, {0xe7, 0xbd, 0x91}, {0x29, 0x29, 0x29}, {0x29, 0x29, 0x29}, {0x29, 0x29, 0x29}, {0x29, 0x29, 0x29}, {0x29, 0x29, 0x29}, {0xd1, 0xc2, 0x70}, {0xd1, 0xc2, 0x70}, {0xd1, 0xc2, 0x70}, {0xd1, 0xc2, 0x70}, {0xd1, 0xc2, 0x70}, {0xd1, 0xc2, 0x70}, {0xe7, 0x65, 0x5c}, {0xe7, 0x65, 0x5c}, {0xe7, 0x65, 0x5c}, {0xe7, 0x65, 0x5c}, {0xe7, 0x65, 0x5c}, {0xe7, 0x65, 0x5c}, {0x61, 0x87, 0xd3}, {0x61, 0x87, 0xd3}, {0x61, 0x87, 0xd3}, {0x61, 0x87, 0xd3}, {0x61, 0x87, 0xd3}, {0xf0, 0x47, 0x2f}, {0xf0, 0x47, 0x2f}, {0xf0, 0x47, 0x2f}, {0xf0, 0x47, 0x2f} };
 	unsigned char texture[32 * 32 * 3] = { 0 };
-
-	char row_color[32][3] = {
-		{0xe7, 0xbd, 0x91},
-		{0xe7, 0xbd, 0x91},
-		{0xe7, 0xbd, 0x91},
-		{0xe7, 0xbd, 0x91},
-		{0xe7, 0xbd, 0x91},
-		{0xe7, 0xbd, 0x91},
-		{0x29, 0x29, 0x29},
-		{0x29, 0x29, 0x29},
-		{0x29, 0x29, 0x29},
-		{0x29, 0x29, 0x29},
-		{0x29, 0x29, 0x29},
-		{0xd1, 0xc2, 0x70},
-		{0xd1, 0xc2, 0x70},
-		{0xd1, 0xc2, 0x70},
-		{0xd1, 0xc2, 0x70},
-		{0xd1, 0xc2, 0x70},
-		{0xd1, 0xc2, 0x70},
-		{0xe7, 0x65, 0x5c},
-		{0xe7, 0x65, 0x5c},
-		{0xe7, 0x65, 0x5c},
-		{0xe7, 0x65, 0x5c},
-		{0xe7, 0x65, 0x5c},
-		{0xe7, 0x65, 0x5c},
-		{0x61, 0x87, 0xd3},
-		{0x61, 0x87, 0xd3},
-		{0x61, 0x87, 0xd3},
-		{0x61, 0x87, 0xd3},
-		{0x61, 0x87, 0xd3},
-		{0xf0, 0x47, 0x2f},
-		{0xf0, 0x47, 0x2f},
-		{0xf0, 0x47, 0x2f},
-		{0xf0, 0x47, 0x2f}
-	};
 
 	for (unsigned int row = 0; row < 32; ++row) {
 		for (unsigned int col = 0; col < 32; ++col) {
@@ -333,77 +253,58 @@ void SkinnedSample::Update(float dt) {
 
 #if	0
 	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime + dt, true);
-	mAnimatedPose.ToMatrixPalette(&mAnimatedPosePalette[0], mAnimatedPose.Size() * 16);
+	mAnimatedPose.ToMatrixPalette(m_AnimatedPosePalette[0].v, mAnimatedPose.Size());
 
-	for (unsigned int i = 0; i < mVertices.size() / 3; ++i) {
-		float vertex[4] = {
-			mVertices[i * 3 + 0],
-			mVertices[i * 3 + 1],
-			mVertices[i * 3 + 2],
-			1.0f
-		};
-		float normal[4] = {
-			mNormals[i * 3 + 0],
-			mNormals[i * 3 + 1],
-			mNormals[i * 3 + 2],
-			0.0f
-		};
+	for (unsigned int i = 0; i < m_Vertices.size(); ++i) {
+		vec4 vertex(m_Vertices[i].x, m_Vertices[i].y, m_Vertices[i].z, 1.0f);
+		vec4 normal(m_Normals[i].x, m_Normals[i].y, m_Normals[i].z, 0.0f);
 
-		float skin[16] = { 0.0f };
-		float total = 0.0f;
+		mat4 skin;
+		skin.xx = skin.yy = skin.zz = skin.tw = 0.0f;
+
 		for (int j = 0; j < 4; ++j) {
-			unsigned int influence = mInfluences[i * 4 + j];
-			float weight = mWeights[i * 4 + j];
+			unsigned int influence = m_Influences[i].v[j];
+			float weight = m_Weights[i].v[j];
 
 			if (weight > 0.0f) {
 				float matrix[16] = { 0.0f };
-				Animation::MultiplyMatrices(matrix, &mAnimatedPosePalette[influence * 16], &mInvBindPosePalette[influence * 16]);
+				Animation::Internal::MultiplyMatrices(matrix, m_AnimatedPosePalette[influence].v, m_InvBindPosePalette[influence].v);
 
 				for (int k = 0; k < 16; ++k) {
-					skin[k] += matrix[k] * weight;
+					skin.v[k] += matrix[k] * weight;
 				}
 			}
 		}
-		if (!Animation::FloatCompare(total, 1.0f)) {
-			int debug = 7;
-		}
 
 		float result[4] = { 0.0f };
-		
-		Animation::MultiplyMat4Vec4(result, skin, vertex);
-		mSkinned[i * 6 + 0] = result[0];
-		mSkinned[i * 6 + 1] = result[1];
-		mSkinned[i * 6 + 2] = result[2];
-		
-		Animation::MultiplyMat4Vec4(result, skin, normal);
-		mSkinned[i * 6 + 3] = result[0];
-		mSkinned[i * 6 + 4] = result[1];
-		mSkinned[i * 6 + 5] = result[2];
+		Animation::Internal::MultiplyMat4Vec4(result, skin, vertex);
+		mSkinned[i * 2 + 0] = vec3(result[0], result[1], result[2]);
+		Animation::Internal::MultiplyMat4Vec4(result, skin, normal);
+		mSkinned[i * 2 + 1] = vec3(result[0], result[1], result[2]);
 	}
 #else
 	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime + dt, true);
 
 	unsigned int numJoints = mAnimatedPose.Size();
-	mAnimatedPose.ToMatrixPalette(&mAnimatedPosePalette[0], numJoints * 16);
+	mAnimatedPose.ToMatrixPalette(m_AnimatedPosePalette[0].v, numJoints);
 
 #if 0
 	for (unsigned int i = 0; i < numJoints; ++i) {
-		Animation::Internal::MultiplyMatrices(&mAnimatedPosePalette[i * 16], &mAnimatedPosePalette[i * 16], &mInvBindPosePalette[i * 16]);
+		Animation::Internal::MultiplyMatrices(m_AnimatedPosePalette[i].v, m_AnimatedPosePalette[i].v, m_InvBindPosePalette[i].v);
 	}
-	Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, &mAnimatedPosePalette[0], mReadInfluences, mReadWeights);
-	Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, &mAnimatedPosePalette[0], mReadInfluences, mReadWeights);
+	Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, m_AnimatedPosePalette[0].v, mReadInfluences, mReadWeights);
+	Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, m_AnimatedPosePalette[0].v, mReadInfluences, mReadWeights);
 #else
-	Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, &mAnimatedPosePalette[0], &mInvBindPosePalette[0], mReadInfluences, mReadWeights);
-	Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, &mAnimatedPosePalette[0], &mInvBindPosePalette[0], mReadInfluences, mReadWeights);
+	Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, m_AnimatedPosePalette[0].v, m_InvBindPosePalette[0].v, mReadInfluences, mReadWeights);
+	Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, m_AnimatedPosePalette[0].v, m_InvBindPosePalette[0].v, mReadInfluences, mReadWeights);
 #endif
 #endif
 }
 
-void SkinnedSample::DrawAnimatedModel(float* viewProjection, float* model) {
+void SkinnedSample::DrawAnimatedModel(const mat4& viewProjection, const mat4& model) {
 	glBindVertexArray(mCharacterVAO);
 
 	glUseProgram(mCharacterShader);
-
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mCharacterTexture); // mCharacterTexture to GL_TEXTURE0
@@ -414,7 +315,7 @@ void SkinnedSample::DrawAnimatedModel(float* viewProjection, float* model) {
 	glVertexAttribPointer(mCharacterAttribTexCoord, 2, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (GLvoid*)0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mCharacterDynamicVBO);
-	glBufferData(GL_ARRAY_BUFFER, mSkinned.size() * sizeof(float), &mSkinned[0], GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, m_Skinned.size() * 6 * sizeof(float), m_Skinned[0].v, GL_STREAM_DRAW);
 
 	glEnableVertexAttribArray(mCharacterAttribPosition);
 	glVertexAttribPointer(mCharacterAttribPosition, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (GLvoid*)0);
@@ -422,8 +323,8 @@ void SkinnedSample::DrawAnimatedModel(float* viewProjection, float* model) {
 	glEnableVertexAttribArray(mCharacterAttribNormal);
 	glVertexAttribPointer(mCharacterAttribNormal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (GLvoid*)(3 * sizeof(float)));
 
-	glUniformMatrix4fv(mCharacterUniformVP, 1, GL_FALSE, viewProjection);
-	glUniformMatrix4fv(mCharacterUniformModel, 1, GL_FALSE, model);
+	glUniformMatrix4fv(mCharacterUniformVP, 1, GL_FALSE, viewProjection.v);
+	glUniformMatrix4fv(mCharacterUniformModel, 1, GL_FALSE, model.v);
 
 	if (mIndices.size() > 0) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mCharacterIBO);
@@ -431,7 +332,7 @@ void SkinnedSample::DrawAnimatedModel(float* viewProjection, float* model) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 	else {
-		unsigned int numVerts = (unsigned int)(mVertices.size() / 3);
+		unsigned int numVerts = (unsigned int)m_Vertices.size();
 		glDrawArrays(GL_TRIANGLES, 0, numVerts);
 	}
 
@@ -441,156 +342,30 @@ void SkinnedSample::DrawAnimatedModel(float* viewProjection, float* model) {
 	glBindVertexArray(0);
 }
 
-void TODO_Remove_Skinned_Sample_Frustum(float* out, float l, float r, float b, float t, float n, float f) {
-	if (l == r || t == b || n == f) {
-		std::cout << "WARNING: Trying to create invalid frustum\n";
-		return; // Error
-	}
-
-	out[0] = (2.0f * n) / (r - l);
-	out[1] = 0.0f;
-	out[2] = 0.0f;
-	out[3] = 0.0f;
-
-	out[4] = 0.0f;
-	out[5] = (2.0f * n) / (t - b);
-	out[6] = 0.0f;
-	out[7] = 0.0f;
-
-	out[8] = (r + l) / (r - l);
-	out[9] = (t + b) / (t - b);
-	out[10] = (-(f + n)) / (f - n);
-	out[11] = -1.0f;
-
-	out[12] = 0.0f;
-	out[13] = 0.0f;
-	out[14] = (-2 * f * n) / (f - n);
-	out[15] = 0.0f;
-}
-
-void TODO_Remove_Skinned_Sample_Perspective(float* out, float fov, float aspect, float znear, float zfar) {
-	float ymax = znear * tanf(fov * 3.14159265359f / 360.0f);
-	float xmax = ymax * aspect;
-
-	return TODO_Remove_Skinned_Sample_Frustum(out, -xmax, xmax, -ymax, ymax, znear, zfar);
-}
-
-void TODO_Remove_Skinned_Sample_LookAt(float* out, const float* position, const float* target, const float* up) {
-	float delta[3] = {
-		target[0] - position[0],
-		target[1] - position[1],
-		target[2] - position[2]
-	};
-
-	float invDeltaLen = 0.0f;
-	float deltaDot = delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2];
-	if (deltaDot > 0.00001f) { // Len sq
-		invDeltaLen = 1.0f / sqrtf(deltaDot);
-	}
-
-	float f[3] = { // Forward is negative Z
-		delta[0] * invDeltaLen * -1.0f,
-		delta[1] * invDeltaLen * -1.0f,
-		delta[2] * invDeltaLen * -1.0f
-	};
-
-	float r[3] = { // cross(up, f);
-		up[1] * f[2] - up[2] * f[1],
-		up[2] * f[0] - up[0] * f[2],
-		up[0] * f[1] - up[1] * f[0]
-	};
-
-	float rDot = r[0] * r[0] + r[1] * r[1] + r[2] * r[2];
-	if (rDot < 0.00001f) {
-		std::cout << "Could not find right\n";
-		return;
-	}
-	else { // normalize(r);
-		float invRLen = 1.0f / sqrtf(rDot);
-		r[0] *= invRLen;
-		r[1] *= invRLen;
-		r[2] *= invRLen;
-	}
-
-	float u[3] = { // normalized(cross(f, r));
-		f[1] * r[2] - f[2] * r[1],
-		f[2] * r[0] - f[0] * r[2],
-		f[0] * r[1] - f[1] * r[0]
-	};
-
-	float uDot = u[0] * u[0] + u[1] * u[1] + u[2] * u[2];
-	if (uDot < 0.00001f) {
-		std::cout << "Could not find up\n";
-		return;
-	}
-	else { // do the normalize here
-		float invULen = 1.0f / sqrtf(uDot);
-		u[0] *= invULen;
-		u[1] *= invULen;
-		u[2] *= invULen;
-	}
-
-	float t[3] = {
-		-1.0f * (r[0] * position[0] + r[1] * position[1] + r[2] * position[2]),
-		-1.0f * (u[0] * position[0] + u[1] * position[1] + u[2] * position[2]),
-		-1.0f * (f[0] * position[0] + f[1] * position[1] + f[2] * position[2]),
-	};
-
-	out[0] = r[0];
-	out[1] = u[0];
-	out[2] = f[0];
-	out[3] = 0.0f;
-
-	out[4] = r[1];
-	out[5] = u[1];
-	out[6] = f[1];
-	out[7] = 0.0f;
-
-	out[8] = r[2];
-	out[9] = u[2];
-	out[10] = f[2];
-	out[11] = 0.0f;
-
-	out[12] = t[0];
-	out[13] = t[1];
-	out[14] = t[2];
-	out[15] = 1.0f;
-}
-
 void SkinnedSample::Render(float aspect) {
 	if (!mOpenGLInitialized) {
 		return;
 	}
 
-	float model[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-	float view[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-	float projection[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-	float mvp[16] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-
-	float position[3] = { 0.0f, 7.0f, 5.0f };
-	float target[3] = { 0.0f, 3.0f, 0.0f };
-	float up[3] = { 0.0f, 1.0f, 0.0f };
-
-	TODO_Remove_Skinned_Sample_LookAt(view, position, target, up);
-	TODO_Remove_Skinned_Sample_Perspective(projection, 60.0f, aspect, 0.01f, 1000.0f);
-	float tmp[16] = { 0.0f };
-	Animation::Internal::MultiplyMatrices(mvp, view, model);
-	Animation::Internal::MultiplyMatrices(mvp, projection, mvp);
+	mat4 model, view, projection, mvp;
+	view = lookAt(vec3(0.0f, 7.0f, 5.0f), vec3(0.0f, 3.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+	projection = perspective(60.0f, aspect, 0.01f, 1000.0f);
+	mvp = projection * view * model;
 
 	glEnable(GL_DEPTH_TEST);
 	DrawAnimatedModel(mvp, model);
 }
 
 void SkinnedSample::Shutdown() {
-	mVertices.clear();
-	mNormals.clear();
-	mSkinned.clear();
-	mTexCoords.clear();
-	mInfluences.clear();
-	mWeights.clear();
+	m_Vertices.clear();
+	m_Normals.clear();
+	m_Skinned.clear();
+	m_TexCoords.clear();
+	m_Influences.clear();
+	m_Weights.clear();
 	mIndices.clear();
-	mInvBindPosePalette.clear();
-	mAnimatedPosePalette.clear();
+	m_InvBindPosePalette.clear();
+	m_AnimatedPosePalette.clear();
 	mPlayTime = 0.0f;
 	mAniamtionData = Animation::Data();
 	mAnimatedPose = Animation::State();

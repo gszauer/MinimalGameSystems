@@ -5,12 +5,12 @@
 
 class SkinnedSample : public ISample {
 protected: // Raw model data. mSkinned is a write buffer, it contains interleaved vertex and normal data
-	std::vector<float> mVertices;
-	std::vector<float> mNormals;
-	std::vector<float> mSkinned;
-	std::vector<float> mTexCoords;
-	std::vector<unsigned int> mInfluences;
-	std::vector<float> mWeights;
+	std::vector<vec3> m_Vertices;
+	std::vector<vec3> m_Normals;
+	std::vector<vec3> m_Skinned;
+	std::vector<vec2> m_TexCoords;
+	std::vector<uivec4> m_Influences;
+	std::vector<vec4> m_Weights;
 	std::vector<unsigned int> mIndices;
 protected: // Animation data. the two vectors are flat matrix arrays, elements = num matrices * 16
 	Animation::Data mAniamtionData;
@@ -18,8 +18,8 @@ protected: // Animation data. the two vectors are flat matrix arrays, elements =
 	Animation::State mRestPose;
 	Animation::State mBindPose;
 	float mPlayTime = 0.0f;
-	std::vector<float> mInvBindPosePalette;
-	std::vector<float> mAnimatedPosePalette;
+	std::vector<mat4> m_InvBindPosePalette;
+	std::vector<mat4> m_AnimatedPosePalette;
 protected: // The animation system works trough descriptors to allow for things like interleaved arrays
 	// Read positions points to mVertices, writePositions points to mSkinnedVertices. The actual animation
 	// API doesn't care how the underlying data is stored
@@ -49,7 +49,7 @@ private:
 	void LoadAnimation();
 	void InitDescriptors();
 	void InitOpenGL();
-	void DrawAnimatedModel(float* viewProjection, float* model);
+	void DrawAnimatedModel(const mat4& viewProjection, const mat4& model);
 public:
 	void Initialize();
 	void Update(float dt);

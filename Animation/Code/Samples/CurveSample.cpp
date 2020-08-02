@@ -181,7 +181,7 @@ void CurvesSample::Initialize() {
 	mColorAttrib = glGetAttribLocation(mCurveShader, "color");
 
 	glBindBuffer(GL_ARRAY_BUFFER, mCurveVBO);
-	glBufferData(GL_ARRAY_BUFFER, verts.size() * 6 * sizeof(float), &verts[0].v[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, verts.size() * 6 * sizeof(float), verts[0].v, GL_STATIC_DRAW);
 	
 	glEnableVertexAttribArray(mVertexAttrib);
 	glVertexAttribPointer(mVertexAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);

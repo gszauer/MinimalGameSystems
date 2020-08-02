@@ -9,7 +9,25 @@
 #include "glad.h"
 #include <vector>
 
-// TODO: There is no reason the samples need to use floating point arrays. Define some common mathematical constructs in here
+template<typename T>
+struct TVec2 {
+	union {
+		struct {
+			T x;
+			T y;
+		};
+		T v[2];
+	};
+	inline TVec2() : x(T(0)), y(T(0)) { }
+	inline TVec2(T _x, T _y) :
+		x(_x), y(_y) { }
+	inline TVec2(T* fv) :
+		x(fv[0]), y(fv[1]) { }
+};
+
+typedef TVec2<float> vec2;
+typedef TVec2<int> ivec2;
+typedef TVec2<unsigned int> uivec2;
 
 struct vec3 {
 	union {
@@ -128,7 +146,5 @@ mat4 lookAt(const vec3& position, const vec3& target, const vec3& up);
 mat4 operator*(const mat4& a, const mat4& b);
 
 GLuint CompileShaders(const char* v_source, const char* f_source);
-
-// TODO: Remove GLAD. Move common OpenGL definitions in here!
 
 #endif
