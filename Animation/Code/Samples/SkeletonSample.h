@@ -21,10 +21,6 @@ protected:
 	GLint mColorUniform = 0;
 	GLint mVertexAttrib = 0;
 	GLint mMVPUniform = 0;
-private:
-	void CreateModel();
-	void LoadAnimation();
-	void InitOpenGL();
 	void DrawSkeleton(const Animation::State& state, const mat4& mvp, const vec3& color);
 public:
 	void Initialize();

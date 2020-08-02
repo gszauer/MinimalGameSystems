@@ -166,8 +166,8 @@ void CurvesSample::Initialize() {
 	// Setup OpenGL
 	glGenVertexArrays(1, &mCurveVAO);
 	glGenBuffers(1, &mCurveVBO);
-	const char* v_source = ReadFileContents("Assets/curve_vert.txt");
-	const char* f_source = ReadFileContents("Assets/curve_frag.txt");
+	char* v_source = ReadFileContents("Assets/curve_vert.txt");
+	char* f_source = ReadFileContents("Assets/curve_frag.txt");
 	mCurveShader = CompileShaders(v_source, f_source);
 	free((void*)v_source);
 	free((void*)f_source);
