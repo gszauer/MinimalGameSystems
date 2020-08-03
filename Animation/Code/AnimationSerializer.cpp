@@ -423,7 +423,7 @@ void Animation::Serializer::SerializeState(char* output, const State& state) {
     for (; *output = *message; ++message, ++output);
     output = WriteUInt(output, size);
 
-    const char* message = "mHierarchy: ";
+    message = "mHierarchy: ";
     for (; *output = *message; ++message, ++output);
     for (unsigned int i = 0; i < size; ++i) {
         int parent = state.GetParent(i);
@@ -431,7 +431,7 @@ void Animation::Serializer::SerializeState(char* output, const State& state) {
     }
     output = WriteNewLine(output);
 
-    const char* message = "mTransforms: ";
+    message = "mTransforms: ";
     for (; *output = *message; ++message, ++output);
     for (unsigned int i = 0; i < size; ++i) {
         float pos[3], rot[4], scl[3];
