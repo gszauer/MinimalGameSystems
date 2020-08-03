@@ -252,53 +252,10 @@ void SkinnedSample::Update(float dt) {
 		return;
 	}
 
-#if	0
 	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime + dt, true);
-	mAnimatedPose.ToMatrixPalette(m_AnimatedPosePalette[0].v, mAnimatedPose.Size());
-
-	for (unsigned int i = 0; i < m_Vertices.size(); ++i) {
-		vec4 vertex(m_Vertices[i].x, m_Vertices[i].y, m_Vertices[i].z, 1.0f);
-		vec4 normal(m_Normals[i].x, m_Normals[i].y, m_Normals[i].z, 0.0f);
-
-		mat4 skin;
-		skin.xx = skin.yy = skin.zz = skin.tw = 0.0f;
-
-		for (int j = 0; j < 4; ++j) {
-			unsigned int influence = m_Influences[i].v[j];
-			float weight = m_Weights[i].v[j];
-
-			if (weight > 0.0f) {
-				float matrix[16] = { 0.0f };
-				Animation::Internal::MultiplyMatrices(matrix, m_AnimatedPosePalette[influence].v, m_InvBindPosePalette[influence].v);
-
-				for (int k = 0; k < 16; ++k) {
-					skin.v[k] += matrix[k] * weight;
-				}
-			}
-		}
-
-		float result[4] = { 0.0f };
-		Animation::Internal::MultiplyMat4Vec4(result, skin, vertex);
-		mSkinned[i * 2 + 0] = vec3(result[0], result[1], result[2]);
-		Animation::Internal::MultiplyMat4Vec4(result, skin, normal);
-		mSkinned[i * 2 + 1] = vec3(result[0], result[1], result[2]);
-	}
-#else
-	mPlayTime = mAniamtionData.Sample(mAnimatedPose, mPlayTime + dt, true);
-
 	Animation::ToMatrixPalette(m_AnimatedPosePalette[0].v, mAnimatedPose);
-
-#if 0
-	for (unsigned int i = 0; i < numJoints; ++i) {
-		Animation::Internal::MultiplyMatrices(m_AnimatedPosePalette[i].v, m_AnimatedPosePalette[i].v, m_InvBindPosePalette[i].v);
-	}
-	Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, m_AnimatedPosePalette[0].v, mReadInfluences, mReadWeights);
-	Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, m_AnimatedPosePalette[0].v, mReadInfluences, mReadWeights);
-#else
 	Animation::Skin::Apply(mWritePositions, mReadPositions, 1.0f, m_AnimatedPosePalette[0].v, m_InvBindPosePalette[0].v, mReadInfluences, mReadWeights);
 	Animation::Skin::Apply(mWriteNormals, mReadNormals, 0.0f, m_AnimatedPosePalette[0].v, m_InvBindPosePalette[0].v, mReadInfluences, mReadWeights);
-#endif
-#endif
 }
 
 void SkinnedSample::Render(float aspect) {

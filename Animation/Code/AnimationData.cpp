@@ -291,19 +291,10 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 	float clipTime = time;
 	{
 		if (looping) {
-#if 0
-			while (clipTime < clipStartTime) {
-				clipTime += clipDuration;
-			}
-			while (clipTime >= clipEndTime) {
-				clipTime -= clipDuration;
-			}
-#else
 			clipTime = Animation::Internal::FMod(clipTime - clipStartTime, clipDuration) + clipStartTime;
 			if (clipTime < clipStartTime) {
 				clipTime += clipDuration;
 			}
-#endif
 		}
 		else {
 			if (clipTime < clipStartTime) {
@@ -366,19 +357,10 @@ float Animation::Data::SampleTrack(float* out, unsigned int trackIndex, float ti
 
 	float trackTime = time;
 	if (looping) {
-#if 0
-		while (trackTime < trackStartTime) {
-			trackTime += trackDuration;
-		}
-		while (trackTime >= trackEndTime) {
-			trackTime -= trackDuration;
-		}
-#else
 		trackTime = Animation::Internal::FMod(trackTime - trackStartTime, trackDuration) + trackStartTime;
 		if (trackTime < trackStartTime) {
 			trackTime += trackDuration;
 		}
-#endif
 	}
 	else {
 		if (trackTime < trackStartTime) {
