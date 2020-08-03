@@ -22,7 +22,6 @@ namespace Animation {
         const char* IgnoreUntilNumber(const char* target);
         char* WriteNewLine(char* target);
 
-
         void SerializeData(char* out, const Data& in);
         void DeserializeData(Data& out, const char* in);
         unsigned int SerializedDataSize(const Data& in);
