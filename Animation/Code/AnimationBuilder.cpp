@@ -1,5 +1,5 @@
 #include "AnimationBuilder.h"
-#include "AnimationHelpers.h"
+#include "AnimationInternal.h"
 #include <new>
 
 namespace Animation {
@@ -98,7 +98,7 @@ Animation::Builder::Track::Track(unsigned int jointID, Animation::Data::Componen
 
 Animation::Builder::Track::~Track() {
 	if (mFrameData != 0) {
-		Animation::Free(mFrameData);
+		Animation::Internal::Free(mFrameData);
 	}
 }
 
@@ -129,7 +129,7 @@ unsigned int Animation::Builder::Track::Capacity() const {
 
 void Animation::Builder::Track::Reserve(unsigned int numToReserve) {
 	if (mFrameCapacity < numToReserve) {
-		Frame* newFrames = (Frame*)Animation::Allocate(sizeof(Frame) * numToReserve);
+		Frame* newFrames = (Frame*)Animation::Internal::Allocate(sizeof(Frame) * numToReserve);
 
 		for (unsigned int i = 0; i < mFrameCount; ++i) {
 			newFrames[i] = mFrameData[i];
@@ -139,7 +139,7 @@ void Animation::Builder::Track::Reserve(unsigned int numToReserve) {
 		}
 
 		if (mFrameData != 0) {
-			Animation::Free(mFrameData);
+			Animation::Internal::Free(mFrameData);
 		}
 		mFrameData = newFrames;
 		mFrameCapacity = numToReserve;
@@ -150,24 +150,24 @@ void Animation::Builder::Track::Resize(unsigned int newSize) {
 	Frame* newFrames = 0;
 	if (newSize == 0) {
 		if (mFrameData != 0) {
-			Animation::Free(mFrameData);
+			Animation::Internal::Free(mFrameData);
 		}
 	}
 	else if (newSize == mFrameCount && newSize == mFrameCapacity) {
 		newFrames = mFrameData;
 	}
 	else if (newSize < mFrameCount) {
-		newFrames = (Frame*)Animation::Allocate(sizeof(Frame) * newSize);
+		newFrames = (Frame*)Animation::Internal::Allocate(sizeof(Frame) * newSize);
 
 		for (unsigned int i = 0; i < newSize; ++i) {
 			newFrames[i] = mFrameData[i];
 		}
 		if (mFrameData != 0) {
-			Animation::Free(mFrameData);
+			Animation::Internal::Free(mFrameData);
 		}
 	}
 	else { // newSize > mFrameCount
-		newFrames = (Frame*)Animation::Allocate(sizeof(Frame) * newSize);
+		newFrames = (Frame*)Animation::Internal::Allocate(sizeof(Frame) * newSize);
 
 		for (unsigned int i = 0; i < mFrameCount; ++i) {
 			newFrames[i] = mFrameData[i];
@@ -176,7 +176,7 @@ void Animation::Builder::Track::Resize(unsigned int newSize) {
 			newFrames[i] = Frame();
 		}
 		if (mFrameData != 0) {
-			Animation::Free(mFrameData);
+			Animation::Internal::Free(mFrameData);
 		}
 	}
 	mFrameCount = mFrameCapacity = newSize;
@@ -218,14 +218,14 @@ void Animation::Builder::Track::ForceLinear() {
 			float deltaY = nextY - thisY;
 
 			float lenSq = deltaX * deltaX + deltaY * deltaY;
-			if (!FloatCompare(lenSq, 0.0f)) {
-				float invLen = InvSqrt(lenSq);
+			if (!Animation::Internal::FloatCompare(lenSq, 0.0f)) {
+				float invLen = Animation::Internal::InvSqrt(lenSq);
 				deltaX *= invLen;
 				deltaY *= invLen;
 			}
 
 			float tangent = 0.0f;
-			if (!FloatCompare(deltaY, 0.0f)) {
+			if (!Animation::Internal::FloatCompare(deltaY, 0.0f)) {
 				tangent = deltaX / deltaY;
 			}
 
@@ -276,14 +276,14 @@ Animation::Builder::Clip::Clip(const Clip& other) {
 
 Animation::Builder::Clip::~Clip() {
 	if (mName != 0) {
-		Animation::Free(mName);
+		Animation::Internal::Free(mName);
 	}
 
 	if (mTracks != 0) {
 		for (unsigned int i = 0; i < mTrackCount; ++i) {
 			mTracks[i].~Track();
 		}
-		Animation::Free(mTracks);
+		Animation::Internal::Free(mTracks);
 	}
 }
 
@@ -337,7 +337,7 @@ Animation::Builder::Clip& Animation::Builder::Clip::operator=(const Clip& other)
 
 void Animation::Builder::Clip::SetName(const char* newName) {
 	if (mName != 0) {
-		Animation::Free(mName);
+		Animation::Internal::Free(mName);
 		mName = 0;
 	}
 
@@ -345,7 +345,7 @@ void Animation::Builder::Clip::SetName(const char* newName) {
 		unsigned int len = 0;
 		for (const char* c = newName; *c != '\0'; c += 1, len += 1);
 		if (len != 0) {
-			mName = (char*)Allocate((unsigned int)(sizeof(char)) * (len + 1));
+			mName = (char*)Animation::Internal::Allocate((unsigned int)(sizeof(char)) * (len + 1));
 			for (unsigned int i = 0; i < len; ++i) {
 				mName[i] = newName[i];
 			}
@@ -356,7 +356,7 @@ void Animation::Builder::Clip::SetName(const char* newName) {
 
 void Animation::Builder::Clip::Reserve(unsigned int numToReserve) {
 	if (mTrackCapacity < numToReserve) {
-		Track* newTracks = (Track*)Animation::Allocate(sizeof(Track) * numToReserve);
+		Track* newTracks = (Track*)Animation::Internal::Allocate(sizeof(Track) * numToReserve);
 		for (unsigned int i = 0; i < numToReserve; ++i) {
 			new(&newTracks[i])Track(); // Need to call constructor for track
 		}
@@ -372,7 +372,7 @@ void Animation::Builder::Clip::Reserve(unsigned int numToReserve) {
 			for (unsigned int i = 0; i < mTrackCount; ++i) {
 				mTracks[i].~Track();
 			}
-			Animation::Free(mTracks);
+			Animation::Internal::Free(mTracks);
 		}
 		mTracks = newTracks;
 		mTrackCapacity = numToReserve;
@@ -386,14 +386,14 @@ void Animation::Builder::Clip::Resize(unsigned int newSize) {
 			for (unsigned int i = 0; i < mTrackCount; ++i) {
 				mTracks[i].~Track();
 			}
-			Animation::Free(mTracks);
+			Animation::Internal::Free(mTracks);
 		}
 	}
 	else if (newSize == mTrackCount && newSize == mTrackCapacity) {
 		newTracks = mTracks;
 	}
 	else if (newSize < mTrackCount) {
-		newTracks = (Track*)Animation::Allocate(sizeof(Track) * newSize);
+		newTracks = (Track*)Animation::Internal::Allocate(sizeof(Track) * newSize);
 		for (unsigned int i = 0; i < newSize; ++i) {
 			new(&newTracks[i])Track(); // Need to call constructor for track
 		}
@@ -404,11 +404,11 @@ void Animation::Builder::Clip::Resize(unsigned int newSize) {
 			for (unsigned int i = 0; i < mTrackCount; ++i) {
 				mTracks[i].~Track();
 			}
-			Animation::Free(mTracks);
+			Animation::Internal::Free(mTracks);
 		}
 	}
 	else { // newSize > mTrackCount
-		newTracks = (Track*)Animation::Allocate(sizeof(Track) * newSize);
+		newTracks = (Track*)Animation::Internal::Allocate(sizeof(Track) * newSize);
 		for (unsigned int i = 0; i < newSize; ++i) {
 			new(&newTracks[i])Track(); // Need to call constructor for track
 		}
@@ -422,7 +422,7 @@ void Animation::Builder::Clip::Resize(unsigned int newSize) {
 			for (unsigned int i = 0; i < mTrackCount; ++i) {
 				mTracks[i].~Track();
 			}
-			Animation::Free(mTracks);
+			Animation::Internal::Free(mTracks);
 		}
 	}
 	mTrackCount = mTrackCapacity = newSize;
@@ -440,7 +440,7 @@ Animation::Data Animation::Builder::Convert(const Animation::Builder::Clip& clip
 	unsigned int frameDataSize = 0;
 
 	trackDataSize = clip.Size() * 4;
-	trackData = (unsigned int*)Animation::Allocate(((unsigned int)sizeof(unsigned int)) * trackDataSize);
+	trackData = (unsigned int*)Animation::Internal::Allocate(((unsigned int)sizeof(unsigned int)) * trackDataSize);
 	for (unsigned int i = 0; i < clip.Size(); ++i) {
 		const Animation::Builder::Track& track = clip[i];
 		trackData[i * 4 + 0] = track.GetJointID();
@@ -450,7 +450,7 @@ Animation::Data Animation::Builder::Convert(const Animation::Builder::Clip& clip
 		frameDataSize += trackData[i * 4 + 3];
 	}
 
-	float* frameData = (float*)Animation::Allocate(((unsigned int)sizeof(float)) * frameDataSize);
+	float* frameData = (float*)Animation::Internal::Allocate(((unsigned int)sizeof(float)) * frameDataSize);
 	unsigned int writeIndex = 0;
 
 	for (unsigned int trackIndex = 0; trackIndex < clip.Size(); ++trackIndex) {
@@ -482,10 +482,10 @@ Animation::Data Animation::Builder::Convert(const Animation::Builder::Clip& clip
 	}
 	
 	// Rotations are normalized in the SetRawData function
-	result.SetRawData(frameData, frameDataSize, trackData, trackDataSize);
+	result.Set(frameData, frameDataSize, trackData, trackDataSize);
 
-	Animation::Free(trackData);
-	Animation::Free(frameData);
+	Animation::Internal::Free(trackData);
+	Animation::Internal::Free(frameData);
 
 	return result;
 }

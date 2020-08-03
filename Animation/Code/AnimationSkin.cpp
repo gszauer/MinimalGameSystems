@@ -1,5 +1,5 @@
 #include "AnimationSkin.h"
-#include "AnimationHelpers.h"
+#include "AnimationInternal.h"
 
 template Animation::Skin::Descriptor<float, 4>;
 template Animation::Skin::Descriptor<float, 3>;
@@ -114,15 +114,54 @@ void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float
 
 		for (unsigned int j = 0; j < 4; ++j) {
 			if (weight[j] >= 0.000001f) {
-				Animation::Internal::MultiplyMatrices(matrix, &animationMatrixPalette[influence[j] * 16], &invBindPalette[influence[j] * 16]);
+				// Multiply matrices
+				const float* a = &animationMatrixPalette[influence[j] * 16];
+				const float* b = &invBindPalette[influence[j] * 16];
+				float* out = matrix;
+				{
+					float result[16] = { 0.0f };
+
+					// Column 0
+					result[0] = a[0] * b[0] + a[4] * b[1] + a[8] * b[2] + a[12] * b[3];
+					result[1] = a[1] * b[0] + a[5] * b[1] + a[9] * b[2] + a[13] * b[3];
+					result[2] = a[2] * b[0] + a[6] * b[1] + a[10] * b[2] + a[14] * b[3];
+					result[3] = a[3] * b[0] + a[7] * b[1] + a[11] * b[2] + a[15] * b[3];
+
+					// Column 1
+					result[4] = a[0] * b[4] + a[4] * b[5] + a[8] * b[6] + a[12] * b[7];
+					result[5] = a[1] * b[4] + a[5] * b[5] + a[9] * b[6] + a[13] * b[7];
+					result[6] = a[2] * b[4] + a[6] * b[5] + a[10] * b[6] + a[14] * b[7];
+					result[7] = a[3] * b[4] + a[7] * b[5] + a[11] * b[6] + a[15] * b[7];
+
+					// Column 2
+					result[8] = a[0] * b[8] + a[4] * b[9] + a[8] * b[10] + a[12] * b[11];
+					result[9] = a[1] * b[8] + a[5] * b[9] + a[9] * b[10] + a[13] * b[11];
+					result[10] = a[2] * b[8] + a[6] * b[9] + a[10] * b[10] + a[14] * b[11];
+					result[11] = a[3] * b[8] + a[7] * b[9] + a[11] * b[10] + a[15] * b[11];
+
+					// Column 3
+					result[12] = a[0] * b[12] + a[4] * b[13] + a[8] * b[14] + a[12] * b[15];
+					result[13] = a[1] * b[12] + a[5] * b[13] + a[9] * b[14] + a[13] * b[15];
+					result[14] = a[2] * b[12] + a[6] * b[13] + a[10] * b[14] + a[14] * b[15];
+					result[15] = a[3] * b[12] + a[7] * b[13] + a[11] * b[14] + a[15] * b[15];
+
+					for (unsigned int k = 0; k < 16; ++k) {
+						out[k] = result[k];
+					}
+				}
+
 				for (unsigned int k = 0; k < 16; ++k) {
 					skin[k] += matrix[k] * weight[j];
 				}
 			}
 		}
 
-		float result[4] = { 0 };
-		Animation::Internal::MultiplyMat4Vec4(result, skin, vertex);
+		float result[4] = { // Multiply matrix * vertex
+			vertex[0] * skin[0] + vertex[1] * skin[4] + vertex[2] * skin[8]  + vertex[3] * skin[12],
+			vertex[0] * skin[1] + vertex[1] * skin[5] + vertex[2] * skin[9]  + vertex[3] * skin[13],
+			vertex[0] * skin[2] + vertex[1] * skin[6] + vertex[2] * skin[10] + vertex[3] * skin[14],
+			vertex[0] * skin[3] + vertex[1] * skin[7] + vertex[2] * skin[11] + vertex[3] * skin[15]
+		};
 
 		float* outputScalar = output[i];
 		outputScalar[0] = result[0];
@@ -155,9 +194,13 @@ void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float
 				}
 			}
 		}
-
-		float result[4] = { 0 };
-		Animation::Internal::MultiplyMat4Vec4(result, skin, vertex);
+		
+		float result[4] = { // Multiply matrix * vertex
+			vertex[0] * skin[0] + vertex[1] * skin[4] + vertex[2] * skin[8] + vertex[3] * skin[12],
+			vertex[0] * skin[1] + vertex[1] * skin[5] + vertex[2] * skin[9] + vertex[3] * skin[13],
+			vertex[0] * skin[2] + vertex[1] * skin[6] + vertex[2] * skin[10] + vertex[3] * skin[14],
+			vertex[0] * skin[3] + vertex[1] * skin[7] + vertex[2] * skin[11] + vertex[3] * skin[15]
+		};
 
 		float* outputScalar = output[i];
 		outputScalar[0] = result[0];

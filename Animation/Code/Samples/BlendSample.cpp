@@ -1,6 +1,7 @@
 #include "BlendSample.h"
 #include "../AnimationBlend.h"
 #include "../AnimationBuilder.h"
+#include "../AnimationSerializer.h"
 #include <iostream>
 
 namespace BlendSampleInternal {
@@ -28,51 +29,51 @@ void BlendSample::LoadModel() {
 	unsigned int infSize = 0;
 	unsigned int idxSize = 0;
 
-	input = Animation::ReadUInt(input, posSize);
+	input = Animation::Serializer::ReadUInt(input, posSize);
 	mVertices.resize(posSize);
 	for (unsigned int i = 0; i < posSize; ++i) {
-		input = Animation::ReadFloat(input, mVertices[i].x);
-		input = Animation::ReadFloat(input, mVertices[i].y);
-		input = Animation::ReadFloat(input, mVertices[i].z);
+		input = Animation::Serializer::ReadFloat(input, mVertices[i].x);
+		input = Animation::Serializer::ReadFloat(input, mVertices[i].y);
+		input = Animation::Serializer::ReadFloat(input, mVertices[i].z);
 	}
 
-	input = Animation::ReadUInt(input, normSize);
+	input = Animation::Serializer::ReadUInt(input, normSize);
 	mNormals.resize(normSize);
 	for (unsigned int i = 0; i < normSize; ++i) {
-		input = Animation::ReadFloat(input, mNormals[i].x);
-		input = Animation::ReadFloat(input, mNormals[i].y);
-		input = Animation::ReadFloat(input, mNormals[i].z);
+		input = Animation::Serializer::ReadFloat(input, mNormals[i].x);
+		input = Animation::Serializer::ReadFloat(input, mNormals[i].y);
+		input = Animation::Serializer::ReadFloat(input, mNormals[i].z);
 	}
 
-	input = Animation::ReadUInt(input, texSize);
+	input = Animation::Serializer::ReadUInt(input, texSize);
 	mTexCoords.resize(texSize);
 	for (unsigned int i = 0; i < texSize; ++i) {
-		input = Animation::ReadFloat(input, mTexCoords[i].x);
-		input = Animation::ReadFloat(input, mTexCoords[i].y);
+		input = Animation::Serializer::ReadFloat(input, mTexCoords[i].x);
+		input = Animation::Serializer::ReadFloat(input, mTexCoords[i].y);
 	}
 
-	input = Animation::ReadUInt(input, weightSize);
+	input = Animation::Serializer::ReadUInt(input, weightSize);
 	mWeights.resize(weightSize);
 	for (unsigned int i = 0; i < weightSize; ++i) {
-		input = Animation::ReadFloat(input, mWeights[i].x);
-		input = Animation::ReadFloat(input, mWeights[i].y);
-		input = Animation::ReadFloat(input, mWeights[i].z);
-		input = Animation::ReadFloat(input, mWeights[i].w);
+		input = Animation::Serializer::ReadFloat(input, mWeights[i].x);
+		input = Animation::Serializer::ReadFloat(input, mWeights[i].y);
+		input = Animation::Serializer::ReadFloat(input, mWeights[i].z);
+		input = Animation::Serializer::ReadFloat(input, mWeights[i].w);
 	}
 
-	input = Animation::ReadUInt(input, infSize);
+	input = Animation::Serializer::ReadUInt(input, infSize);
 	mInfluences.resize(infSize);
 	for (unsigned int i = 0; i < infSize; ++i) {
-		input = Animation::ReadUInt(input, mInfluences[i].x);
-		input = Animation::ReadUInt(input, mInfluences[i].y);
-		input = Animation::ReadUInt(input, mInfluences[i].z);
-		input = Animation::ReadUInt(input, mInfluences[i].w);
+		input = Animation::Serializer::ReadUInt(input, mInfluences[i].x);
+		input = Animation::Serializer::ReadUInt(input, mInfluences[i].y);
+		input = Animation::Serializer::ReadUInt(input, mInfluences[i].z);
+		input = Animation::Serializer::ReadUInt(input, mInfluences[i].w);
 	}
 
-	input = Animation::ReadUInt(input, idxSize);
+	input = Animation::Serializer::ReadUInt(input, idxSize);
 	mIndices.resize(idxSize);
 	for (unsigned int i = 0; i < idxSize; ++i) {
-		input = Animation::ReadUInt(input, mIndices[i]);
+		input = Animation::Serializer::ReadUInt(input, mIndices[i]);
 	}
 
 	free(fileContent);
@@ -82,22 +83,22 @@ void BlendSample::LoadModel() {
 
 void BlendSample::LoadAnimation() {
 	char* input = ReadFileContents("Assets/bindState.txt");
-	mBindPose.DeSerializeFromString(input);
+	Animation::Serializer::DeserializeState(mBindPose, input);
 	free(input);
 
 	input = ReadFileContents("Assets/restState.txt");
-	mRestPose.DeSerializeFromString(input);
+	Animation::Serializer::DeserializeState(mRestPose, input);
 	mAnimatedPoseA = mRestPose;
 	mAnimatedPoseB = mRestPose;
 	mBlendedPose = mRestPose;
 	free(input);
 
 	input = ReadFileContents("Assets/walkingData.txt");
-	mAniamtionDataA.DeSerializeFromString(input);
+	Animation::Serializer::DeserializeData(mAniamtionDataA, input);
 	free(input);
 
 	input = ReadFileContents("Assets/runningData.txt");
-	mAniamtionDataB.DeSerializeFromString(input);
+	Animation::Serializer::DeserializeData(mAniamtionDataB, input);
 	free(input);
 
 	mPlayTimeA = 0.0f;
@@ -109,7 +110,7 @@ void BlendSample::LoadAnimation() {
 	Animation::ToMatrixPalette(m_InvBindPosePalette[0].v, mBindPose);
 
 	for (unsigned int i = 0; i < mBindPose.Size(); ++i) {
-		Animation::Internal::InvertMatrix(m_InvBindPosePalette[i].v, m_InvBindPosePalette[i].v);
+		m_InvBindPosePalette[i] = inverse(m_InvBindPosePalette[i]);
 	}
 
 	Animation::Builder::Track blendTrack;

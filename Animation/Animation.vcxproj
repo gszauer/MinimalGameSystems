@@ -22,7 +22,8 @@
     <ClInclude Include="Code\AnimationBlend.h" />
     <ClInclude Include="Code\AnimationData.h" />
     <ClInclude Include="Code\AnimationBuilder.h" />
-    <ClInclude Include="Code\AnimationHelpers.h" />
+    <ClInclude Include="Code\AnimationInternal.h" />
+    <ClInclude Include="Code\AnimationSerializer.h" />
     <ClInclude Include="Code\AnimationSkin.h" />
     <ClInclude Include="Code\AnimationState.h" />
     <ClInclude Include="Code\Samples\BlendSample.h" />
@@ -37,7 +38,8 @@
     <ClCompile Include="Code\AnimationBlend.cpp" />
     <ClCompile Include="Code\AnimationBuilder.cpp" />
     <ClCompile Include="Code\AnimationData.cpp" />
-    <ClCompile Include="Code\AnimationHelpers.cpp" />
+    <ClCompile Include="Code\AnimationInternal.cpp" />
+    <ClCompile Include="Code\AnimationSerializer.cpp" />
     <ClCompile Include="Code\AnimationSkin.cpp" />
     <ClCompile Include="Code\AnimationState.cpp" />
     <ClCompile Include="Code\Samples\BlendSample.cpp" />

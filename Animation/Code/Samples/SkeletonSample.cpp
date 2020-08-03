@@ -1,4 +1,5 @@
 #include "SkeletonSample.h"
+#include "../AnimationSerializer.h"
 #include <iostream>
 
 void SkeletonSample::DrawSkeleton(const Animation::State& state, const mat4& mvp, const vec3& color) {
@@ -41,16 +42,16 @@ void SkeletonSample::Initialize() {
 	mPlayTime = 0.0f;
 	
 	char* input = ReadFileContents("Assets/bindState.txt");
-	mBindPose.DeSerializeFromString(input);
+	Animation::Serializer::DeserializeState(mBindPose, input);
 	free(input);
 
 	input = ReadFileContents("Assets/restState.txt");
-	mRestPose.DeSerializeFromString(input);
+	Animation::Serializer::DeserializeState(mRestPose, input);
 	mAnimatedPose = mRestPose;
 	free(input);
 
 	input = ReadFileContents("Assets/walkingData.txt");
-	mAnimationData.DeSerializeFromString(input);
+	Animation::Serializer::DeserializeData(mAnimationData, input);
 	free(input);
 
 	vec3 iPos, pPos;

@@ -33,7 +33,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 #include "../AnimationState.h"
 #include "../AnimationData.h"
-#include "../AnimationHelpers.h"
+#include "../AnimationInternal.h"
 #include "../AnimationSkin.h"
 #include "../AnimationBlend.h"
 

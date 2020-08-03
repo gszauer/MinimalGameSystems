@@ -34,10 +34,6 @@ namespace Animation {
 
         void GetRelativeTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const;
         void GetAbsoluteTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const;
-
-        void SerializeToString(char* output) const;
-        void DeSerializeFromString(const char* input);
-        unsigned int SerializedStringLength() const;
     };
 
     void ToMatrixPalette(float* outArray, const State& state);

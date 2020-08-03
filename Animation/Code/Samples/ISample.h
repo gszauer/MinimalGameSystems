@@ -3,7 +3,7 @@
 
 #include "../AnimationState.h"
 #include "../AnimationData.h"
-#include "../AnimationHelpers.h"
+#include "../AnimationInternal.h"
 #include "../AnimationSkin.h"
 #include "../AnimationBlend.h"
 #include "glad.h"
@@ -127,8 +127,6 @@ public:
 	virtual void Shutdown() = 0;
 };
 
-char* ReadFileContents(const char* file);
-
 void normalize(vec3& v);
 vec3 normalized(const vec3& v);
 vec3 cross(const vec3& l, const vec3& r);
@@ -144,7 +142,13 @@ mat4 perspective(float fov, float aspect, float znear, float zfar);
 mat4 ortho(float l, float r, float b, float t, float n, float f);
 mat4 lookAt(const vec3& position, const vec3& target, const vec3& up);
 mat4 operator*(const mat4& a, const mat4& b);
+mat4 operator*(const mat4& m, float f);
+mat4 inverse(const mat4& m);
+mat4 adjugate(const mat4& m);
+float determinant(const mat4& m);
+mat4 transposed(const mat4& m);
 
 GLuint CompileShaders(const char* v_source, const char* f_source);
+char* ReadFileContents(const char* file);
 
 #endif

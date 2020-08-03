@@ -1,6 +1,6 @@
 #include "AnimationData.h"
 #include "AnimationState.h"
-#include "AnimationHelpers.h"
+#include "AnimationInternal.h"
 
 namespace Animation {
 	int Data::StepLimit = 1000000.0f;
@@ -51,7 +51,7 @@ namespace Animation {
 					if (stepOut || stepIn) {
 						out[component] = valueLeft[component];
 					}
-					else if (Animation::FloatCompare(outTangent, linearTangent) && Animation::FloatCompare(inTangent, linearTangent)) {
+					else if (Animation::Internal::FloatCompare(outTangent, linearTangent) && Animation::Internal::FloatCompare(inTangent, linearTangent)) {
 						out[component] = valueLeft[component] + (valueRight[component] - valueLeft[component]) * t;
 					}
 					else { // Cubic
@@ -156,9 +156,9 @@ namespace Animation {
 
 				// Normalize
 				float lenSq = out[0] * out[0] + out[1] * out[1] + out[2] * out[2] + out[3] * out[3];
-				if (!Animation::FloatCompare(lenSq, 1.0f)) {
+				if (!Animation::Internal::FloatCompare(lenSq, 1.0f)) {
 					if (lenSq > 0.0f) {
-						float invLen = Animation::InvSqrt(lenSq);
+						float invLen = Animation::Internal::InvSqrt(lenSq);
 						out[0] *= invLen;
 						out[1] *= invLen;
 						out[2] *= invLen;
@@ -196,7 +196,7 @@ Animation::Data& Animation::Data::operator=(const Data& other) {
 		return *this;
 	}
 
-	SetRawData(other.mFrameData, other.mFrameDataSize, other.mTrackData, other.mTrackDataSize);
+	Set(other.mFrameData, other.mFrameDataSize, other.mTrackData, other.mTrackDataSize);
 	SetLabel(other.GetLabel());
 
 	return *this;
@@ -204,13 +204,13 @@ Animation::Data& Animation::Data::operator=(const Data& other) {
 
 Animation::Data::~Data() {
 	if (mFrameData != 0) {
-		Animation::Free(mFrameData);
+		Animation::Internal::Free(mFrameData);
 	}
 	if (mTrackData != 0) {
-		Animation::Free(mTrackData);
+		Animation::Internal::Free(mTrackData);
 	}
 	if (mLabel != 0) {
-		Animation::Free(mLabel);
+		Animation::Internal::Free(mLabel);
 	}
 }
 
@@ -256,7 +256,7 @@ const char* Animation::Data::GetLabel() const {
 
 void Animation::Data::SetLabel(const char* label) {
 	if (mLabel != 0) {
-		Animation::Free(mLabel);
+		Animation::Internal::Free(mLabel);
 		mLabel = 0;
 	}
 
@@ -271,7 +271,7 @@ void Animation::Data::SetLabel(const char* label) {
 	if (length == 0) {
 		return;
 	}
-	mLabel = (char*)Animation::Allocate(sizeof(char) * (length + 1));
+	mLabel = (char*)Animation::Internal::Allocate(sizeof(char) * (length + 1));
 	for (char* cpy = mLabel; *cpy = *label; ++label, ++cpy); // StrCpy
 	mLabel[length] = '\0';
 }
@@ -299,7 +299,7 @@ float Animation::Data::Sample(State& out, float time, bool looping) const {
 				clipTime -= clipDuration;
 			}
 #else
-			clipTime = Animation::FMod(clipTime - clipStartTime, clipDuration) + clipStartTime;
+			clipTime = Animation::Internal::FMod(clipTime - clipStartTime, clipDuration) + clipStartTime;
 			if (clipTime < clipStartTime) {
 				clipTime += clipDuration;
 			}
@@ -374,7 +374,7 @@ float Animation::Data::SampleTrack(float* out, unsigned int trackIndex, float ti
 			trackTime -= trackDuration;
 		}
 #else
-		trackTime = Animation::FMod(trackTime - trackStartTime, trackDuration) + trackStartTime;
+		trackTime = Animation::Internal::FMod(trackTime - trackStartTime, trackDuration) + trackStartTime;
 		if (trackTime < trackStartTime) {
 			trackTime += trackDuration;
 		}
@@ -471,51 +471,18 @@ float Animation::Data::SampleTrack(float* out, unsigned int trackIndex, float ti
 	return trackTime;
 }
 
-void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize, const unsigned int* trackData, unsigned int trackSize) {
-	// Set frame data
-	if (frameData == 0 || frameSize == 0) {
-		if (mFrameData != 0) {
-			Animation::Free(mFrameData);
-		}
-		mFrameData = 0;
-		mFrameDataSize = 0;
+void Animation::Data::SetPointers(float* frameData, unsigned int frameSize, unsigned int* trackData, unsigned int trackSize) {
+	if (mFrameData != 0 && mFrameData != frameData) {
+		Animation::Internal::Free(mFrameData);
 	}
-	else {
-		if (frameSize != mFrameDataSize) {
-			if (mFrameData != 0) {
-				Animation::Free(mFrameData);
-			}
-			mFrameData = (float*)Animation::Allocate(((unsigned int)sizeof(float)) * frameSize);
-			mFrameDataSize = frameSize;
-		}
+	mFrameData = frameData;
+	mFrameDataSize = frameSize;
 
-		for (unsigned int i = 0; i < frameSize; ++i) {
-			mFrameData[i] = frameData[i];
-		}
+	if (mTrackData != 0 && mTrackData != trackData) {
+		Animation::Internal::Free(mTrackData);
 	}
-
-	// Set track data
-	if (trackData == 0 || trackSize == 0) {
-		if (mTrackData != 0) {
-			Animation::Free(mTrackData);
-		}
-		mTrackData = 0;
-		mTrackDataSize = 0;
-		return;
-	}
-	else {
-		if (trackSize != mTrackDataSize) {
-			if (mTrackData != 0) {
-				Animation::Free(mTrackData);
-			}
-			mTrackData = (unsigned int*)Animation::Allocate(((unsigned int)sizeof(unsigned int)) * trackSize);
-			mTrackDataSize = trackSize;
-		}
-
-		for (unsigned int i = 0; i < trackSize; ++i) {
-			mTrackData[i] = trackData[i];
-		}
-	}
+	mTrackData = trackData;
+	mTrackDataSize = trackSize;
 
 	// Figure out start and end times
 	if (mFrameData != 0 && mTrackData != 0) {
@@ -543,7 +510,7 @@ void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize,
 		}
 	}
 
-	// Normalize vectors
+	// Normalize quaternions
 	if (mFrameData != 0 && mTrackData != 0) {
 		unsigned int trackStride = 4;
 		// Loop trough all tracks
@@ -559,9 +526,9 @@ void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize,
 					float* rot = &mFrameData[offset + (j * 13) + 1 + 4];
 
 					float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];
-					if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
+					if (!Animation::Internal::FloatCompare(rotLenSq, 1.0f)) {
 						if (rotLenSq > 0.0f) {
-							float invRotLen = Animation::InvSqrt(rotLenSq);
+							float invRotLen = Animation::Internal::InvSqrt(rotLenSq);
 							rot[0] *= rotLenSq;
 							rot[1] *= rotLenSq;
 							rot[2] *= rotLenSq;
@@ -574,150 +541,52 @@ void Animation::Data::SetRawData(const float* frameData, unsigned int frameSize,
 	}
 }
 
-void Animation::Data::SerializeToString(char* output) const {
-	char* last = output;
-	unsigned int written = 0;
-	unsigned int delta = 0;
-
-	output = WriteUInt(output, mFrameDataSize);
-	output = WriteNewLine(output);
-
-	for (unsigned int i = 0; i < mFrameDataSize; ++i) {
-		output = WriteFloat(output, mFrameData[i]);
-	}
-	output = WriteNewLine(output);
-
-	output = WriteUInt(output, mTrackDataSize);
-	output = WriteNewLine(output);
-	for (unsigned int i = 0; i < mTrackDataSize; ++i) {
-		output = WriteUInt(output, mTrackData[i]);
-	}
-	output = WriteNewLine(output);
-
-	output = WriteFloat(output, mStartTime);
-	output = WriteFloat(output, mEndTime);
-	output = WriteNewLine(output);
-
-	unsigned int labelLength = 0;
-	if (mLabel != 0) {
-		char* it = mLabel;
-		while (*it != '\0') {
-			labelLength += 1;
-			it += 1;
+void Animation::Data::Set(const float* frameData, unsigned int frameSize, const unsigned int* trackData, unsigned int trackSize) {
+	// Set frame data
+	if (frameData == 0 || frameSize == 0) {
+		if (mFrameData != 0) {
+			Animation::Internal::Free(mFrameData);
 		}
+		mFrameData = 0;
+		mFrameDataSize = 0;
 	}
-	output = WriteUInt(output, labelLength);
-
-	for (unsigned int i = 0; i < labelLength; ++i) {
-		*output = mLabel[i];
-		output += 1;
-	}
-
-	*output = '\0';
-}
-
-unsigned int Animation::Data::SerializedStringLength() const {
-	unsigned int size = 0;
-
-	size += StringLengthUInt(mFrameDataSize) + 1;
-	size += 1;
-
-	for (unsigned int i = 0; i < mFrameDataSize; ++i) {
-		size += StringLengthFloat(mFrameData[i]) + 1;
-	}
-	size += 1;
-
-	size += StringLengthUInt(mTrackDataSize) + 1;
-	size += 1;
-	for (unsigned int i = 0; i < mTrackDataSize; ++i) {
-		size += StringLengthUInt(mTrackData[i]) + 1;
-	}
-	size += 1;
-
-	size += StringLengthFloat(mStartTime) + 1;
-	size += StringLengthFloat(mEndTime) + 1;
-	size += 1;
-
-	unsigned int labelLength = 0;
-	if (mLabel != 0) {
-		char* it = mLabel;
-		while (*it != '\0') {
-			labelLength += 1;
-			it += 1;
-		}
-	}
-	size += StringLengthUInt(labelLength) + 1;
-
-	for (unsigned int i = 0; i < labelLength; ++i) {
-		size += 1;
-	}
-
-	size += 1;
-
-	return size;
-}
-
-void Animation::Data::DeSerializeFromString(const char* input) {
-	input = IgnoreUntilNumber(input);
-	input = ReadUInt(input, mFrameDataSize);
-	if (mFrameData != 0) {
-		Free(mFrameData);
-	}
-	mFrameData = (float*)Allocate(sizeof(float) * mFrameDataSize);
-
-	for (unsigned int i = 0; i < mFrameDataSize; ++i) {
-		input = ReadFloat(input, mFrameData[i]);
-	}
-
-	input = ReadUInt(input, mTrackDataSize);
-	if (mTrackData != 0) {
-		Free(mTrackData);
-	}
-	mTrackData = (unsigned int*)Allocate(sizeof(unsigned int) * mTrackDataSize);
-	for (unsigned int i = 0; i < mTrackDataSize; ++i) {
-		input = ReadUInt(input, mTrackData[i]);
-	}
-
-	input = ReadFloat(input, mStartTime);
-	input = ReadFloat(input, mEndTime);
-
-	unsigned int labelLength = 0;
-	input = ReadUInt(input, labelLength);
-	mLabel = (char*)Allocate(sizeof(char) * labelLength + 1);
-
-	for (unsigned int i = 0; i < labelLength; ++i) {
-		mLabel[i] = *input;
-		input += 1;
-	}
-	mLabel[labelLength] = '\0';
-
-	// Normalize vectors
-	if (mFrameData != 0 && mTrackData != 0) {
-		unsigned int trackStride = 4;
-		// Loop trough all tracks
-		for (unsigned int i = 0; i < mTrackDataSize; i += trackStride) {
-			unsigned int component = mTrackData[i + 1];
-			if (component == (unsigned int)Animation::Data::Component::Rotation) {
-				unsigned int offset = mTrackData[i + 2];
-				unsigned int size = mTrackData[i + 3];
-
-				unsigned int frameDataStride = 13;
-
-				for (int j = 0; j < size / frameDataStride; ++j) {
-					float* rot = &mFrameData[offset + (j * 13) + 1 + 4];
-
-					float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];
-					if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
-						if (rotLenSq > 0.0f) {
-							float invRotLen = Animation::InvSqrt(rotLenSq);
-							rot[0] *= rotLenSq;
-							rot[1] *= rotLenSq;
-							rot[2] *= rotLenSq;
-							rot[3] *= rotLenSq;
-						}
-					}
-				}
+	else {
+		if (frameSize != mFrameDataSize) {
+			if (mFrameData != 0) {
+				Animation::Internal::Free(mFrameData);
 			}
+			mFrameData = (float*)Animation::Internal::Allocate(((unsigned int)sizeof(float)) * frameSize);
+			mFrameDataSize = frameSize;
+		}
+
+		for (unsigned int i = 0; i < frameSize; ++i) {
+			mFrameData[i] = frameData[i];
 		}
 	}
+
+	// Set track data
+	if (trackData == 0 || trackSize == 0) {
+		if (mTrackData != 0) {
+			Animation::Internal::Free(mTrackData);
+		}
+		mTrackData = 0;
+		mTrackDataSize = 0;
+		return;
+	}
+	else {
+		if (trackSize != mTrackDataSize) {
+			if (mTrackData != 0) {
+				Animation::Internal::Free(mTrackData);
+			}
+			mTrackData = (unsigned int*)Animation::Internal::Allocate(((unsigned int)sizeof(unsigned int)) * trackSize);
+			mTrackDataSize = trackSize;
+		}
+
+		for (unsigned int i = 0; i < trackSize; ++i) {
+			mTrackData[i] = trackData[i];
+		}
+	}
+
+	// Figure out start and end times and normalize quaternions in the set pointer function
+	SetPointers(mFrameData, mFrameDataSize, mTrackData, mTrackDataSize);
 }

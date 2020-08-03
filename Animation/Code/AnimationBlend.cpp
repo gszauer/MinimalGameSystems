@@ -1,6 +1,6 @@
 #include "AnimationBlend.h"
 #include "AnimationState.h"
-#include "AnimationHelpers.h"
+#include "AnimationInternal.h"
 
 bool Animation::Blend(State& target, const State& a, const State& b, float t) {
 	if (a.Size() != b.Size() || target.Size() != a.Size()) {
@@ -45,8 +45,8 @@ bool Animation::Blend(State& target, const State& a, const State& b, float t) {
 		blend[2] = value_a[2] + (value_b[2] - value_a[2]) * t;
 		blend[3] = value_a[3] + (value_b[3] - value_a[3]) * t;
 		float lenSquared = blend[0] * blend[0] + blend[1] * blend[1] + blend[2] * blend[2] + blend[3] * blend[3];
-		if (!Animation::FloatCompare(lenSquared, 1.0f)) {
-			float inverseLength = Animation::InvSqrt(lenSquared);
+		if (!Animation::Internal::FloatCompare(lenSquared, 1.0f)) {
+			float inverseLength = Animation::Internal::InvSqrt(lenSquared);
 			blend[0] *= inverseLength;
 			blend[1] *= inverseLength;
 			blend[2] *= inverseLength;

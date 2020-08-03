@@ -213,3 +213,72 @@ GLuint CompileShaders(const char* v_source, const char* f_source) {
 
 	return shader;
 }
+
+mat4 inverse(const mat4& m) {
+	float det = determinant(m);
+
+	if (det == 0.0f) { // Epsilon check would need to be REALLY small
+		std::cout << "WARNING: Trying to invert a matrix with a zero determinant\n";
+		return mat4();
+	}
+	mat4 adj = adjugate(m);
+
+	return adj * (1.0f / det);
+}
+
+#define M4_3X3MINOR(c0, c1, c2, r0, r1, r2) \
+    (m.v[c0 * 4 + r0] * (m.v[c1 * 4 + r1] * m.v[c2 * 4 + r2] - m.v[c1 * 4 + r2] * m.v[c2 * 4 + r1]) - \
+     m.v[c1 * 4 + r0] * (m.v[c0 * 4 + r1] * m.v[c2 * 4 + r2] - m.v[c0 * 4 + r2] * m.v[c2 * 4 + r1]) + \
+     m.v[c2 * 4 + r0] * (m.v[c0 * 4 + r1] * m.v[c1 * 4 + r2] - m.v[c0 * 4 + r2] * m.v[c1 * 4 + r1]))
+
+float determinant(const mat4& m) {
+	return  m.v[0] * M4_3X3MINOR(1, 2, 3, 1, 2, 3)
+		- m.v[4] * M4_3X3MINOR(0, 2, 3, 1, 2, 3)
+		+ m.v[8] * M4_3X3MINOR(0, 1, 3, 1, 2, 3)
+		- m.v[12] * M4_3X3MINOR(0, 1, 2, 1, 2, 3);
+}
+
+mat4 adjugate(const mat4& m) {
+	// Cofactor(M[i, j]) = Minor(M[i, j]] * pow(-1, i + j)
+	mat4 cofactor;
+
+	cofactor.v[0] = M4_3X3MINOR(1, 2, 3, 1, 2, 3);
+	cofactor.v[1] = -M4_3X3MINOR(1, 2, 3, 0, 2, 3);
+	cofactor.v[2] = M4_3X3MINOR(1, 2, 3, 0, 1, 3);
+	cofactor.v[3] = -M4_3X3MINOR(1, 2, 3, 0, 1, 2);
+
+	cofactor.v[4] = -M4_3X3MINOR(0, 2, 3, 1, 2, 3);
+	cofactor.v[5] = M4_3X3MINOR(0, 2, 3, 0, 2, 3);
+	cofactor.v[6] = -M4_3X3MINOR(0, 2, 3, 0, 1, 3);
+	cofactor.v[7] = M4_3X3MINOR(0, 2, 3, 0, 1, 2);
+
+	cofactor.v[8] = M4_3X3MINOR(0, 1, 3, 1, 2, 3);
+	cofactor.v[9] = -M4_3X3MINOR(0, 1, 3, 0, 2, 3);
+	cofactor.v[10] = M4_3X3MINOR(0, 1, 3, 0, 1, 3);
+	cofactor.v[11] = -M4_3X3MINOR(0, 1, 3, 0, 1, 2);
+
+	cofactor.v[12] = -M4_3X3MINOR(0, 1, 2, 1, 2, 3);
+	cofactor.v[13] = M4_3X3MINOR(0, 1, 2, 0, 2, 3);
+	cofactor.v[14] = -M4_3X3MINOR(0, 1, 2, 0, 1, 3);
+	cofactor.v[15] = M4_3X3MINOR(0, 1, 2, 0, 1, 2);
+
+	return transposed(cofactor);
+}
+
+mat4 transposed(const mat4& m) {
+	return mat4(
+		m.xx, m.yx, m.zx, m.tx,
+		m.xy, m.yy, m.zy, m.ty,
+		m.xz, m.yz, m.zz, m.tz,
+		m.xw, m.yw, m.zw, m.tw
+		);
+}
+
+mat4 operator*(const mat4& m, float f) {
+	return mat4(
+		m.xx * f, m.xy * f, m.xz * f, m.xw * f,
+		m.yx * f, m.yy * f, m.yz * f, m.yw * f,
+		m.zx * f, m.zy * f, m.zz * f, m.zw * f,
+		m.tx * f, m.ty * f, m.tz * f, m.tw * f
+		);
+}

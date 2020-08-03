@@ -40,7 +40,8 @@ namespace Animation {
         Data& operator=(const Data& other);
         ~Data();
 
-        void SetRawData(const float* frameData, unsigned int frameSize, const unsigned int* trackData, unsigned int trackSize);
+        void Set(const float* frameData, unsigned int frameSize, const unsigned int* trackData, unsigned int trackSize);
+        void SetPointers(float* frameData, unsigned int frameSize, unsigned int* trackData, unsigned int trackSize);
 
         const float* GetFrameData() const;
         unsigned int FrameDataSize() const;
@@ -59,10 +60,6 @@ namespace Animation {
 
         float Sample(State& out, float time, bool looping) const;
         float SampleTrack(float* out, unsigned int trackIndex, float time, bool looping) const;
-        
-        void SerializeToString(char* output) const;
-        void DeSerializeFromString(const char* input);
-        unsigned int SerializedStringLength() const;
     };
 }
 

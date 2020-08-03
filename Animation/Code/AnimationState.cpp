@@ -1,5 +1,71 @@
 #include "AnimationState.h"
-#include "AnimationHelpers.h"
+#include "AnimationInternal.h"
+
+namespace Animation {
+    namespace Internal {
+        static void TransformToMatrix(float* outMatrix, const float* position, const float* rot, const float* scale) {
+            // First, extract the rotation basis of the transform
+            float v[3] = { 1.0f, 0.0f, 0.0f };
+            float d1 = rot[0] * v[0] + rot[1] * v[1] + rot[2] * v[2];
+            float d2 = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2];
+            float x[3] = {
+                 (rot[0] * 2.0f * d1) + (v[0] * (rot[3] * rot[3] - d2)) + ((rot[1] * v[2] - rot[2] * v[1]) * 2.0f * rot[3]),
+                 (rot[1] * 2.0f * d1) + (v[1] * (rot[3] * rot[3] - d2)) + ((rot[2] * v[0] - rot[0] * v[2]) * 2.0f * rot[3]),
+                 (rot[2] * 2.0f * d1) + (v[2] * (rot[3] * rot[3] - d2)) + ((rot[0] * v[1] - rot[1] * v[0]) * 2.0f * rot[3])
+            };
+
+            v[0] = 0.0f; v[1] = 1.0f;
+            d1 = rot[0] * v[0] + rot[1] * v[1] + rot[2] * v[2];
+            float y[3] = {
+                (rot[0] * 2.0f * d1) + (v[0] * (rot[3] * rot[3] - d2)) + ((rot[1] * v[2] - rot[2] * v[1]) * 2.0f * rot[3]),
+                (rot[1] * 2.0f * d1) + (v[1] * (rot[3] * rot[3] - d2)) + ((rot[2] * v[0] - rot[0] * v[2]) * 2.0f * rot[3]),
+                (rot[2] * 2.0f * d1) + (v[2] * (rot[3] * rot[3] - d2)) + ((rot[0] * v[1] - rot[1] * v[0]) * 2.0f * rot[3])
+            };
+
+            v[1] = 0.0f; v[2] = 1.0f;
+            d1 = rot[0] * v[0] + rot[1] * v[1] + rot[2] * v[2];
+            float z[3] = {
+                (rot[0] * 2.0f * d1) + (v[0] * (rot[3] * rot[3] - d2)) + ((rot[1] * v[2] - rot[2] * v[1]) * 2.0f * rot[3]),
+                (rot[1] * 2.0f * d1) + (v[1] * (rot[3] * rot[3] - d2)) + ((rot[2] * v[0] - rot[0] * v[2]) * 2.0f * rot[3]),
+                (rot[2] * 2.0f * d1) + (v[2] * (rot[3] * rot[3] - d2)) + ((rot[0] * v[1] - rot[1] * v[0]) * 2.0f * rot[3])
+            };
+
+            // Next, scale the basis vectors
+            x[0] *= scale[0];
+            x[1] *= scale[0];
+            x[2] *= scale[0];
+
+            y[0] *= scale[1];
+            y[1] *= scale[1];
+            y[2] *= scale[1];
+
+            z[0] *= scale[2];
+            z[1] *= scale[2];
+            z[2] *= scale[2];
+
+            // Create matrix
+            outMatrix[0] = x[0];
+            outMatrix[1] = x[1];
+            outMatrix[2] = x[2];
+            outMatrix[3] = 0.0f;
+
+            outMatrix[4] = y[0];
+            outMatrix[5] = y[1];
+            outMatrix[6] = y[2];
+            outMatrix[7] = 0.0f;
+
+            outMatrix[8] = z[0];
+            outMatrix[9] = z[1];
+            outMatrix[10] = z[2];
+            outMatrix[11] = 0.0f;
+
+            outMatrix[12] = position[0];
+            outMatrix[13] = position[1];
+            outMatrix[14] = position[2];
+            outMatrix[15] = 1.0f;
+        }
+    }
+}
 
 Animation::State::State() {
     mTransforms = 0;
@@ -47,11 +113,11 @@ void Animation::State::Resize(unsigned int size) {
     }
 
     if (mTransforms != 0) {
-        Animation::Free(mTransforms);
+        Animation::Internal::Free(mTransforms);
         mTransforms = 0;
     }
     if (mHierarchy != 0) {
-        Animation::Free(mHierarchy);
+        Animation::Internal::Free(mHierarchy);
         mHierarchy = 0;
     }
 
@@ -60,8 +126,8 @@ void Animation::State::Resize(unsigned int size) {
         mTransforms = 0;
     }
     else {
-        mTransforms = (float*)Animation::Allocate(sizeof(float) * size * 10);
-        mHierarchy = (int*)Animation::Allocate(sizeof(int) * size);
+        mTransforms = (float*)Animation::Internal::Allocate(sizeof(float) * size * 10);
+        mHierarchy = (int*)Animation::Internal::Allocate(sizeof(int) * size);
     }
     mSize = size;
 }
@@ -83,7 +149,42 @@ void Animation::ToMatrixPalette(float* outArray, const State& state) {
         state.GetRelativeScale(i, scale);
         Animation::Internal::TransformToMatrix(&outArray[i * 16], position, rotation, scale);
         if (parent >= 0) {
-            Animation::Internal::MultiplyMatrices(&outArray[i * 16], &outArray[(unsigned int)parent * 16], &outArray[i * 16]);
+
+            // multiply matrices
+            const float* a = &outArray[(unsigned int)parent * 16];
+            const float* b = &outArray[i * 16];
+            float* out = &outArray[i * 16];
+            {
+                float result[16] = { 0.0f };
+
+                // Column 0
+                result[0] = a[0] * b[0] + a[4] * b[1] + a[8] * b[2] + a[12] * b[3];
+                result[1] = a[1] * b[0] + a[5] * b[1] + a[9] * b[2] + a[13] * b[3];
+                result[2] = a[2] * b[0] + a[6] * b[1] + a[10] * b[2] + a[14] * b[3];
+                result[3] = a[3] * b[0] + a[7] * b[1] + a[11] * b[2] + a[15] * b[3];
+
+                // Column 1
+                result[4] = a[0] * b[4] + a[4] * b[5] + a[8] * b[6] + a[12] * b[7];
+                result[5] = a[1] * b[4] + a[5] * b[5] + a[9] * b[6] + a[13] * b[7];
+                result[6] = a[2] * b[4] + a[6] * b[5] + a[10] * b[6] + a[14] * b[7];
+                result[7] = a[3] * b[4] + a[7] * b[5] + a[11] * b[6] + a[15] * b[7];
+
+                // Column 2
+                result[8] = a[0] * b[8] + a[4] * b[9] + a[8] * b[10] + a[12] * b[11];
+                result[9] = a[1] * b[8] + a[5] * b[9] + a[9] * b[10] + a[13] * b[11];
+                result[10] = a[2] * b[8] + a[6] * b[9] + a[10] * b[10] + a[14] * b[11];
+                result[11] = a[3] * b[8] + a[7] * b[9] + a[11] * b[10] + a[15] * b[11];
+
+                // Column 3
+                result[12] = a[0] * b[12] + a[4] * b[13] + a[8] * b[14] + a[12] * b[15];
+                result[13] = a[1] * b[12] + a[5] * b[13] + a[9] * b[14] + a[13] * b[15];
+                result[14] = a[2] * b[12] + a[6] * b[13] + a[10] * b[14] + a[14] * b[15];
+                result[15] = a[3] * b[12] + a[7] * b[13] + a[11] * b[14] + a[15] * b[15];
+
+                for (unsigned int j = 0; j < 16; ++j) {
+                    out[j] = result[j];
+                }
+            }
         }
     }
 
@@ -145,9 +246,9 @@ void Animation::State::SetRelativeRotation(unsigned int index, const float* rot)
     rotation[3] = rot[3];
 
     float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];
-    if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
+    if (!Animation::Internal::FloatCompare(rotLenSq, 1.0f)) {
         if (rotLenSq > 0.0f) {
-            float invRotLen = Animation::InvSqrt(rotLenSq);
+            float invRotLen = Animation::Internal::InvSqrt(rotLenSq);
             rotation[0] *= rotLenSq;
             rotation[1] *= rotLenSq;
             rotation[2] *= rotLenSq;
@@ -255,94 +356,4 @@ void Animation::State::GetAbsoluteScale(unsigned int index, float* outVec3) cons
     float rotation[4];
 
     GetAbsoluteTransform(index, position, rotation, outVec3);
-}
-
-unsigned int Animation::State::SerializedStringLength() const {
-    unsigned int space = 1;
-    unsigned int lineBreak = 1;
-
-    unsigned int stringLength = StringLengthUInt(mSize) + space + lineBreak;
-
-    for (unsigned int i = 0; i < mSize; ++i) {
-        stringLength += StringLengthInt(mHierarchy[i]) + space;
-    }
-    stringLength += lineBreak;
-
-    for (unsigned int i = 0; i < mSize; ++i) {
-        stringLength += StringLengthFloat(mTransforms[i * 10 + 0]) + space;
-        stringLength += StringLengthFloat(mTransforms[i * 10 + 1]) + space;
-        stringLength += StringLengthFloat(mTransforms[i * 10 + 2]) + space;
-        stringLength += StringLengthFloat(mTransforms[i * 10 + 3]) + space;
-        stringLength += StringLengthFloat(mTransforms[i * 10 + 4]) + space;
-        stringLength += StringLengthFloat(mTransforms[i * 10 + 5]) + space;
-        stringLength += StringLengthFloat(mTransforms[i * 10 + 6]) + space;
-        stringLength += StringLengthFloat(mTransforms[i * 10 + 7]) + space;
-        stringLength += StringLengthFloat(mTransforms[i * 10 + 8]) + space;
-        stringLength += StringLengthFloat(mTransforms[i * 10 + 9]) + space;
-    }
-    stringLength += lineBreak;
-
-    stringLength += 1; // null terminator
-
-    return stringLength;
-}
-
-void Animation::State::SerializeToString(char* output) const {
-    output = WriteUInt(output, mSize);
-
-    for (unsigned int i = 0; i < mSize; ++i) {
-        output = WriteInt(output, mHierarchy[i]);
-    }
-    output = WriteNewLine(output);
-
-    for (unsigned int i = 0; i < mSize; ++i) {
-        output = WriteFloat(output, mTransforms[i * 10 + 0]);
-        output = WriteFloat(output, mTransforms[i * 10 + 1]);
-        output = WriteFloat(output, mTransforms[i * 10 + 2]);
-        output = WriteFloat(output, mTransforms[i * 10 + 3]);
-        output = WriteFloat(output, mTransforms[i * 10 + 4]);
-        output = WriteFloat(output, mTransforms[i * 10 + 5]);
-        output = WriteFloat(output, mTransforms[i * 10 + 6]);
-        output = WriteFloat(output, mTransforms[i * 10 + 7]);
-        output = WriteFloat(output, mTransforms[i * 10 + 8]);
-        output = WriteFloat(output, mTransforms[i * 10 + 9]);
-    }
-    output = WriteNewLine(output);
-    *output = '\0';
-}
-
-void Animation::State::DeSerializeFromString(const char* input) {
-    input = ReadUInt(input, mSize);
-    Resize(mSize);
-
-    for (unsigned int i = 0; i < mSize; ++i) {
-        input = ReadInt(input, mHierarchy[i]);
-    }
-
-    for (unsigned int i = 0; i < mSize; ++i) {
-        input = ReadFloat(input, mTransforms[i * 10 + 0]);
-        input = ReadFloat(input, mTransforms[i * 10 + 1]);
-        input = ReadFloat(input, mTransforms[i * 10 + 2]);
-        input = ReadFloat(input, mTransforms[i * 10 + 3]);
-        input = ReadFloat(input, mTransforms[i * 10 + 4]);
-        input = ReadFloat(input, mTransforms[i * 10 + 5]);
-        input = ReadFloat(input, mTransforms[i * 10 + 6]);
-        input = ReadFloat(input, mTransforms[i * 10 + 7]);
-        input = ReadFloat(input, mTransforms[i * 10 + 8]);
-        input = ReadFloat(input, mTransforms[i * 10 + 9]);
-
-        float* rot = &mTransforms[i * 10 + 3];
-        float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];
-        if (!Animation::FloatCompare(rotLenSq, 1.0f)) {
-            if (rotLenSq > 0.0f) {
-                float invRotLen = Animation::InvSqrt(rotLenSq);
-               rot[0] *= rotLenSq;
-               rot[1] *= rotLenSq;
-               rot[2] *= rotLenSq;
-               rot[3] *= rotLenSq;
-            }
-        }
-    }
-
-    // Ignore null terminator
 }
