@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{B457FC44-5D99-42F8-ACB9-46DD1583BF51}</ProjectGuid>
+    <ProjectGuid>{C44BA68D-42BB-46E4-9DC5-F019F32E2565}</ProjectGuid>
     <RootNamespace>Converter</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -138,6 +138,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Code\AnimationBlend.cpp" />
+    <ClCompile Include="Code\AnimationBuilder.cpp" />
+    <ClCompile Include="Code\AnimationData.cpp" />
+    <ClCompile Include="Code\AnimationInternal.cpp" />
+    <ClCompile Include="Code\AnimationSerializer.cpp" />
+    <ClCompile Include="Code\AnimationSkin.cpp" />
+    <ClCompile Include="Code\AnimationState.cpp" />
+    <ClCompile Include="Code\Converter\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\AnimationBlend.h" />
+    <ClInclude Include="Code\AnimationBuilder.h" />
+    <ClInclude Include="Code\AnimationData.h" />
+    <ClInclude Include="Code\AnimationInternal.h" />
+    <ClInclude Include="Code\AnimationSerializer.h" />
+    <ClInclude Include="Code\AnimationSkin.h" />
+    <ClInclude Include="Code\AnimationState.h" />
+    <ClInclude Include="Code\Converter\cgltf.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

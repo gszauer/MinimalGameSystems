@@ -29,6 +29,9 @@ void BlendSample::LoadModel() {
 	unsigned int infSize = 0;
 	unsigned int idxSize = 0;
 
+	unsigned int pivot = 0;
+	input = Animation::Serializer::ReadUInt(input, pivot);
+
 	input = Animation::Serializer::ReadUInt(input, posSize);
 	mVertices.resize(posSize);
 	for (unsigned int i = 0; i < posSize; ++i) {

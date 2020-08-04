@@ -268,6 +268,7 @@ void Animation::Serializer::SerializeData(char* output, const Data& data) {
     message = "mStartTime: ";
     for (; *output = *message; ++message, ++output);
     output = WriteFloat(output, data.GetStartTime());
+    output = WriteNewLine(output);
     message = "mEndTime: ";
     for (; *output = *message; ++message, ++output);
     output = WriteFloat(output, data.GetEndtime());
@@ -322,6 +323,7 @@ unsigned int Animation::Serializer::SerializedDataSize(const Data& data) {
     size += 1;
 
     size += StringLengthFloat(data.GetStartTime()) + 1;
+    size += 1;
     size += StringLengthFloat(data.GetEndtime()) + 1;
     size += 1;
 
@@ -422,6 +424,7 @@ void Animation::Serializer::SerializeState(char* output, const State& state) {
     const char* message = "mSize: ";
     for (; *output = *message; ++message, ++output);
     output = WriteUInt(output, size);
+    output = WriteNewLine(output);
 
     message = "mHierarchy: ";
     for (; *output = *message; ++message, ++output);
