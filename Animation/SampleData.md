@@ -3,6 +3,7 @@
 TODO: Write doc
 
 ```
+
 Animation::State PoseToState(Pose& pose) {
 	Animation::State result;
 	result.Resize(pose.Size());
@@ -17,225 +18,157 @@ Animation::State PoseToState(Pose& pose) {
 	return result;
 }
 
-Pose StateToPose(Animation::State& state) {
-	Pose result;
-	result.Resize(state.Size());
+Animation::Builder::Track ConvertTrack(unsigned int joint, bool scale, VectorTrack& track) {
+	Animation::Builder::Track result;
 
-	for (unsigned int i = 0; i < state.Size(); ++i) {
-		result.SetParent(i, state.GetParent(i));
-		result.SetLocalTransform(i, Transform(
-			state.GetRelativePosition(i),
-			state.GetRelativeRotation(i),
-			state.GetRelativeScale(i)
-			));
+	result.SetJointID(joint);
+	if (scale) {
+		result.SetTarget(Animation::Data::Component::Scale);
+	}
+	else {
+		result.SetTarget(Animation::Data::Component::Position);
+	}
+
+	result.Resize(track.Size());
+
+	for (unsigned int frameIndex = 0; frameIndex < track.Size(); frameIndex++) {
+		Animation::Builder::Frame& target = result[frameIndex];
+		Frame<3>& source = track[frameIndex];
+
+		target.time = source.mTime;
+
+		for (int i = 0; i < 3; ++i) {
+			target.in[i] = source.mIn[i];
+			target.value[i] = source.mValue[i];
+			target.out[i] = source.mOut[i];
+		}
+		target.in[3] = target.value[3] = target.out[3] = 0.0f;
+	}
+
+	if (track.GetInterpolation() == Interpolation::Constant) {
+		for (unsigned int frameIndex = 0; frameIndex < track.Size(); frameIndex++) {
+			Animation::Builder::Frame& target = result[frameIndex];
+
+			for (int i = 0; i < 4; ++i) {
+				target.in[i] = target.out[i] = Animation::Data::StepLimit + 1.0f;
+			}
+		}
+	}
+	else if (track.GetInterpolation() == Interpolation::Linear) {
+		for (unsigned int frameIndex = 0; frameIndex < track.Size() - 1; frameIndex++) {
+			Animation::Builder::Frame& thisFrame = result[frameIndex];
+			Animation::Builder::Frame& nextFrame = result[frameIndex + 1];
+
+			float frameDelta = nextFrame.time - thisFrame.time;
+			for (int i = 0; i < 4; ++i) {
+				float valueDelta = nextFrame.value[i] - thisFrame.value[i];
+				float linearTangent = valueDelta / frameDelta;
+				thisFrame.out[i] = nextFrame.in[i] = linearTangent;
+			}
+		}
+
+		for (int i = 0; i < 4; ++i) {
+			result[result.Size() - 1].out[i] = -result[0].out[i];
+			result[0].in[i] = -result[result.Size() - 1].in[i];
+		}
+	}
+
+	return result;
+}
+
+Animation::Builder::Track ConvertTrack(unsigned int joint, QuaternionTrack& track) {
+	Animation::Builder::Track result;
+
+	result.SetJointID(joint);
+	result.SetTarget(Animation::Data::Component::Rotation);
+
+	result.Resize(track.Size());
+
+	for (unsigned int frameIndex = 0; frameIndex < track.Size(); frameIndex++) {
+		Animation::Builder::Frame& target = result[frameIndex];
+		Frame<4>& source = track[frameIndex];
+
+		target.time = source.mTime;
+
+		for (int i = 0; i < 4; ++i) {
+			target.in[i] = source.mIn[i];
+			target.value[i] = source.mValue[i];
+			target.out[i] = source.mOut[i];
+		}
+	}
+
+	if (track.GetInterpolation() == Interpolation::Constant) {
+		for (unsigned int frameIndex = 0; frameIndex < track.Size(); frameIndex++) {
+			Animation::Builder::Frame& target = result[frameIndex];
+
+			for (int i = 0; i < 4; ++i) {
+				target.in[i] = target.out[i] = Animation::Data::StepLimit + 1.0f;
+			}
+		}
+	}
+	else if (track.GetInterpolation() == Interpolation::Linear) {
+		for (unsigned int frameIndex = 0; frameIndex < track.Size() - 1; frameIndex++) {
+			Animation::Builder::Frame& thisFrame = result[frameIndex];
+			Animation::Builder::Frame& nextFrame = result[frameIndex + 1];
+
+			float frameDelta = nextFrame.time - thisFrame.time;
+			for (int i = 0; i < 4; ++i) {
+				float valueDelta = nextFrame.value[i] - thisFrame.value[i];
+				float linearTangent = valueDelta / frameDelta;
+				thisFrame.out[i] = nextFrame.in[i] = linearTangent;
+			}
+		}
+
+		for (int i = 0; i < 4; ++i) {
+			result[result.Size() - 1].out[i] = -result[0].out[i];
+			result[0].in[i] = -result[result.Size() - 1].in[i];
+		}
 	}
 
 	return result;
 }
 
 Animation::Data ClipToData(Clip& clip) {
-	Animation::Data result;
+	Animation::Builder::Clip result;
 
-	unsigned int frameSize = 0;
-	unsigned int trackSize = (unsigned int)clip.mTracks.size() * 3 * 4;
+	std::string name = clip.GetName();
+	result.SetName(name.c_str());
 
-	unsigned int* trackData = new unsigned int[trackSize];
+	unsigned int numTracks = 0;
 
-	for (unsigned int i = 0; i < trackSize; i += 3 * 4) {
-		TransformTrack& track = clip.mTracks[i / 12];
-		unsigned int joint = track.GetId();
+	for (int trackIndex = 0; trackIndex < clip.Size(); ++trackIndex) {
+		unsigned int joint = clip.GetIdAtIndex(trackIndex);
+		TransformTrack& track = clip[joint];
 
-		trackData[i + 0] = joint; // Position.id
-		trackData[i + 1] = 1; // Position.component
-		trackData[i + 2] = frameSize; // Position.offset
-		trackData[i + 3] = track.mPosition.Size(); // Position.numFrames
-		frameSize += 10 * trackData[i + 3];
-
-		trackData[i + 4] = joint; // Rotation.id
-		trackData[i + 5] = 2; // Rotation.component
-		trackData[i + 6] = frameSize; // Rotation.offset
-		trackData[i + 7] = track.mRotation.Size(); // Rotation.numFrames
-		frameSize += 13 * trackData[i + 7];
-
-		trackData[i + 8] = joint; // Scale.id
-		trackData[i + 9] = 4; // Scale.component
-		trackData[i + 10] = frameSize; // Scale.offset
-		trackData[i + 11] = track.mScale.Size(); // Scale.numFrames
-		frameSize += 10 * trackData[i + 11];
-	}
-
-	float* frameData = new float[frameSize];
-	unsigned int index = 0;
-
-	for (unsigned int i = 0; i < trackSize; i += 3 * 4) {
-		VectorTrack& pos = clip.mTracks[i / 12].mPosition;
-		for (unsigned int j = 0; j < pos.mFrames.size(); ++j) {
-			frameData[index++] = pos.mFrames[j].mTime;
-
-			frameData[index++] = pos.mFrames[j].mIn[0];
-			frameData[index++] = pos.mFrames[j].mIn[1];
-			frameData[index++] = pos.mFrames[j].mIn[2];
-
-			frameData[index++] = pos.mFrames[j].mValue[0];
-			frameData[index++] = pos.mFrames[j].mValue[1];
-			frameData[index++] = pos.mFrames[j].mValue[2];
-
-			frameData[index++] = pos.mFrames[j].mOut[0];
-			frameData[index++] = pos.mFrames[j].mOut[1];
-			frameData[index++] = pos.mFrames[j].mOut[2];
+		if (track.GetPositionTrack().Size() >= 2) {
+			numTracks += 1;
 		}
-
-		QuaternionTrack& rot = clip.mTracks[i / 12].mRotation;
-		for (unsigned int j = 0; j < pos.mFrames.size(); ++j) {
-			frameData[index++] = rot.mFrames[j].mTime;
-
-			frameData[index++] = rot.mFrames[j].mIn[0];
-			frameData[index++] = rot.mFrames[j].mIn[1];
-			frameData[index++] = rot.mFrames[j].mIn[2];
-			frameData[index++] = rot.mFrames[j].mIn[3];
-
-			frameData[index++] = rot.mFrames[j].mValue[0];
-			frameData[index++] = rot.mFrames[j].mValue[1];
-			frameData[index++] = rot.mFrames[j].mValue[2];
-			frameData[index++] = rot.mFrames[j].mValue[3];
-
-			frameData[index++] = rot.mFrames[j].mOut[0];
-			frameData[index++] = rot.mFrames[j].mOut[1];
-			frameData[index++] = rot.mFrames[j].mOut[2];
-			frameData[index++] = rot.mFrames[j].mOut[3];
+		if (track.GetRotationTrack().Size() >= 2) {
+			numTracks += 1;
 		}
-
-		VectorTrack& scl = clip.mTracks[i / 12].mScale;
-		for (unsigned int j = 0; j < pos.mFrames.size(); ++j) {
-			frameData[index++] = scl.mFrames[j].mTime;
-
-			frameData[index++] = scl.mFrames[j].mIn[0];
-			frameData[index++] = scl.mFrames[j].mIn[1];
-			frameData[index++] = scl.mFrames[j].mIn[2];
-
-			frameData[index++] = scl.mFrames[j].mValue[0];
-			frameData[index++] = scl.mFrames[j].mValue[1];
-			frameData[index++] = scl.mFrames[j].mValue[2];
-
-			frameData[index++] = scl.mFrames[j].mOut[0];
-			frameData[index++] = scl.mFrames[j].mOut[1];
-			frameData[index++] = scl.mFrames[j].mOut[2];
+		if (track.GetScaleTrack().Size() >= 2) {
+			numTracks += 1;
 		}
 	}
 
-	result.SetRawData(frameData, frameSize, trackData, trackSize);
-	result.SetLabel(clip.GetName().c_str());
+	result.Reserve(numTracks);
 
-	delete[] trackData;
-	delete[] frameData;
+	for (int trackIndex = 0; trackIndex < clip.Size(); ++trackIndex) {
+		unsigned int joint = clip.GetIdAtIndex(trackIndex);
+		TransformTrack& track = clip[joint];
 
-	return result;
-}
-
-Clip DataToClip(Animation::Data& data) {
-	Clip result;
-
-	// Read in track data
-	unsigned int trackDataSize = data.TrackDataSize();
-	const unsigned int* track = data.GetTrackData();
-	std::vector<unsigned int> allJoints;
-	allJoints.resize(trackDataSize / 4);
-	for (unsigned int i = 0; i < trackDataSize; i += 4) {
-		allJoints[i / 4] = track[i];
-	}
-
-	const float* frames = data.GetFrameData();
-	
-	// Remove duplicates
-	auto end = allJoints.end();
-	for (auto it = allJoints.begin(); it != end; ++it) {
-		end = std::remove(it + 1, end, *it);
-	}
-	allJoints.erase(end, allJoints.end());
-
-	// Set size, name and looping
-	//result.Resize(allJoints.size());
-	result.SetName(data.GetLabel());
-	result.SetLooping(true);
-
-	// Loop trough every track
-	for (unsigned int i = 0; i < trackDataSize / 4; ++i) {
-		unsigned int id = track[i * 4 + 0];
-		unsigned int component = track[i * 4 + 1];
-		unsigned int offset = track[i * 4 + 2];
-		unsigned int size = track[i * 4 + 3];
-
-		if (component == 1) {
-			VectorTrack& targetTrack = result[id].GetPositionTrack();
-			targetTrack.Resize(size);
-			targetTrack.SetInterpolation(Interpolation::Linear); 
-
-			for (unsigned int j = 0; j < size; ++j) { // For each frame
-				const float* frame = &frames[offset + j * 10];
-				//memcpy(&targetTrack[j], frame, sizeof(float) * 10);
-				targetTrack[j].mTime = *frame++;
-				targetTrack[j].mIn[0] = *frame++;
-				targetTrack[j].mIn[1] = *frame++;
-				targetTrack[j].mIn[2] = *frame++;
-				targetTrack[j].mValue[0] = *frame++;
-				targetTrack[j].mValue[1] = *frame++;
-				targetTrack[j].mValue[2] = *frame++;
-				targetTrack[j].mOut[0] = *frame++;
-				targetTrack[j].mOut[1] = *frame++;
-				targetTrack[j].mOut[2] = *frame++;
-			}
+		if (track.GetPositionTrack().Size() >= 2) {
+			result.PushTrack(ConvertTrack(joint, false, track.GetPositionTrack()));
 		}
-		else if (component == 2) {
-			QuaternionTrack& targetTrack = result[id].GetRotationTrack();
-			targetTrack.Resize(size);
-			targetTrack.SetInterpolation(Interpolation::Linear); 
-
-			for (unsigned int j = 0; j < size; ++j) { // For each frame
-				const float* frame = &frames[offset + j * 13];
-				//memcpy(&targetTrack[j], frame, sizeof(float) * 13);
-				targetTrack[j].mTime = *frame++;
-				targetTrack[j].mIn[0] = *frame++;
-				targetTrack[j].mIn[1] = *frame++;
-				targetTrack[j].mIn[2] = *frame++;
-				targetTrack[j].mIn[3] = *frame++;
-				targetTrack[j].mValue[0] = *frame++;
-				targetTrack[j].mValue[1] = *frame++;
-				targetTrack[j].mValue[2] = *frame++;
-				targetTrack[j].mValue[3] = *frame++;
-				targetTrack[j].mOut[0] = *frame++;
-				targetTrack[j].mOut[1] = *frame++;
-				targetTrack[j].mOut[2] = *frame++;
-				targetTrack[j].mOut[3] = *frame++;
-			}
+		if (track.GetRotationTrack().Size() >= 2) {
+			result.PushTrack(ConvertTrack(joint, track.GetRotationTrack()));
 		}
-		else if (component == 4) {
-			VectorTrack& targetTrack = result[id].GetScaleTrack();
-			targetTrack.Resize(size);
-			targetTrack.SetInterpolation(Interpolation::Linear); 
-
-			for (unsigned int j = 0; j < size; ++j) { // For each frame
-				const float* frame = &frames[offset + j * 10];
-				//memcpy(&targetTrack[j], frame, sizeof(float) * 13);
-				targetTrack[j].mTime = *frame++;
-				targetTrack[j].mIn[0] = *frame++;
-				targetTrack[j].mIn[1] = *frame++;
-				targetTrack[j].mIn[2] = *frame++;
-				targetTrack[j].mValue[0] = *frame++;
-				targetTrack[j].mValue[1] = *frame++;
-				targetTrack[j].mValue[2] = *frame++;
-				targetTrack[j].mOut[0] = *frame++;
-				targetTrack[j].mOut[1] = *frame++;
-				targetTrack[j].mOut[2] = *frame++;
-			}
-		}
-		else {
-			std::cout << "Unexpected component: " << component << "\n";
+		if (track.GetScaleTrack().Size() >= 2) {
+			result.PushTrack(ConvertTrack(joint, true, track.GetScaleTrack()));
 		}
 	}
 
-
-	result.RecalculateDuration();
-	return result;
+	return Animation::Builder::Convert(result);
 }
 
 unsigned int SerializedMeshStringSize(Mesh& mesh) {
@@ -257,60 +190,67 @@ unsigned int SerializedMeshStringSize(Mesh& mesh) {
 	unsigned int space = 1;
 	unsigned int newLine = 1;
 
-	result += Animation::UIntStringLength(posSize) + space;
+	result += Animation::Serializer::StringLengthUInt(posSize) + space;
 	result += newLine;
 	for (unsigned int i = 0; i < posSize; ++i) {
-		result += Animation::FloatStringLength(position[i].x) + space;
-		result += Animation::FloatStringLength(position[i].y) + space;
-		result += Animation::FloatStringLength(position[i].z) + space;
+		result += Animation::Serializer::StringLengthFloat(position[i].x) + space;
+		result += Animation::Serializer::StringLengthFloat(position[i].y) + space;
+		result += Animation::Serializer::StringLengthFloat(position[i].z) + space;
 	}
 	result += newLine;
 
-	result += Animation::UIntStringLength(normSize) + space;
+	result += Animation::Serializer::StringLengthUInt(normSize) + space;
 	result += newLine;
 	for (unsigned int i = 0; i < normSize; ++i) {
-		result += Animation::FloatStringLength(normal[i].x) + space;
-		result += Animation::FloatStringLength(normal[i].y) + space;
-		result += Animation::FloatStringLength(normal[i].z) + space;
+		result += Animation::Serializer::StringLengthFloat(normal[i].x) + space;
+		result += Animation::Serializer::StringLengthFloat(normal[i].y) + space;
+		result += Animation::Serializer::StringLengthFloat(normal[i].z) + space;
 	}
 	result += newLine;
 
-	result += Animation::UIntStringLength(texSize) + space;
+	result += Animation::Serializer::StringLengthUInt(texSize) + space;
 	result += newLine;
 	for (unsigned int i = 0; i < texSize; ++i) {
-		result += Animation::FloatStringLength(texCoord[i].x) + space;
-		result += Animation::FloatStringLength(texCoord[i].y) + space;
+		result += Animation::Serializer::StringLengthFloat(texCoord[i].x) + space;
+		result += Animation::Serializer::StringLengthFloat(texCoord[i].y) + space;
 	}
 	result += newLine;
 
-	result += Animation::UIntStringLength(weightSize) + space;
+	result += Animation::Serializer::StringLengthUInt(weightSize) + space;
 	result += newLine;
 	for (unsigned int i = 0; i < weightSize; ++i) {
-		result += Animation::FloatStringLength(weights[i].x) + space;
-		result += Animation::FloatStringLength(weights[i].y) + space;
-		result += Animation::FloatStringLength(weights[i].z) + space;
-		result += Animation::FloatStringLength(weights[i].w) + space;
+		result += Animation::Serializer::StringLengthFloat(weights[i].x) + space;
+		result += Animation::Serializer::StringLengthFloat(weights[i].y) + space;
+		result += Animation::Serializer::StringLengthFloat(weights[i].z) + space;
+		result += Animation::Serializer::StringLengthFloat(weights[i].w) + space;
 	}
 	result += newLine;
 
-	result += Animation::UIntStringLength(infSize) + space;
+	result += Animation::Serializer::StringLengthUInt(infSize) + space;
 	result += newLine;
 	for (unsigned int i = 0; i < infSize; ++i) {
-		result += Animation::UIntStringLength(influences[i].x) + space;
-		result += Animation::UIntStringLength(influences[i].y) + space;
-		result += Animation::UIntStringLength(influences[i].z) + space;
-		result += Animation::UIntStringLength(influences[i].w) + space;
+		result += Animation::Serializer::StringLengthUInt(influences[i].x) + space;
+		result += Animation::Serializer::StringLengthUInt(influences[i].y) + space;
+		result += Animation::Serializer::StringLengthUInt(influences[i].z) + space;
+		result += Animation::Serializer::StringLengthUInt(influences[i].w) + space;
 	}
 	result += newLine;
 
-	result += Animation::UIntStringLength(idxSize) + space;
+	result += Animation::Serializer::StringLengthUInt(idxSize) + space;
 	result += newLine;
 	for (unsigned int i = 0; i < idxSize; ++i) {
-		result += Animation::UIntStringLength(indices[i]) + space;
+		result += Animation::Serializer::StringLengthUInt(indices[i]) + space;
 	}
 	result += newLine;
 
 	result += 1; // null term
+
+
+	const char* str = "mIndices: mIndices.size(): mInfluences: mInfluences.size(): mWeights: mWeights.size(): mTexCoords: mTexCoords.size(): mNormals: mNormals.size(): mPositions: mPositions.size(): ";
+	const char* s;
+	for (s = str; *s; ++s);
+	unsigned int strLen = (unsigned int)(s - str);
+	result += strLen;
 
 	return result;
 }
@@ -330,128 +270,147 @@ void SerializeMesh(Mesh& mesh, char* output) {
 	unsigned int infSize = influences.size();
 	unsigned int idxSize = indices.size();
 
-	output = Animation::WriteUInt(output, posSize);
-	output = Animation::WriteNewLine(output);
+	const char* message = "mPositions.size(): ";
+	for (; *output = *message; ++message, ++output);
+	output = Animation::Serializer::WriteUInt(output, posSize);
+	output = Animation::Serializer::WriteNewLine(output);
+
+	message = "mPositions: ";
+	for (; *output = *message; ++message, ++output);
 	for (unsigned int i = 0; i < posSize; ++i) {
-		output = Animation::WriteFloat(output, position[i].x);
-		output = Animation::WriteFloat(output, position[i].y);
-		output = Animation::WriteFloat(output, position[i].z);
+		output = Animation::Serializer::WriteFloat(output, position[i].x);
+		output = Animation::Serializer::WriteFloat(output, position[i].y);
+		output = Animation::Serializer::WriteFloat(output, position[i].z);
 	}
-	output = Animation::WriteNewLine(output);
+	output = Animation::Serializer::WriteNewLine(output);
 
-	output = Animation::WriteUInt(output, normSize);
-	output = Animation::WriteNewLine(output);
+	message = "mNormals.size(): ";
+	for (; *output = *message; ++message, ++output);
+	output = Animation::Serializer::WriteUInt(output, normSize);
+	output = Animation::Serializer::WriteNewLine(output);
+
+	message = "mNormals: ";
+	for (; *output = *message; ++message, ++output);
 	for (unsigned int i = 0; i < normSize; ++i) {
-		output = Animation::WriteFloat(output, normal[i].x);
-		output = Animation::WriteFloat(output, normal[i].y);
-		output = Animation::WriteFloat(output, normal[i].z);
+		output = Animation::Serializer::WriteFloat(output, normal[i].x);
+		output = Animation::Serializer::WriteFloat(output, normal[i].y);
+		output = Animation::Serializer::WriteFloat(output, normal[i].z);
 	}
-	output = Animation::WriteNewLine(output);
+	output = Animation::Serializer::WriteNewLine(output);
 
-	output = Animation::WriteUInt(output, texSize);
-	output = Animation::WriteNewLine(output);
+	message = "mTexCoords.size(): ";
+	for (; *output = *message; ++message, ++output);
+	output = Animation::Serializer::WriteUInt(output, texSize);
+	output = Animation::Serializer::WriteNewLine(output);
+
+	message = "mTexCoords: ";
+	for (; *output = *message; ++message, ++output);
 	for (unsigned int i = 0; i < texSize; ++i) {
-		output = Animation::WriteFloat(output, texCoord[i].x);
-		output = Animation::WriteFloat(output, texCoord[i].y);
+		output = Animation::Serializer::WriteFloat(output, texCoord[i].x);
+		output = Animation::Serializer::WriteFloat(output, texCoord[i].y);
 	}
-	output = Animation::WriteNewLine(output);
+	output = Animation::Serializer::WriteNewLine(output);
 
-	output = Animation::WriteUInt(output, weightSize);
-	output = Animation::WriteNewLine(output);
+	message = "mWeights.size(): ";
+	for (; *output = *message; ++message, ++output);
+	output = Animation::Serializer::WriteUInt(output, weightSize);
+	output = Animation::Serializer::WriteNewLine(output);
+
+	message = "mWeights: ";
+	for (; *output = *message; ++message, ++output);
 	for (unsigned int i = 0; i < weightSize; ++i) {
-		output = Animation::WriteFloat(output, weights[i].x);
-		output = Animation::WriteFloat(output, weights[i].y);
-		output = Animation::WriteFloat(output, weights[i].z);
-		output = Animation::WriteFloat(output, weights[i].w);
+		output = Animation::Serializer::WriteFloat(output, weights[i].x);
+		output = Animation::Serializer::WriteFloat(output, weights[i].y);
+		output = Animation::Serializer::WriteFloat(output, weights[i].z);
+		output = Animation::Serializer::WriteFloat(output, weights[i].w);
 	}
-	output = Animation::WriteNewLine(output);
+	output = Animation::Serializer::WriteNewLine(output);
 
-	output = Animation::WriteUInt(output, infSize);
-	output = Animation::WriteNewLine(output);
+	message = "mInfluences.size(): ";
+	for (; *output = *message; ++message, ++output);
+	output = Animation::Serializer::WriteUInt(output, infSize);
+	output = Animation::Serializer::WriteNewLine(output);
+
+	message = "mInfluences: ";
+	for (; *output = *message; ++message, ++output);
 	for (unsigned int i = 0; i < infSize; ++i) {
-		output = Animation::WriteUInt(output, influences[i].x);
-		output = Animation::WriteUInt(output, influences[i].y);
-		output = Animation::WriteUInt(output, influences[i].z);
-		output = Animation::WriteUInt(output, influences[i].w);
+		output = Animation::Serializer::WriteUInt(output, influences[i].x);
+		output = Animation::Serializer::WriteUInt(output, influences[i].y);
+		output = Animation::Serializer::WriteUInt(output, influences[i].z);
+		output = Animation::Serializer::WriteUInt(output, influences[i].w);
 	}
-	output = Animation::WriteNewLine(output);
+	output = Animation::Serializer::WriteNewLine(output);
 
-	output = Animation::WriteUInt(output, idxSize);
-	output = Animation::WriteNewLine(output);
+	message = "mIndices.size(): ";
+	for (; *output = *message; ++message, ++output);
+	output = Animation::Serializer::WriteUInt(output, idxSize);
+	output = Animation::Serializer::WriteNewLine(output);
+	
+	message = "mIndices: ";
+	for (; *output = *message; ++message, ++output);
 	for (unsigned int i = 0; i < idxSize; ++i) {
-		output = Animation::WriteUInt(output, indices[i]);
+		output = Animation::Serializer::WriteUInt(output, indices[i]);
 	}
-	output = Animation::WriteNewLine(output);
+	output = Animation::Serializer::WriteNewLine(output);
 
 	*output = '\0';
 }
 
-void DeSerializeMesh(Mesh& mesh, const char* input) {
-	std::vector<vec3>& position = mesh.GetPosition();
-	std::vector<vec3>& normal = mesh.GetNormal();
-	std::vector<vec2>& texCoord = mesh.GetTexCoord();
-	std::vector<vec4>& weights = mesh.GetWeights();
-	std::vector<ivec4>& influences = mesh.GetInfluences();
-	std::vector<unsigned int>& indices = mesh.GetIndices();
 
-	unsigned int posSize = 0;
-	unsigned int normSize = 0;
-	unsigned int texSize = 0;
-	unsigned int weightSize = 0;
-	unsigned int infSize = 0;
-	unsigned int idxSize = 0;
+void Sample::Initialize() {
+	cgltf_data* gltf = LoadGLTFFile("Assets/Woman.gltf");
+	mMeshes = LoadMeshes(gltf);
+	mSkeleton = LoadSkeleton(gltf);
+	mClips = LoadAnimationClips(gltf);
+	FreeGLTFFile(gltf);
 
-	input = Animation::ReadUInt(input, posSize);
-	position.resize(posSize);
-	for (unsigned int i = 0; i < posSize; ++i) {
-		input = Animation::ReadFloat(input, position[i].x);
-		input = Animation::ReadFloat(input, position[i].y);
-		input = Animation::ReadFloat(input, position[i].z);
+	BoneMap bones = RearrangeSkeleton(mSkeleton);
+	for (unsigned int i = 0, size = (unsigned int)mMeshes.size(); i < size; ++i) {
+		RearrangeMesh(mMeshes[i], bones);
+	}
+	for (unsigned int i = 0, size = (unsigned int)mClips.size(); i < size; ++i) {
+		RearrangeClip(mClips[i], bones);
 	}
 
-	input = Animation::ReadUInt(input, normSize);
-	normal.resize(normSize);
-	for (unsigned int i = 0; i < normSize; ++i) {
-		input = Animation::ReadFloat(input, normal[i].x);
-		input = Animation::ReadFloat(input, normal[i].y);
-		input = Animation::ReadFloat(input, normal[i].z);
-	}
+	Animation::State bindPose = PoseToState(mSkeleton.GetBindPose());
+	Animation::State restPose = PoseToState(mSkeleton.GetRestPose());
+	Animation::Data walkingClip = ClipToData(mClips[7]);
+	Animation::Data runningClip = ClipToData(mClips[0]);
 
-	input = Animation::ReadUInt(input, texSize);
-	texCoord.resize(texSize);
-	for (unsigned int i = 0; i < texSize; ++i) {
-		input = Animation::ReadFloat(input, texCoord[i].x);
-		input = Animation::ReadFloat(input, texCoord[i].y);
-	}
+	std::ofstream out;
 
-	input = Animation::ReadUInt(input, weightSize);
-	weights.resize(weightSize);
-	for (unsigned int i = 0; i < weightSize; ++i) {
-		input = Animation::ReadFloat(input, weights[i].x);
-		input = Animation::ReadFloat(input, weights[i].y);
-		input = Animation::ReadFloat(input, weights[i].z);
-		input = Animation::ReadFloat(input, weights[i].w);
-	}
+	char* outputBuffer = new char[Animation::Serializer::SerializedStateSize(bindPose)];
+	Animation::Serializer::SerializeState(outputBuffer, bindPose);
+	out.open("bindState.txt");
+	out << outputBuffer;
+	out.close();
+	delete[] outputBuffer;
 
-	input = Animation::ReadUInt(input, infSize);
-	influences.resize(infSize);
-	for (unsigned int i = 0; i < infSize; ++i) {
-		unsigned int read = 0;
-		input = Animation::ReadUInt(input, read);
-		influences[i].x = (int)read;
-		input = Animation::ReadUInt(input, read);
-		influences[i].y = (int)read;
-		input = Animation::ReadUInt(input, read);
-		influences[i].z = (int)read;
-		input = Animation::ReadUInt(input, read);
-		influences[i].w = (int)read;
-	}
+	outputBuffer = new char[Animation::Serializer::SerializedStateSize(restPose)];
+	Animation::Serializer::SerializeState(outputBuffer, restPose);
+	out.open("restState.txt");
+	out << outputBuffer;
+	out.close();
+	delete[] outputBuffer;
 
-	input = Animation::ReadUInt(input, idxSize);
-	indices.resize(idxSize);
-	for (unsigned int i = 0; i < idxSize; ++i) {
-		input = Animation::ReadUInt(input, indices[i]);
-	}
+	outputBuffer = new char[Animation::Serializer::SerializedDataSize(walkingClip)];
+	Animation::Serializer::SerializeData(outputBuffer, walkingClip);
+	out.open("walkingData.txt");
+	out << outputBuffer;
+	out.close();
+	delete[] outputBuffer;
 
-}
+	outputBuffer = new char[Animation::Serializer::SerializedDataSize(runningClip)];
+	Animation::Serializer::SerializeData(outputBuffer, runningClip);
+	out.open("runningData.txt");
+	out << outputBuffer;
+	out.close();
+	delete[] outputBuffer;
+
+	outputBuffer = new char[SerializedMeshStringSize(mMeshes[0])];
+	SerializeMesh(mMeshes[0], outputBuffer);
+	out.open("womanMesh.txt");
+	out << outputBuffer;
+	out.close();
+	delete[] outputBuffer;
 ```

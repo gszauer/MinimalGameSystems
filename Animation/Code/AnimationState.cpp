@@ -139,7 +139,7 @@ void Animation::ToMatrixPalette(float* outArray, const State& state) {
 
     unsigned int i = 0;
     for (unsigned int size = state.Size(); i < size; ++i) {
-        int parent = state.GetParent(i); // TODO: Fast path is untested because of bad model. Export an optimized / re-ordered data set and try again with that.
+        int parent = state.GetParent(i);
         if (parent > ((int)i)) {
             break;
         }
