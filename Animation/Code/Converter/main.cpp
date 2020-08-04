@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
 			label = clip_name;
 		}
 
-		sprintf(file_name, "%s.txt", label);
+		sprintf(file_name, "%sData.txt", label);
 		out.open(file_name);
 		out << outputBuffer;
 		out.close();
@@ -156,7 +156,7 @@ int main(int argc, char** argv) {
 			label = clip_name;
 		}
 
-		sprintf(file_name, "%s.txt", label);
+		sprintf(file_name, "%s.Meshtxt", label);
 		out.open(file_name);
 		out << outputBuffer;
 		out.close();
@@ -1002,6 +1002,7 @@ void TrackFromChannel(Animation::Builder::Track& inOutTrack, const cgltf_animati
 	unsigned int numFrames = (unsigned int)sampler.input->count;
 	unsigned int numberOfValuesPerFrame = valueFloats.size() / timelineFloats.size();
 	inOutTrack.Resize(numFrames);
+
 	for (unsigned int i = 0; i < numFrames; ++i) {
 		int baseIndex = i * numberOfValuesPerFrame;
 		Animation::Builder::Frame& frame = inOutTrack[i];
@@ -1023,7 +1024,7 @@ void TrackFromChannel(Animation::Builder::Track& inOutTrack, const cgltf_animati
 	}
 
 	if (inChannel.sampler->interpolation == cgltf_interpolation_type_step) {
-		inOutTrack.ForceStep();
+		//inOutTrack.ForceStep();
 	}
 	else if (inChannel.sampler->interpolation == cgltf_interpolation_type_linear) {
 		inOutTrack.ForceLinear();
@@ -1048,22 +1049,17 @@ std::vector<Animation::Data> LoadClips(cgltf_data* data) {
 			cgltf_node* target = channel.target_node;
 			int nodeId = GetNodeIndex(target, data->nodes, numNodes);
 			Animation::Builder::Track track;
+			track.SetJointID(nodeId);
 			if (channel.target_path == cgltf_animation_path_type_translation) {
 				track.SetTarget(Animation::Data::Component::Position);
-				track.SetJointID(nodeId);
-				//VectorTrack& track = result[i][nodeId].GetPositionTrack();
 				TrackFromChannel<vec3, 3>(track, channel);
 			}
 			else if (channel.target_path == cgltf_animation_path_type_scale) {
 				track.SetTarget(Animation::Data::Component::Scale);
-				track.SetJointID(nodeId);
-				//VectorTrack& track = result[i][nodeId].GetScaleTrack();
 				TrackFromChannel<vec3, 3>(track, channel);
 			}
 			else if (channel.target_path == cgltf_animation_path_type_rotation) {
 				track.SetTarget(Animation::Data::Component::Rotation);
-				track.SetJointID(nodeId);
-				//QuaternionTrack& track = result[i][nodeId].GetRotationTrack();
 				TrackFromChannel<quat, 4>(track, channel);
 			}
 			if (channel.target_path == cgltf_animation_path_type_translation ||

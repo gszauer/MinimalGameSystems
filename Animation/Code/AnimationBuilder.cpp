@@ -217,20 +217,15 @@ void Animation::Builder::Track::ForceLinear() {
 			float deltaX = nextX - thisX;
 			float deltaY = nextY - thisY;
 
-			float lenSq = deltaX * deltaX + deltaY * deltaY;
-			if (!Animation::Internal::FloatCompare(lenSq, 0.0f)) {
-				float invLen = Animation::Internal::InvSqrt(lenSq);
-				deltaX *= invLen;
-				deltaY *= invLen;
-			}
-
-			float tangent = 0.0f;
 			if (!Animation::Internal::FloatCompare(deltaY, 0.0f)) {
-				tangent = deltaX / deltaY;
+				float tangent = deltaY / deltaX;
+				mFrameData[i].out[j] = tangent;
+				mFrameData[i + 1].in[j] = tangent;
 			}
-
-			mFrameData[i].out[j] = tangent;
-			mFrameData[i].in[j] = -tangent;
+			else {
+				mFrameData[i].out[j] = 0.0f;
+				mFrameData[i + 1].in[j] = 0.0f;
+			}
 		}
 	}
 }

@@ -70,7 +70,7 @@ struct Samples {
 	ISample* skeleton = 0;
 	ISample* skin = 0;
 	ISample* blend = 0;
-	int showCurve = 1;
+	int showCurve = 0;
 	int showSkeleton = 1;
 	int showSkin = 1;
 	int showBlend = 1;
