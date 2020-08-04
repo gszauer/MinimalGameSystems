@@ -18,43 +18,10 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Code\AnimationBlend.h" />
-    <ClInclude Include="Code\AnimationData.h" />
-    <ClInclude Include="Code\AnimationBuilder.h" />
-    <ClInclude Include="Code\AnimationInternal.h" />
-    <ClInclude Include="Code\AnimationSerializer.h" />
-    <ClInclude Include="Code\AnimationSkin.h" />
-    <ClInclude Include="Code\AnimationState.h" />
-    <ClInclude Include="Code\Samples\BlendSample.h" />
-    <ClInclude Include="Code\Samples\CurvesSample.h" />
-    <ClInclude Include="Code\Samples\glad.h" />
-    <ClInclude Include="Code\Samples\ISample.h" />
-    <ClInclude Include="Code\Samples\microui.h" />
-    <ClInclude Include="Code\Samples\SkeletonSample.h" />
-    <ClInclude Include="Code\Samples\SkinnedSample.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Code\AnimationBlend.cpp" />
-    <ClCompile Include="Code\AnimationBuilder.cpp" />
-    <ClCompile Include="Code\AnimationData.cpp" />
-    <ClCompile Include="Code\AnimationInternal.cpp" />
-    <ClCompile Include="Code\AnimationSerializer.cpp" />
-    <ClCompile Include="Code\AnimationSkin.cpp" />
-    <ClCompile Include="Code\AnimationState.cpp" />
-    <ClCompile Include="Code\Samples\BlendSample.cpp" />
-    <ClCompile Include="Code\Samples\CurveSample.cpp" />
-    <ClCompile Include="Code\Samples\glad.c" />
-    <ClCompile Include="Code\Samples\ISample.cpp" />
-    <ClCompile Include="Code\Samples\microui.c" />
-    <ClCompile Include="Code\Samples\SkeletonSample.cpp" />
-    <ClCompile Include="Code\Samples\SkinnedSample.cpp" />
-    <ClCompile Include="Code\Samples\WinMain.cpp" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{AC762EA5-F4E7-4F05-8985-4512580624CB}</ProjectGuid>
-    <RootNamespace>Animation</RootNamespace>
+    <ProjectGuid>{DCC8F4F5-FB81-414F-B91C-F77F7DFB7264}</ProjectGuid>
+    <RootNamespace>Sample</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -170,6 +137,39 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\AnimationBlend.cpp" />
+    <ClCompile Include="Code\AnimationBuilder.cpp" />
+    <ClCompile Include="Code\AnimationData.cpp" />
+    <ClCompile Include="Code\AnimationInternal.cpp" />
+    <ClCompile Include="Code\AnimationSerializer.cpp" />
+    <ClCompile Include="Code\AnimationSkin.cpp" />
+    <ClCompile Include="Code\AnimationState.cpp" />
+    <ClCompile Include="Code\Samples\BlendSample.cpp" />
+    <ClCompile Include="Code\Samples\CurveSample.cpp" />
+    <ClCompile Include="Code\Samples\glad.c" />
+    <ClCompile Include="Code\Samples\ISample.cpp" />
+    <ClCompile Include="Code\Samples\microui.c" />
+    <ClCompile Include="Code\Samples\SkeletonSample.cpp" />
+    <ClCompile Include="Code\Samples\SkinnedSample.cpp" />
+    <ClCompile Include="Code\Samples\WinMain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\AnimationBlend.h" />
+    <ClInclude Include="Code\AnimationBuilder.h" />
+    <ClInclude Include="Code\AnimationData.h" />
+    <ClInclude Include="Code\AnimationInternal.h" />
+    <ClInclude Include="Code\AnimationSerializer.h" />
+    <ClInclude Include="Code\AnimationSkin.h" />
+    <ClInclude Include="Code\AnimationState.h" />
+    <ClInclude Include="Code\Samples\BlendSample.h" />
+    <ClInclude Include="Code\Samples\CurvesSample.h" />
+    <ClInclude Include="Code\Samples\glad.h" />
+    <ClInclude Include="Code\Samples\ISample.h" />
+    <ClInclude Include="Code\Samples\microui.h" />
+    <ClInclude Include="Code\Samples\SkeletonSample.h" />
+    <ClInclude Include="Code\Samples\SkinnedSample.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

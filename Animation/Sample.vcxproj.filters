@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Sample">
+      <UniqueIdentifier>{8824cb61-8e0b-402b-90a6-83cbfd3b46e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Sample">
+      <UniqueIdentifier>{64ce0d35-c5b1-4b80-9b32-b3c9c6a39fdf}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\Samples\BlendSample.cpp">
+      <Filter>Source Files\Sample</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\CurveSample.cpp">
+      <Filter>Source Files\Sample</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\glad.c">
+      <Filter>Source Files\Sample</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\ISample.cpp">
+      <Filter>Source Files\Sample</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\microui.c">
+      <Filter>Source Files\Sample</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\SkeletonSample.cpp">
+      <Filter>Source Files\Sample</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\SkinnedSample.cpp">
+      <Filter>Source Files\Sample</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Samples\WinMain.cpp">
+      <Filter>Source Files\Sample</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\AnimationBlend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\AnimationBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\AnimationInternal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\AnimationSerializer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\AnimationSkin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\AnimationState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\AnimationData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\Samples\BlendSample.h">
+      <Filter>Header Files\Sample</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Samples\CurvesSample.h">
+      <Filter>Header Files\Sample</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Samples\glad.h">
+      <Filter>Header Files\Sample</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Samples\ISample.h">
+      <Filter>Header Files\Sample</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Samples\microui.h">
+      <Filter>Header Files\Sample</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Samples\SkeletonSample.h">
+      <Filter>Header Files\Sample</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Samples\SkinnedSample.h">
+      <Filter>Header Files\Sample</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\AnimationBlend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\AnimationBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\AnimationData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\AnimationInternal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\AnimationSerializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\AnimationSkin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\AnimationState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
