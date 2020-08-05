@@ -1,4 +1,6 @@
+#pragma warning(push)
 #pragma warning( disable : 26812)
+#pragma warning( disable : 26451)
 #define _CRT_SECURE_NO_WARNINGS
 
 #define CGLTF_IMPLEMENTATION
@@ -155,7 +157,7 @@ int main(int argc, char** argv) {
 		outputBuffer = new char[Animation::Serializer::SerializedDataSize(clips[i])];
 		Animation::Serializer::SerializeData(outputBuffer, clips[i]);
 
-		sprintf(clip_name, "CLIP_%d\0", i);
+		sprintf(clip_name, "CLIP_%d\0", (int)i);
 		const char* label = clips[i].GetLabel();
 		if (label == 0 || strlen(label) == 0) {
 			label = clip_name;
@@ -173,7 +175,7 @@ int main(int argc, char** argv) {
 		outputBuffer = new char[SerializedMeshStringSize(meshes[i])];
 		SerializeMesh(meshes[i], outputBuffer);
 
-		sprintf(clip_name, "MESH_%d\0", i);
+		sprintf(clip_name, "MESH_%d\0", (int)i);
 		const char* label = meshes[i].name.c_str();
 		if (label == 0 || strlen(label) == 0) {
 			label = clip_name;
@@ -287,12 +289,12 @@ unsigned int SerializedMeshStringSize(Mesh& mesh) {
 	std::vector<unsigned int>& indices = mesh.indices;
 	unsigned int pivot = mesh.pivot;
 
-	unsigned int posSize = position.size();
-	unsigned int normSize = normal.size();
-	unsigned int texSize = texCoord.size();
-	unsigned int weightSize = weights.size();
-	unsigned int infSize = influences.size();
-	unsigned int idxSize = indices.size();
+	unsigned int posSize = (unsigned int) position.size();
+	unsigned int normSize = (unsigned int)normal.size();
+	unsigned int texSize = (unsigned int)texCoord.size();
+	unsigned int weightSize = (unsigned int)weights.size();
+	unsigned int infSize = (unsigned int)influences.size();
+	unsigned int idxSize = (unsigned int)indices.size();
 
 	unsigned int result = 0;
 	unsigned int space = 1;
@@ -375,12 +377,12 @@ void SerializeMesh(Mesh& mesh, char* output) {
 	std::vector<unsigned int>& indices = mesh.indices;
 	unsigned int pivot = mesh.pivot;
 
-	unsigned int posSize = position.size();
-	unsigned int normSize = normal.size();
-	unsigned int texSize = texCoord.size();
-	unsigned int weightSize = weights.size();
-	unsigned int infSize = influences.size();
-	unsigned int idxSize = indices.size();
+	unsigned int posSize = (unsigned int)position.size();
+	unsigned int normSize = (unsigned int)normal.size();
+	unsigned int texSize = (unsigned int)texCoord.size();
+	unsigned int weightSize = (unsigned int)weights.size();
+	unsigned int infSize = (unsigned int)influences.size();
+	unsigned int idxSize = (unsigned int)indices.size();
 
 	const char* message = "mPivot: ";
 	for (; *output = *message; ++message, ++output);
@@ -1022,7 +1024,7 @@ void TrackFromChannel(Animation::Builder::Track& inOutTrack, const cgltf_animati
 	GetScalarValues(valueFloats, N, *sampler.output);
 
 	unsigned int numFrames = (unsigned int)sampler.input->count;
-	unsigned int numberOfValuesPerFrame = valueFloats.size() / timelineFloats.size();
+	unsigned int numberOfValuesPerFrame = (unsigned int)(valueFloats.size() / timelineFloats.size());
 	inOutTrack.Resize(numFrames);
 
 	for (unsigned int i = 0; i < numFrames; ++i) {
@@ -1097,3 +1099,4 @@ std::vector<Animation::Data> LoadClips(cgltf_data* data) {
 	}
 	return final;
 }
+#pragma warning(pop)

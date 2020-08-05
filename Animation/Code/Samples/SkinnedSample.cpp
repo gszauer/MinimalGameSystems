@@ -129,6 +129,10 @@ void SkinnedSample::InitDescriptors() {
 	}
 }
 
+#pragma warning( push )
+#pragma warning( disable : 4838)
+#pragma warning( disable : 4309)
+
 void SkinnedSample::InitOpenGL() {
 	mOpenGLInitialized = false;
 
@@ -242,6 +246,8 @@ void SkinnedSample::InitOpenGL() {
 
 	mOpenGLInitialized = true;
 }
+
+#pragma warning (pop)
 
 void SkinnedSample::Initialize() {
 	LoadModel();

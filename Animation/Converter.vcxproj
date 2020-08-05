@@ -71,19 +71,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)Converter\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\Converter\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)$(Platform)\Conterver_$(Configuration)\</OutDir>
-    <IntDir>$(Platform)\Converter_$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(Platform)\Conterver\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\Converter\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)Converter\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\Converter\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)$(Platform)\Conterver_$(Configuration)\</OutDir>
-    <IntDir>$(Platform)\Converter_$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(Platform)\Conterver\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\Converter\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

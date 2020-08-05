@@ -151,6 +151,11 @@ void BlendSample::InitDescriptors() {
 	}
 }
 
+#pragma warning( push )
+#pragma warning( disable : 4838)
+#pragma warning( disable : 4309)
+
+
 void BlendSample::InitOpenGL() {
 	mOpenGLInitialized = false;
 
@@ -264,6 +269,8 @@ void BlendSample::InitOpenGL() {
 
 	mOpenGLInitialized = true;
 }
+#pragma warning( pop )
+
 
 void BlendSample::Initialize() {
 	LoadModel();

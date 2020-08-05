@@ -1,5 +1,7 @@
-//#pragma warning(disable : 28251)
-//#pragma warning(disable : 28159)
+#pragma warning(push)
+#pragma warning(disable : 28251)
+#pragma warning(disable : 28159)
+#pragma warning(disable : 26451)
 //#pragma warning(disable : 26451)
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -352,3 +354,4 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 
 	return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }
+#pragma warning(pop)

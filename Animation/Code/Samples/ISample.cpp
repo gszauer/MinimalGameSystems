@@ -13,11 +13,11 @@ char* ReadFileContents(const char* filename) {
 
 	if (f) {
 		fseek(f, 0, SEEK_END);
-		long length = ftell(f);
+		unsigned int length = (unsigned int)ftell(f);
 		fseek(f, 0, SEEK_SET);
-		buffer = (char*)malloc(sizeof(char) * (length + 1));
-		if (buffer) {
-			memset(buffer, 0, sizeof(char) * (length + 1));
+		buffer = (char*)malloc((unsigned int)sizeof(char) * (length + 1));
+		if (buffer != 0) {
+			memset(buffer, 0, (unsigned int)sizeof(char) * (length + 1));
 			fread(buffer, 1, length, f);
 			buffer[length] = '\0';
 		}
