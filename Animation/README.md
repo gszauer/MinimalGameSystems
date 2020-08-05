@@ -1,40 +1,53 @@
-# Animation
+# Minimal Game Animation
 
-This library is intended to be a simple, easy to use animation library that's easy to integrate into any project. The library was designed for, but is not limited to character animation. The code does not provide anything outside of animation. There is no file loading, dependancy on any external libraries, external headers, etc... There are a few instances of ```new``` and ```delete```, but they should be easy to replace if needed.
+This is intended to be a simple, easy to use character animation library. What makes this a _character animation library_ and not a _generic animation_ library? The data structures make an assumption that the target of animation data is a transform hierarchy. Tracks don't have a generic way to bind to values, they are always assumed to be bound to transoform objects.
 
-The goal of this library is simplicity, to provide a minimal surface API for animation. The code here aims to be easy and intuitive by providing a minimal API to interact with. For basic animations, you only need two class, ```Animation::State``` and ```Animation::Data```. Aside from the core classes, utilities for skinning and animation blending are also provided.
+The library was designed to have as few files as possible, the runtime consists of only three files. The code is self contained, support functions like matrix multiplications are written in-line when possible. The runtime API is designed to be small and easy to digest, the classes present the smallest set of functions needed to work. 
 
-The readability of the logic for many of these functions suffers from trying to keep the API as small as possible. For an in depth guide to animation programming that covers all of the techniques implemented here check out my book [Hands-On C++ Game Animation Programming](https://animationprogramming.com). The following files are provided
+The following files make up the minimal animation library:
 
 * ```AnimationData[.h, .cpp]``` - **required** - Contains ```Animation::Data```, analogous to an animation clip.
 * ```AnimationState[.h, .cpp]``` - **required** - Contains ```Aniamtion::State```, analogous to an animated pose. 
-* ```AnimationHelpers[.h, .cpp]``` - **required** - Contains helper functions that can be used as is or replaced by more specialized implementations.
-* ```AnimationBuilder[.h, .cpp]``` - **optional** - Contains verbose classes and conversion functions that make authoring ```Animation::Data``` and ```Animation::State``` intuitive. Intended to be used by conversion tools, not the runtime.
+* ```AnimationInternal[.h, .cpp]``` - **required** - Contains helper functions that can be used as is or replaced by more specialized implementations.
+* ```AnimationBuilder[.h, .cpp]``` - **optional** - Contains verbose classes and conversion functions that make authoring ```Animation::Data``` intuitive. Intended to be used by conversion tools, not the runtime.
 * ```AnimationBlend[.h, .cpp]``` - **optional** - Contains code to blend animations smoothly.
-* ```AnimationSkin[.h, .cpp]``` - **optional** - Contains code to skin meshes using ```Animation::State```.
+* ```AnimationSkin[.h, .cpp]``` - **optional** - Contains code to skin meshes using descriptors and an ```Animation::State```.
+* ```AnimationSerializer[.h, .cpp]``` - **optional** - Contains code to serialie and deserialise ```Animation::State``` and ```Aniamtion::Data```
 
-# Helpers
+For basic animations, you only need two class, ```Animation::State``` and ```Animation::Data```. Both of these classes have a dependancy on ```Animation::Helpers```, a namespace which contains helper functions for math and memory allocation. 
 
-The ```AnimationState[.h, .cpp]``` files contains helper function. These helper functions wrap functionality that is already available (and probably better implemented) in the standard library. The intention with this was to provide a central place for all standard library functions so they can be re-implemented with more appropriate versions.
+Animations clips and tracks are both represented by the ```Aniamtion::Data``` class, which makes authoring animations clips difficult. To address this, the ```Animation::Builder``` namespace contains easy to use classes for _Clips_ and _Tracks_ which are convertable to ```Animation::Data``` objects. Animation data and animation state can be serialized or deserialized using functions in the ```Animation::Serializer``` namespace.
 
-# State And Data
+A reference skinning implementation is provided in the ```Aniamtion::Skin``` namespace. This is a software skinning implementation which maps vertex data using descriptors or views. Using these descriptors allows the skinning function to deform a mesh regardless of how it's data is stored. Animation blendin is also provided trough the ```Animation::Blend``` function which does linear blending between two poses in local space.
+
+Much of the provided code's readability suffers from trying to keep the API as small as possible. For an in depth guide to animation programming that covers all the techniques implemented here, check out my book [Hands-On C++ Game Animation Programming](https://animationprogramming.com). 
+
+# Animation::Internal
+
+The internal namespace contains math and memory related functions. If you want to use a custom allocator, re-implement ```Animation::Internal::Allocate``` and ```Animation::Internal::Free```.  The ```Animation::Internall``` namespace contains the following math related functions:
+
+* ```Animation::Internal::Fmod``` - A simple implementation of ```float fmod(float x, float y)```, the c library version is not used.
+* ```Animation::Internal::FloatCompare``` - Uses a small epsilon value to compare two floating point numbers. The default epsilon value is ```0.000001f```.
+* ```Animation::Internal::InvSqrt``` - A [fast inverse square root](https://en.wikipedia.org/wiki/Fast_inverse_square_root) method used to normalize vectors and quaternions. The implementation could be replaced with ```1/sqrt(x)```
+
+# Animation::State And Animation::Data
 
 This library breaks animation down into two key concepts, **animation state** and **animation data**. Data is static, it does not change. State is driven by data, it's volatile and changes. 
 
-Animation data is analogous to an animation clip. It contains frames, the frames make tracks and the tracks move components of transforms. 
+Animation data is analogous to an animation clip. It contains tracks, the tracks contain frames and when sampled this data animates the components of transforms. 
 
-Animation state is analogous to the Pose of an animation. An animation clip is typically sampled into a pose. Animation state is that, it holds the same information as a pose.
+Animation state is analogous to the Pose of an animation. An animation clip is typically sampled into a pose. Animation state holds the same information as a pose, think of animation state as a snapshot of animation data at some point in time.
 
 Troughout the rest of this document, animation data will be used interchangably with animation clip and animation state will be used interchangably with pose.
 
 ## Animation::Data
 
-In a more straight forward animation system, animation data is represented by several classes. In my [book](https://animationprogramming.com) I break this down into the following classes:
+In a more straight forward animation system, animation data is represented by several classes. In my [book](https://animationprogramming.com) I break animation data down into the following classes:
 
-* __[Frame](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/Frame.h)__ Encodes a value at a given time. Also contains tangents for cubic interpolation. You can interpolate between two frames
-* __[Track](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/Track.h)__ A track is made up of multiple frames. You can have different types of tracks like scalar, vector or quaternion tracks. Sampling a track results in the data type of the track
-* __[TransformTrack](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/TransformTrack.h)__ A transform track is made up of multiple Tracks. It maps tracks to joints. Each joint can have three tracks: position, rotation and scale. Sampling a TransformTrack will always result in a Transform object.
-* __[Clip](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/Clip.h)__ A clip, such as "waling" is made up of multiple transform tracks. Each TransformTrack describes the motion of one joint over time. An animation clip describes the motion of multiple joints, a skeleton over time. A clip samples into a Pose.
+* __[```Frame```](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/Frame.h)__ Encodes a value at a given time. Also contains tangents for cubic interpolation. You can interpolate between two frames
+* __[```Track```](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/Track.h)__ A track is made up of multiple frames. You can have different types of tracks like scalar, vector or quaternion tracks. Sampling a track results in the data type of the track
+* __[```TransformTrack```](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/TransformTrack.h)__ A transform track is made up of multiple Tracks. It maps tracks to joints. Each joint can have three tracks: position, rotation and scale. Sampling a TransformTrack will always result in a Transform object.
+* __[```Clip```](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/Clip.h)__ A clip, such as "waling" is made up of multiple transform tracks. Each TransformTrack describes the motion of one joint over time. An animation clip describes the motion of multiple joints, a skeleton over time. A clip samples into a Pose.
 
 In this animation system, all of that data still exists, it's just all packed into one compact class. The ```Animation::Data``` class contains the following members:
 
@@ -55,7 +68,7 @@ class Data {
         char* mLabel;
 ```
 
-The ```mFrameData``` variable contains all of the frames that are inside of the animation clip. The ```mFrameDataSize``` variable contains the number of elements are inside the array. All of the frames for one track are laid out linearly. This makes the ```mFrameData``` array segmented on a high level like this:
+The ```mFrameData``` variable contains all of the frames that are inside of the animation clip. The ```mFrameDataSize``` variable contains the number of elements are inside the array. All of the frames for one track are laid out linearly. On a high level, this makes the ```mFrameData``` array segmented like so:
 
 ```
 +----------------------+----------------------------------+----------------------------+
@@ -63,7 +76,7 @@ The ```mFrameData``` variable contains all of the frames that are inside of the 
 +----------------------+----------------------------------+----------------------------+
 ```
 
-An animation track usually drives every component of a vector, not just a single one. To make a track work with higher order data, animation systems often have different classes like ```ScalarTrack```, ```VectorTrack```, ```QuaternionTrack```. In my [book](https://animationprogramming.com) book i chose to template the __[Track](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/Track.h)__ class, this library takes a different approac..
+An animation track usually drives every component of a vector, not just a single one. To make a track work with higher order data, animation systems often have different classes like ```ScalarTrack```, ```VectorTrack```, ```QuaternionTrack```. In this animation library, the concept of a track doesn't really exist, let's explore how tracks of vectors and quaternions are implemented.
 
 Conceptually, each type of track has to have it's own type of frame. This is important because the size of a single frame (in bytes) changes based on how much data a frame represents. Consider the following frame structures
 
@@ -82,18 +95,16 @@ struct VectorFrame {
     vec3 out;
 }
 
-// QuaternionFrame, etc...
-
-// Higher order frames like VectorFrame could be expressed with arrays:
-struct Float3Frame {
+// Higher order frames like VectorFrame or QuaternionFrame could be expressed with arrays:
+struct QuaternionFrame {
     float time;
-    float in[3];
-    float value[3];
-    float out[3];
+    float in[4];
+    float value[4];
+    float out[4];
 }
 ```
 
-This makes the diagram of how ```mFrameData``` is segmented harder to read. Two segments both containing 5 frames could have a different size (in bytes) if one segment could hold a vector track while another segment could hold a quaternion track. The ```mFrameData``` is already segmented into tracks. Each track is also segmented into frames, like so:
+This makes the diagram of how ```mFrameData``` is segmented harder to read. Two segments both containing 5 frames could have a different size (in bytes) if one segment is a vector track while another segment is a quaternion track. The ```mFrameData``` is already segmented into tracks. Each track is also segmented into frames, like so:
 
 ```
 +----------------------+----------------------------------+----------------------------+
@@ -114,7 +125,7 @@ This makes the diagram of how ```mFrameData``` is segmented harder to read. Two 
 ```
 
 
-There is no context for where one track begins and the other ends. There is also no context for where a frame in this array might be located. The ```mFrameData``` array is just a large chunk of memory. The ```mTrackData``` array provides context for interpreting the ```mFrameData``` array.
+So far, there is no context for where one track begins and the other ends. There is also no context for where a frame in this array might be located. The ```mFrameData``` array is just a large chunk of memory. The ```mTrackData``` array provides context for interpreting the ```mFrameData``` array.
 
 The ```mTrackData``` contains information needed to tell where a track begins, how many frames the track has and how large each element of a frame is. Even tough it's stored as an array of unsigned integers, ```mTrackData``` should be interpreted as if it consisted of this struct:
 
@@ -130,7 +141,7 @@ struct Track {
 So, each "Track" in ```mTrackData``` consists of 4 unsigned integers. Another way to think about it is that the  ```mTrackData``` array has a stride of 4. Here is a breakdown of what each integer represetns.
 
 * __```id```__ The index of the joint in ```Animation::State``` whose transform is driven by this track.
-* __```component```__ Represents if the track is targeting the position, rotation or scale component of the joints transform. The size of each frame depends on this. Tracks that target position and scale are vector tracks, tracks that target rotation are quaternion tracks.
+* __```component```__ Represents if the track is targeting the position, rotation or scale component of the joints transform. The size of each frame depends on this. Tracks that target position or scale are vector tracks, tracks that target rotation are quaternion tracks. The ```Animation::Data::Component``` enum should be used for the value of this int.
 * __```offset```__ Where in the ```mFrameData``` array this track starts. This is an index.
 * __```size```__ How many elements the ```mFrameData``` array contains make up this track. Counts how many floating point numbers make up the track.
 
@@ -140,130 +151,129 @@ The start and end time of an animation clip depend on the tracks. The track that
 
 ### Interpreting Animation::Data
 
-The only thing that's non trivial about <code>Animtion::Data</code> is the granularity at which interpolation types can be defined. Interpolation can change on a per frame basis. This means frames 1 and 2 might interpolate lineraly, frames 2 and 3 might use constant interpolation and frames 3 and 4 might use cubic interpolation. This isn't uncommon, Unity's Animation window works the same way. The following criteria is used to determine how two frames should be interpolated.
+The only non-trivial part of  ```Animtion::Data``` is the granularity at which interpolation types can be defined. Interpolation can change on a per frame basis. This means frames 1 and 2 might interpolate lineraly, frames 2 and 3 might use constant interpolation and frames 3 and 4 might use cubic interpolation. 
 
-TODO: Show interpolation selection logic
+This interpolation granularity isn't uncommon, Unity's Animation window works the same way. This single curve uses step, linear and cubic interpolation.
 
-The following code prints out the ```Animation::Data``` class. It demonstrates how to access all important elements inside the ```Animation::Data``` class.
+![images/curve_reference.png](images/curve_reference.png)
 
+The following criteria is used to determine how two frames should be interpolated.  The condition flow checks if the interpolation is constant first, if it's linear next and does cubic interpolation by default.
+
+* If the tangent of either frame is over the step threshold (```Animation::Data::StepLimit```, ``` 1000000.0f```), the frames will have **constant interpolation**.
+* If both tangents are linear, the frames will have **linear interpolation**. The linear tangent between two frames can be expressed as ```value delta / time delta```.
+* If the frame interpolation is not constant or linear, it will be **cubic interpolation** by default.
+
+The following code demonstrates how to access the values inside of the ```Animation::Data``` class in a meaningful way by printing out the contents of the class. 
 
 ```
 void Print(const Animation::Data& data) {
-    unsigned int trackStride = 4;
-    unsigned int numTracks = data.mTrackDataSize / trackStride;
+	const float* frameData = data.GetFrameData();
+	unsigned int frameDataSize = data.FrameDataSize();
+	const unsigned int* trackData = data.GetTrackData();
+	unsigned int trackDataSize = data.TrackDataSize();
 
-    std::cout << "Animation: " << data.mLabel << "\n";
-    std::cout << "\tNumber of tracks: " << numTracks << "\n";
-    std::cout << "\tStart time: " << mStartTime << "\n";
-    std::cout << "\tEnd time: " << mEndTime << "\n";
-    std::cout << "\tTracks:\n";
+	unsigned int trackStride = 4;
+	unsigned int numTracks = trackDataSize / trackStride;
 
-    // Loop trough all tracks in the animation clip
-    for (unsigned int t = 0; t < numTracks; ++t) {
-        std::cout << "\tTrack " << t << ":\n";
+	std::cout << "Animation: " << data.GetLabel() << "\n";
+	std::cout << "\tNumber of tracks: " << numTracks << "\n";
+	std::cout << "\tStart time: " << data.GetStartTime() << "\n";
+	std::cout << "\tEnd time: " << data.GetEndtime() << "\n";
+	std::cout << "\tTracks:\n";
 
-        // Current track data
-        unsigned int trackId = data.mTrackData[t * trackStride + 0];
-        unsigned int trackComponent = data.mTrackData[t * trackStride + 1];
-        unsigned int trackOffset = data.mTrackData[t * trackStride + 2];
-        unsigned int trackSize = data.mTrackData[t * trackStride + 3];
+	// Loop trough all tracks in the animation clip
+	for (unsigned int t = 0; t < numTracks; ++t) {
+		std::cout << "\tTrack " << t << ":\n";
 
-        std::cout << "\t\tTarget: " << trackId << "\n";
-        std::cout << "\t\tComponent: ";
-        if (trackComponent == COMPONENT_POSITION) {
-            std::cout << "position\n";
-        }
-        else if (trackComponent == COMPONENT_ROTATION) {
-            std::cout << "rotation\n";
-        }
-        else {
-            std::cout << "scale\n";
-        }
-        std::cout << "\t\tOffset: " << trackOffset << "\n";
-        std::cout << "\t\tSize: " << trackSize << "\n";
-        
-        unsigned int frameStride = 3;
-        if (trackComponent = COMPONENT_ROTATION) {
-            frameStride = 4;
-        }
-        
-        unsigned int numFrames = trackSize / frameStride;
-        std::cout << "\t\tNumber of frames:" << numFrames << "\n";
-        std::cout << "\t\tFrames:\n";
+		// Current track data
+		unsigned int trackId = trackData[t * trackStride + 0];
+		unsigned int trackComponent = trackData[t * trackStride + 1];
+		unsigned int trackOffset = trackData[t * trackStride + 2];
+		unsigned int trackSize = trackData[t * trackStride + 3];
 
-        // Loop trough all frames in current track
-        for (unsigned int f = 0; f < numFrames; ++f) {
-            int frameIndex = trackOffset + f * frameStride;
+		std::cout << "\t\tTarget: " << trackId << "\n";
+		std::cout << "\t\tComponent: ";
+		if (trackComponent == (unsigned int)Animation::Data::Component::Position) {
+			std::cout << "position\n";
+		}
+		else if (trackComponent == (unsigned int)Animation::Data::Component::Rotation) {
+			std::cout << "rotation\n";
+		}
+		else {
+			std::cout << "scale\n";
+		}
+		std::cout << "\t\tOffset: " << trackOffset << "\n";
+		std::cout << "\t\tSize: " << trackSize << "\n";
 
-            // Current frame data
-            float frameTime = data.mFrameData[frameIndex++];
-            float frameIn[4] = {
-                data.mFrameData[frameIndex++],
-                data.mFrameData[frameIndex++],
-                data.mFrameData[frameIndex++],
-                (frameStride == 4)? data.mFrameData[frameIndex++] : 0
-            };
-            float frameValue[4] = {
-                data.mFrameData[frameIndex++],
-                data.mFrameData[frameIndex++],
-                data.mFrameData[frameIndex++],
-                (frameStride == 4)? data.mFrameData[frameIndex++] : 0
-            };
-            float frameOut[4] = {
-                data.mFrameData[frameIndex++],
-                data.mFrameData[frameIndex++],
-                data.mFrameData[frameIndex++],
-                (frameStride == 4)? data.mFrameData[frameIndex++] : 0
-            };
+		unsigned int frameStride = 3; // Vec3
+		if (trackComponent == (unsigned int)Animation::Data::Component::Rotation) {
+			frameStride = 4; // Quaternion
+		}
 
-            std::cout << "\t\tFrame " << f << ":\n";
-            std::cout << "\t\t\tTime: " << frameTime << "\n";
-            for (int c = 0; c < frameStride; ++c) {
-                std::cout << "\t\t\tIn[" << c << "]: " << frameIn[c];
-                std::cout << (c == frameStride - 1)? "\n" : ", ";
-            }
-            for (int c = 0; c < frameStride; ++c) {
-                std::cout << "\t\t\tValue[" << c << "]: " << frameValue[c];
-                std::cout << (c == frameStride - 1)? "\n" : ", ";
-            }
-            for (int c = 0; c < frameStride; ++c) {
-                std::cout << "\t\t\tValue[" << c << "]: " << frameOut[c];
-                std::cout << (c == frameStride - 1)? "\n" : ", ";
-            }
-        }
-    }
+		unsigned int numFrames = trackSize / frameStride;
+		std::cout << "\t\tNumber of frames:" << numFrames << "\n";
+		std::cout << "\t\tFrames:\n";
+
+		// Loop trough all frames in current track
+		for (unsigned int f = 0; f < numFrames; ++f) {
+			int frameIndex = trackOffset + f * frameStride;
+
+			// Current frame data
+			float frameTime = frameData[frameIndex++];
+			float frameIn[4] = {
+				frameData[frameIndex++],
+				frameData[frameIndex++],
+				frameData[frameIndex++],
+				(frameStride == 4) ? frameData[frameIndex++] : 0
+			};
+			float frameValue[4] = {
+				frameData[frameIndex++],
+				frameData[frameIndex++],
+				frameData[frameIndex++],
+				(frameStride == 4) ? frameData[frameIndex++] : 0
+			};
+			float frameOut[4] = {
+				frameData[frameIndex++],
+				frameData[frameIndex++],
+				frameData[frameIndex++],
+				(frameStride == 4) ? frameData[frameIndex++] : 0
+			};
+
+			std::cout << "\t\tFrame " << f << ":\n";
+			std::cout << "\t\t\tTime: " << frameTime << "\n";
+			for (int c = 0; c < frameStride; ++c) {
+				std::cout << "\t\t\tIn[" << c << "]: " << frameIn[c];
+				std::cout << (c == frameStride - 1) ? "\n" : ", ";
+			}
+			for (int c = 0; c < frameStride; ++c) {
+				std::cout << "\t\t\tValue[" << c << "]: " << frameValue[c];
+				std::cout << (c == frameStride - 1) ? "\n" : ", ";
+			}
+			for (int c = 0; c < frameStride; ++c) {
+				std::cout << "\t\t\tValue[" << c << "]: " << frameOut[c];
+				std::cout << (c == frameStride - 1) ? "\n" : ", ";
+			}
+		}
+	}
 }
 ```
 
-### Loading Animation::Data
+### Creating Animation::Data
 
-It's up to the user to load and populate data. The ```Animation::Data``` class provides no functionality for loading anything from disk or from unknown formats. Animation data can be assigned using the ```Set``` function of ```Animation::Data```. The class does provide a ```Serialize``` and ```Deserialize``` function to quickly load and save animation data.
+TODO: How to create animation::data with builder classes
 
-The sample files provided in this repo where generated offline using the [glTF loader code](https://github.com/gszauer/GameAnimationProgramming/blob/master/AllChapters/Code/GLTFLoader.h) written in [Hands-On C++ Game Animation Programming](https://animationprogramming.com). I modified the loading code to convert glTF files to the serialized format expected by this library instead.
+### Loading and saving Animation::Data
 
-> I do have plans to add a minimal glTF loader with no external dependancies later, until that happens the utility of this library is limited.
+Animation data can be serialized and de-serialized using the ```Animation::Serializer``` namespace, located in the ```AnimationSerializer[.h, .cpp]``` files. The serialization functions will not do any file handing, they will serialize the data into a provided area of memory. The following functions are important to serialize or de-serialize data:
 
-### Animation::Data functions
+* ```Animation::Serializer::SerializedDataSize``` - Returns how many bytes are needed to serialize an ```Animation::Data``` object. Usage: ```char* data = new char[SerializedDataSize(data)];```
+* ```Animation::Serializer::SerializeData``` - Serializes an ```Aniamtion::Data``` object into the provided memory. It's assumed that hte provided memory is large enough to hold the ```Aniamtion::data``` object.
+* ```Animation::Serializer::DeserializeData``` - Deserializes a given chunk of data into an ```Aniamtion::Data``` object.
 
-* ```Data();``` - Default constructor, trivial.
-* ```Data(const Data& other);``` - Copy constructor, trivial
-* ```Data& operator=(const Data& other);``` - Assignment operator, trivial
-* ```~Data();``` - Destructor, trivial
-* ```void Set(float* frameData, unsigned int frameSize, unsigned int* trackData, unsigned int trackSize);``` - Sets the frame and track data of the ```Animation::Data``` object. This function is the only way to set the data. It also calculates  ```mStartTime``` and ```mEndTime```
-* ```const float* GetFrameData() const;``` - Getter to immutable ```mFrameData```. This is intended to give a "debug view", not for direct modification. That being said, direct modification _should_ be safe so long as the pointer is fresh
-* ```unsigned int FrameDataSize() const;``` - Geter to ```mFrameDataSize```, trivial
-* ```const unsigned int* GetTrackData() const;``` - Getter to ```mTrackData```, trivial
-* ```unsigned int TrackDataSize() const;``` - Getter to ```mTrackDataSize```, trivial
-* ```float GetStartTime() const;``` - Getter for the cached start time of this animation, trivial. Cached start time is set by the ```Set``` function.
-* ```float GetEndtime() const;``` - Getter for the cahced end time of this animation, trivial. Cached end time is set by the ```Set``` function.
-* ```float GetDuration() const;``` - Getter for the cached duration of this animation, trivial. Cached duration is set by the ```Set``` function.
-* ```bool IsValid() const;``` - Returns false if the animation has a duration of 0, there is no frame data, or if there is no track data.
-* ```const char* GetLabel() const;``` - Getter for the string intended to store the animation name, trivial.
-* ```void SetLabel(const char* label);``` - Setter for the string intended to store the animation name, trivial.
-* ```unsigned int Serialize(char* output, unsigned int outputSize) const;``` - Serializes the class into the output buffer. Size is expected in bytes
-* ```void DeSerialize(char* input, unsigned int inputSize);``` - De-Serializes class from the input buffer. Size is expected in bytes
-* ```unsigned int SerializedSize() const;``` - Returns how many bytes are needed to serialize this class.
-* ```float Sample(State& out, float time, bool looping) const;``` - Samples this ```Animation::Data``` object into an ```Animation::State``` given a specific time. The floating point value that is returned is the time, adjusted to be in the valid playback range of the animation.
+
+### Sampling Animation::Data
+
+TODO
 
 ## Animation::State
 
@@ -479,6 +489,3 @@ Link to WebGL sample
 
 ## Intended for characters
 
-What makes this a _character animation library_ and not a _generic animation_ library? This library makes the assumption that the target of animation data is a transform hierarchy. Tracks have targets expressed as enum values that only makes sens in the context of animating a hierarchy. Generally, when animating a hierarchy we're animating characters.
-
-A more general porpuse animation system would just be a collection of tracks. Each track would need a generic way to bind to a value, like a pointer to the tracks target. With a setup like this, it wouldn't matter what is being animated, tracks are bound to the generic attributes of a hierarchy and don't need context for what they are animating.
