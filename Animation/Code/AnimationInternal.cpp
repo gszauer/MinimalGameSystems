@@ -52,10 +52,10 @@ float Animation::Internal::FMod(float x, float y) {
     // The quick fix is to use the std implementation of fmod instead
     float floor_target = x / y;
     if (floor_target < 0.0f) { // floor
-        floor_target = (int)(floor_target - 1);
+        floor_target = (float)((int)(floor_target - 1.0f));
     }
     else { 
-        floor_target = (int)(floor_target);
+        floor_target = (float)((int)floor_target);
     }
 
     float result = x - y * floor_target;

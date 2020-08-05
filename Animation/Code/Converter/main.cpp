@@ -1,3 +1,4 @@
+#pragma warning( disable : 26812)
 #define _CRT_SECURE_NO_WARNINGS
 
 #define CGLTF_IMPLEMENTATION
@@ -69,7 +70,7 @@ struct Mesh {
 	std::vector<vec4> weights;
 	std::vector<ivec4> influences;
 	std::vector<unsigned int> indices;
-	unsigned int pivot;
+	unsigned int pivot = 0;
 };
 
 Animation::State LoadRestPose(cgltf_data* data);
@@ -79,9 +80,28 @@ std::vector<Mesh> LoadMeshes(cgltf_data* data);
 unsigned int SerializedMeshStringSize(Mesh& mesh);
 void SerializeMesh(Mesh& mesh, char* output);
 
+#ifdef _WIN32
+#include <io.h> 
+#define access    _access_s
+#else
+#include <unistd.h>
+#endif
+
+bool FileExists(const std::string& Filename) {
+	return access(Filename.c_str(), 0) == 0;
+}
+
 int main(int argc, char** argv) {
-	const char* path = "Assets/Zombie.gltf"; // TODO: Parse from args
-	// TODO: Check if file exists before continuing
+	if (argc < 2) {
+		std::cout << "Usage: Converter <gltffile>\n";
+		return 0;
+	}
+
+	const char* path = argv[1];
+	if (!FileExists(path)) {
+		std::cout << "File does not exist: " << argv[1] << "\n";
+		return 0;
+	}
 
 	cgltf_options options;
 	memset(&options, 0, sizeof(cgltf_options));
@@ -118,6 +138,7 @@ int main(int argc, char** argv) {
 	out.open("bindState.txt");
 	out << outputBuffer;
 	out.close();
+	std::cout << "Saved: bindState.txt\n";
 	delete[] outputBuffer;
 
 	outputBuffer = new char[Animation::Serializer::SerializedStateSize(restPose)];
@@ -125,6 +146,7 @@ int main(int argc, char** argv) {
 	out.open("restState.txt");
 	out << outputBuffer;
 	out.close();
+	std::cout << "Saved: restState.txt\n";
 	delete[] outputBuffer;
 
 	char clip_name[32];
@@ -143,6 +165,7 @@ int main(int argc, char** argv) {
 		out.open(file_name);
 		out << outputBuffer;
 		out.close();
+		std::cout << "Saved: " << file_name << "\n";
 		delete[] outputBuffer;
 	}
 
@@ -160,6 +183,7 @@ int main(int argc, char** argv) {
 		out.open(file_name);
 		out << outputBuffer;
 		out.close();
+		std::cout << "Saved: " << file_name << "\n";
 		delete[] outputBuffer;
 	}
 
@@ -455,10 +479,8 @@ Transform GetLocalTransform(cgltf_node& node) {
 	Transform result;
 
 	if (node.has_matrix) {
-		std::cout << "mat4 nodes not supported\n"; // TODO: mat4ToTransform
-		result.position = vec3(0, 0, 0);
-		result.rotation = quat(0, 0, 0, 1);
-		result.scale = vec3(1, 1, 1);
+		mat4 mat(&node.matrix[0]);
+		result = mat4ToTransform(mat);
 	}
 
 	if (node.has_translation) {

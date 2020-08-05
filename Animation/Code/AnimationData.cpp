@@ -3,7 +3,7 @@
 #include "AnimationInternal.h"
 
 namespace Animation {
-	int Data::StepLimit = 1000000.0f;
+	float Data::StepLimit = 1000000.0f;
 }
 
 Animation::Data::Data() {
@@ -422,7 +422,7 @@ void Animation::Data::SetPointers(float* frameData, unsigned int frameSize, unsi
 
 				unsigned int frameDataStride = 13;
 
-				for (int j = 0; j < size / frameDataStride; ++j) {
+				for (unsigned int j = 0; j < size / frameDataStride; ++j) {
 					float* rot = &mFrameData[offset + (j * 13) + 1 + 4];
 
 					float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];

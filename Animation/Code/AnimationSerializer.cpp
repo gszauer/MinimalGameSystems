@@ -395,7 +395,7 @@ void Animation::Serializer::DeserializeData(Data& out, const char* input) {
 
                 unsigned int frameDataStride = 13;
 
-                for (int j = 0; j < size / frameDataStride; ++j) {
+                for (unsigned int j = 0; j < size / frameDataStride; ++j) {
                     float* rot = &frameData[offset + (j * 13) + 1 + 4];
 
                     float rotLenSq = rot[0] * rot[0] + rot[1] * rot[1] + rot[2] * rot[2] + rot[3] * rot[3];

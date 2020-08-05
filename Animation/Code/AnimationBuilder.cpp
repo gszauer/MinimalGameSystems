@@ -4,7 +4,7 @@
 
 namespace Animation {
 	namespace Builder {
-		int StepTangent = Animation::Data::StepLimit * 2.0f;
+		float StepTangent = Animation::Data::StepLimit * 2.0f;
 	}
 }
 Animation::Builder::Frame::Frame() {
