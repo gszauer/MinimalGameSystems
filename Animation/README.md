@@ -155,7 +155,7 @@ The only non-trivial part of  ```Animtion::Data``` is the granularity at which i
 
 This interpolation granularity isn't uncommon, Unity's Animation window works the same way. This single curve uses step, linear and cubic interpolation.
 
-![images/curve_reference.png](images/curve_reference.png)
+![Unity Animation Curves](images/curve_reference.png)
 
 The following criteria is used to determine how two frames should be interpolated.  The condition flow checks if the interpolation is constant first, if it's linear next and does cubic interpolation by default.
 
@@ -262,6 +262,12 @@ void Print(const Animation::Data& data) {
 
 TODO: How to create animation::data with builder classes
 
+The ```Animation::Builder``` namespace is provided to create an intuitive interface for building animation clips. This namespace contains more traditional class definitions for ```Frame```, ```Track``` and ```Clip```, where an animation clips is made up of tracks, which are in turn made up of frames.
+
+TODO: Sample usage
+
+Ideally the ```Animation::Builder``` namespace will be used to create offline tools that convert the desired aniamtion to ```Animation::Data``` objects, which will then be serialized. The **Converter** project that is provided uses [cgltf](https://github.com/jkuhlmann/cgltf) to convert [gltf](https://www.khronos.org/gltf/) files to runtime appropriate data.
+
 ### Loading and saving Animation::Data
 
 Animation data can be serialized and de-serialized using the ```Animation::Serializer``` namespace, located in the ```AnimationSerializer[.h, .cpp]``` files. The serialization functions will not do any file handing, they will serialize the data into a provided area of memory. The following functions are important to serialize or de-serialize data:
@@ -269,7 +275,6 @@ Animation data can be serialized and de-serialized using the ```Animation::Seria
 * ```Animation::Serializer::SerializedDataSize``` - Returns how many bytes are needed to serialize an ```Animation::Data``` object. Usage: ```char* data = new char[SerializedDataSize(data)];```
 * ```Animation::Serializer::SerializeData``` - Serializes an ```Aniamtion::Data``` object into the provided memory. It's assumed that hte provided memory is large enough to hold the ```Aniamtion::data``` object.
 * ```Animation::Serializer::DeserializeData``` - Deserializes a given chunk of data into an ```Aniamtion::Data``` object.
-
 
 ### Sampling Animation::Data
 
@@ -457,35 +462,10 @@ TODO
 
 TODO
 
-# Helpers
+# Samples
 
 TODO
 
-# Usage
+# Converter
 
 TODO
-
-## The sample code
-
-Where did the sample data come from
-
-What should the user see
-
-Link to WebGL sample
-
-# What went wrong
-
-* The data storage of ```Animation::Data``` is overly complex. Packing the data is hard to get right, I spent three (weekend) days writing and debugging a converter. Most of the difficuly is in the conversions between vectors of touples (```std::vector<vec3>```) and arrays of scalars (```float*```). 
-* ```Animation::Helpers``` was not planned. I didn't plan on including this module, but the shared code between state and data started to grow and they needed a common place. I like that this namespace contains functions that can be better implemented based on the context that the animation system is used in.
-* The serialized file format is hacky at best. I only created these functions to import existing data that can be used to test the system. A more robust, preferably binary format is needed.
-* Both ```Animation::Data``` and ```Animation::State``` need the ability to load from a standard format, then serialize to something faster to work with. 
-* The ```Animation::Data``` API for setting data requires intimate knowledge of teh data layout. This makes the class complicated and error prone. I have not been able to figure out a better API, primarily beause both Animation Clip and Animation Track data is stored in the same class.
-
-# What went right
-
-* While the internal data storage of the animation classes are complicated, using the classes is simple. I feel like the goal of having a low barrier to entry worked.
-* Since the users of the animation API typically don't work with track data, rolling track and clip data into one class (```Animation::Data```) greatly simplified the API.
-* Making ```Animation::Skin``` work with data views allows for mapping the skinning data to just about any input format. It's a cache nightmare, but the API is easy to use.
-
-## Intended for characters
-
