@@ -1,18 +1,16 @@
-#include "AnimationInternal.h"
+#include "../AnimationInternal.h"
+
+extern unsigned char __heap_base;
+unsigned int bump_pointer = (unsigned int)&__heap_base;
 
 void* Animation::Internal::Allocate(unsigned int bytes) {
-    char* data = new char[bytes];
-    if (data != 0) {
-        for (unsigned int i = 0; i < bytes; ++i) {
-            data[i] = 0;
-        }
-    }
-    return data;
+    unsigned int r = bump_pointer;
+    bump_pointer += bytes;
+    return (void *)r;
 }
 
 void Animation::Internal::Free(void* memory) {
-    char* data = (char*)memory;
-    delete[] data;
+    
 }
 
 bool Animation::Internal::FloatCompare(float a, float b) {

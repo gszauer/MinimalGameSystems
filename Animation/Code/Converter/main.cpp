@@ -385,17 +385,17 @@ void SerializeMesh(Mesh& mesh, char* output) {
 	unsigned int idxSize = (unsigned int)indices.size();
 
 	const char* message = "mPivot: ";
-	for (; *output = *message; ++message, ++output);
+	for (; (*output = *message); ++message, ++output);
 	output = Animation::Serializer::WriteUInt(output, pivot);
 	output = Animation::Serializer::WriteNewLine(output);
 
 	message = "mPositions.size(): ";
-	for (; *output = *message; ++message, ++output);
+	for (; (*output = *message); ++message, ++output);
 	output = Animation::Serializer::WriteUInt(output, posSize);
 	output = Animation::Serializer::WriteNewLine(output);
 
 	message = "mPositions: ";
-	for (; *output = *message; ++message, ++output);
+	for (; (*output = *message); ++message, ++output);
 	for (unsigned int i = 0; i < posSize; ++i) {
 		output = Animation::Serializer::WriteFloat(output, position[i].x);
 		output = Animation::Serializer::WriteFloat(output, position[i].y);
@@ -404,12 +404,12 @@ void SerializeMesh(Mesh& mesh, char* output) {
 	output = Animation::Serializer::WriteNewLine(output);
 
 	message = "mNormals.size(): ";
-	for (; *output = *message; ++message, ++output);
+	for (; (*output = *message); ++message, ++output);
 	output = Animation::Serializer::WriteUInt(output, normSize);
 	output = Animation::Serializer::WriteNewLine(output);
 
 	message = "mNormals: ";
-	for (; *output = *message; ++message, ++output);
+	for (; (*output = *message); ++message, ++output);
 	for (unsigned int i = 0; i < normSize; ++i) {
 		output = Animation::Serializer::WriteFloat(output, normal[i].x);
 		output = Animation::Serializer::WriteFloat(output, normal[i].y);
@@ -418,12 +418,12 @@ void SerializeMesh(Mesh& mesh, char* output) {
 	output = Animation::Serializer::WriteNewLine(output);
 
 	message = "mTexCoords.size(): ";
-	for (; *output = *message; ++message, ++output);
+	for (; (*output = *message); ++message, ++output);
 	output = Animation::Serializer::WriteUInt(output, texSize);
 	output = Animation::Serializer::WriteNewLine(output);
 
 	message = "mTexCoords: ";
-	for (; *output = *message; ++message, ++output);
+	for (; (*output = *message); ++message, ++output);
 	for (unsigned int i = 0; i < texSize; ++i) {
 		output = Animation::Serializer::WriteFloat(output, texCoord[i].x);
 		output = Animation::Serializer::WriteFloat(output, texCoord[i].y);
@@ -431,12 +431,12 @@ void SerializeMesh(Mesh& mesh, char* output) {
 	output = Animation::Serializer::WriteNewLine(output);
 
 	message = "mWeights.size(): ";
-	for (; *output = *message; ++message, ++output);
+	for (; (*output = *message); ++message, ++output);
 	output = Animation::Serializer::WriteUInt(output, weightSize);
 	output = Animation::Serializer::WriteNewLine(output);
 
 	message = "mWeights: ";
-	for (; *output = *message; ++message, ++output);
+	for (; (*output = *message); ++message, ++output);
 	for (unsigned int i = 0; i < weightSize; ++i) {
 		output = Animation::Serializer::WriteFloat(output, weights[i].x);
 		output = Animation::Serializer::WriteFloat(output, weights[i].y);
@@ -446,12 +446,12 @@ void SerializeMesh(Mesh& mesh, char* output) {
 	output = Animation::Serializer::WriteNewLine(output);
 
 	message = "mInfluences.size(): ";
-	for (; *output = *message; ++message, ++output);
+	for (; (*output = *message); ++message, ++output);
 	output = Animation::Serializer::WriteUInt(output, infSize);
 	output = Animation::Serializer::WriteNewLine(output);
 
 	message = "mInfluences: ";
-	for (; *output = *message; ++message, ++output);
+	for (; (*output = *message); ++message, ++output);
 	for (unsigned int i = 0; i < infSize; ++i) {
 		output = Animation::Serializer::WriteUInt(output, influences[i].x);
 		output = Animation::Serializer::WriteUInt(output, influences[i].y);
@@ -461,12 +461,12 @@ void SerializeMesh(Mesh& mesh, char* output) {
 	output = Animation::Serializer::WriteNewLine(output);
 
 	message = "mIndices.size(): ";
-	for (; *output = *message; ++message, ++output);
+	for (; (*output = *message); ++message, ++output);
 	output = Animation::Serializer::WriteUInt(output, idxSize);
 	output = Animation::Serializer::WriteNewLine(output);
 
 	message = "mIndices: ";
-	for (; *output = *message; ++message, ++output);
+	for (; (*output = *message); ++message, ++output);
 	for (unsigned int i = 0; i < idxSize; ++i) {
 		output = Animation::Serializer::WriteUInt(output, indices[i]);
 	}

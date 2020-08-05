@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+
+<script type="module">
+  async function init() {
+    const { instance } = await WebAssembly.instantiateStreaming(
+      fetch("./Animation.wasm")
+    );
+    console.log(instance.exports.add(4, 1));
+  }
+  init();
+</script>
+</head>
+<body>
+
+</body>
+</html>

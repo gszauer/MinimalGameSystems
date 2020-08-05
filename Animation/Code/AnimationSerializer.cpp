@@ -242,35 +242,35 @@ void Animation::Serializer::SerializeData(char* output, const Data& data) {
     const char* label = data.GetLabel();
 
     const char* message = "mFrameDataSize: ";
-    for (; *output = *message; ++message, ++output);
+    for (; (*output = *message); ++message, ++output);
     output = WriteUInt(output, frameDataSize);
     output = WriteNewLine(output);
 
     message = "mFrameData: ";
-    for (; *output = *message; ++message, ++output);
+    for (; (*output = *message); ++message, ++output);
     for (unsigned int i = 0; i < frameDataSize; ++i) {
         output = WriteFloat(output, frameData[i]);
     }
     output = WriteNewLine(output);
 
     message = "mTrackDataSize: ";
-    for (; *output = *message; ++message, ++output);
+    for (; (*output = *message); ++message, ++output);
     output = WriteUInt(output, trackDataSize);
     output = WriteNewLine(output);
 
     message = "mTrackData: ";
-    for (; *output = *message; ++message, ++output);
+    for (; (*output = *message); ++message, ++output);
     for (unsigned int i = 0; i < trackDataSize; ++i) {
         output = WriteUInt(output, trackData[i]);
     }
     output = WriteNewLine(output);
 
     message = "mStartTime: ";
-    for (; *output = *message; ++message, ++output);
+    for (; (*output = *message); ++message, ++output);
     output = WriteFloat(output, data.GetStartTime());
     output = WriteNewLine(output);
     message = "mEndTime: ";
-    for (; *output = *message; ++message, ++output);
+    for (; (*output = *message); ++message, ++output);
     output = WriteFloat(output, data.GetEndtime());
     output = WriteNewLine(output);
 
@@ -284,12 +284,12 @@ void Animation::Serializer::SerializeData(char* output, const Data& data) {
     }
     // mLabel
     message = "strlen(mLabel): ";
-    for (; *output = *message; ++message, ++output);
+    for (; (*output = *message); ++message, ++output);
     output = WriteUInt(output, labelLength);
     output = WriteNewLine(output);
 
     message = "mLabel: ";
-    for (; *output = *message; ++message, ++output);
+    for (; (*output = *message); ++message, ++output);
     for (unsigned int i = 0; i < labelLength; ++i) {
         *output = label[i];
         output += 1;
@@ -422,12 +422,12 @@ void Animation::Serializer::SerializeState(char* output, const State& state) {
     unsigned int size = state.Size();
 
     const char* message = "mSize: ";
-    for (; *output = *message; ++message, ++output);
+    for (; (*output = *message); ++message, ++output);
     output = WriteUInt(output, size);
     output = WriteNewLine(output);
 
     message = "mHierarchy: ";
-    for (; *output = *message; ++message, ++output);
+    for (; (*output = *message); ++message, ++output);
     for (unsigned int i = 0; i < size; ++i) {
         int parent = state.GetParent(i);
         output = WriteInt(output, parent);
@@ -435,7 +435,7 @@ void Animation::Serializer::SerializeState(char* output, const State& state) {
     output = WriteNewLine(output);
 
     message = "mTransforms: ";
-    for (; *output = *message; ++message, ++output);
+    for (; (*output = *message); ++message, ++output);
     for (unsigned int i = 0; i < size; ++i) {
         float pos[3], rot[4], scl[3];
         state.GetRelativePosition(i, pos);

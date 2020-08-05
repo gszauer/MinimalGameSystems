@@ -1,10 +1,20 @@
 #include "AnimationBuilder.h"
 #include "AnimationInternal.h"
-#include <new>
 
 namespace Animation {
 	namespace Builder {
 		float StepTangent = Animation::Data::StepLimit * 2.0f;
+
+		namespace Internal {
+			void* MemCpy(void* dest, const void* src, unsigned int len) {
+				char* d = (char*)dest;
+				const char* s = (const char*)src;
+				while (len--) {
+					*d++ = *s++;
+				}
+				return dest;
+			}
+		}
 	}
 }
 Animation::Builder::Frame::Frame() {
@@ -353,7 +363,8 @@ void Animation::Builder::Clip::Reserve(unsigned int numToReserve) {
 	if (mTrackCapacity < numToReserve) {
 		Track* newTracks = (Track*)Animation::Internal::Allocate(sizeof(Track) * numToReserve);
 		for (unsigned int i = 0; i < numToReserve; ++i) {
-			new(&newTracks[i])Track(); // Need to call constructor for track
+			Track emptyTrack; // Kind of like a placement new operator, without including <new>
+			Animation::Builder::Internal::MemCpy(&newTracks[i], &emptyTrack, sizeof(Track));
 		}
 
 		for (unsigned int i = 0; i < mTrackCount; ++i) {
@@ -390,7 +401,8 @@ void Animation::Builder::Clip::Resize(unsigned int newSize) {
 	else if (newSize < mTrackCount) {
 		newTracks = (Track*)Animation::Internal::Allocate(sizeof(Track) * newSize);
 		for (unsigned int i = 0; i < newSize; ++i) {
-			new(&newTracks[i])Track(); // Need to call constructor for track
+			Track emptyTrack;
+			Animation::Builder::Internal::MemCpy(&newTracks[i], &emptyTrack, sizeof(Track));
 		}
 		for (unsigned int i = 0; i < newSize; ++i) {
 			newTracks[i] = mTracks[i];
@@ -405,7 +417,8 @@ void Animation::Builder::Clip::Resize(unsigned int newSize) {
 	else { // newSize > mTrackCount
 		newTracks = (Track*)Animation::Internal::Allocate(sizeof(Track) * newSize);
 		for (unsigned int i = 0; i < newSize; ++i) {
-			new(&newTracks[i])Track(); // Need to call constructor for track
+			Track emptyTrack;
+			Animation::Builder::Internal::MemCpy(&newTracks[i], &emptyTrack, sizeof(Track));
 		}
 		for (unsigned int i = 0; i < mTrackCount; ++i) {
 			newTracks[i] = mTracks[i];

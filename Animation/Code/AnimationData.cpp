@@ -108,7 +108,7 @@ void Animation::Data::SetLabel(const char* label) {
 		return;
 	}
 	mLabel = (char*)Animation::Internal::Allocate((unsigned int)sizeof(char) * (length + 1));
-	for (char* cpy = mLabel; *cpy = *label; ++label, ++cpy); // StrCpy
+	for (char* cpy = mLabel; (*cpy = *label); ++label, ++cpy); // StrCpy
 	mLabel[length] = '\0';
 }
 
