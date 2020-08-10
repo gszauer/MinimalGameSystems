@@ -155,7 +155,7 @@ The only non-trivial part of  ```Animtion::Data``` is the granularity at which i
 
 This interpolation granularity isn't uncommon, Unity's Animation window works the same way. This single curve uses step, linear and cubic interpolation.
 
-![Unity Animation Curves](images/curve_reference.png)
+![Unity Animation Curves](Images/curve_reference.png)
 
 The following criteria is used to determine how two frames should be interpolated.  The condition flow checks if the interpolation is constant first, if it's linear next and does cubic interpolation by default.
 
@@ -469,7 +469,7 @@ If a joint is a root node, it's parent in ```mHierarchy``` will be negative. The
 
 ### Animation::State to matrix palette
 
-TODO
+Skinning is generally done using matrix palette's. A matrix palette, is just a fancy word for an array of matrices. The ```Animation::ToMatrixPalette``` function will convert an ```Animation::State``` object into a flat array of matrices. The first argument to the function is a pointer to the matrix array and the second is a constant ```Animation::State``` reference, the object to be converted. The ```Animation::ToMatrixPalette``` function assumes that the array passed as the first argument is large enough to hold the state, to get an array that's the correcct size, multiply the state size by 16: ```float* skinPalette = new float[bindPose.Size() * 16];```.
 
 ### Interpreting Animation::State
 
@@ -608,12 +608,37 @@ void SkinnedSample::Update(float dt) {
 
 # Blending
 
-TODO
+The ```Animation::Blend``` function is provided to make transitions between aniamtions easier. The blend function has the following signature:
+
+```
+bool Animation::Blend(State& target, const State& a, const State& b, float t);
+```
+
+The ```target``` argument is the ```Aniamtion::State``` object that the blend will be written to. The ```a``` and ```b``` state objects are the two states being blended between. The last argument, ```t```, is expected to be a floating point number between 0 and 1. This interpolation function can be tought of as a "lerp" for ```Aniamtion::State```.
 
 # Samples
 
-TODO
+The sample projects don't have the same code quality that the acutal animation files do, a lot of this comes down to making the samples as easy to read as possible. The **Samples** solution contains the following four samples:
+
+* **Curve Sample** - Demonstrates how to create and evaluate animation curves
+* **Skeleton Sample** - Demonstrates how to use curves to animate a skeleton
+* **Skinned Sample** - Demonstrates how to skin a mesh to match the animated skeleton
+* **Blend Sample** - Demonstrates how to smoothly transition between animation clips
+
+If curves are evaluating correctly, the **Curve Sample** should look like this
+
+![Curve Sample](Images/curve_sample.png)
+
+The curve in the bottom left shows non-looping curves with keyframes at time 0 and 1. These curves demonstrate that interpolation between points is working. The curve in the upper left shows looping tracks with keyframes at 0.25, 0.5 and 0.75. These curves demonstrate that looped sampling is working. The curve in the bottom right has step, linear and cubic frames in the same curve. If This curve demonstrates that keyframe interpolation is working.
 
 # Converter
+
+The **Converter** solution builds to an executable which provides an easy way to generate runtime usable data. It uses [cgltf](https://github.com/jkuhlmann/cgltf) to convert GLTF files to data that's ready to be loaded. The converter application takes a gltf file as it's only argument and will output the following files:
+
+* ```bindState.txt``` -  The bind pose of the character.
+* ```restState.txt``` - The rest pose of the character. This pose provides the default skeleton configuration, if a clip doesn't animate a track, the information for that joints transform should come from the rest pose.
+* ```CLIP_[0 ... N]Data.txt``` or ```[clip name]Data.txt``` - Contains an animation clip. If the clips in the GLTF file are named, the name of the clip will be used for the file name. If clips in the GLTF file don't have a name, a default name of ```CLIP_[N]Data.txt``` will be used.
+
+# Web Assembly
 
 TODO
