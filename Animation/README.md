@@ -260,33 +260,138 @@ void Print(const Animation::Data& data) {
 
 ### Creating Animation::Data
 
-TODO: How to create animation::data with builder classes
-
 The ```Animation::Builder``` namespace is provided to create an intuitive interface for building animation clips. This namespace contains more traditional class definitions for ```Frame```, ```Track``` and ```Clip```, where an animation clips is made up of tracks, which are in turn made up of frames.
 
-TODO: Sample usage
+To create an animation clip, create an ```Animation::Builder::Clip``` object, which is made up of ```Animation::Builder::Track``` objects which are in turn made up of ```Animation::Builder::Frame``` objects. ```Samples/BlendSample[.h, .cpp]``` uses the animation builder to create an animation clip that is used to control blending what animation is playing.  The code below demonstrates how the ```Animation::Builder``` can be used to create a new animation.
 
-Ideally the ```Animation::Builder``` namespace will be used to create offline tools that convert the desired aniamtion to ```Animation::Data``` objects, which will then be serialized. The **Converter** project that is provided uses [cgltf](https://github.com/jkuhlmann/cgltf) to convert [gltf](https://www.khronos.org/gltf/) files to runtime appropriate data.
+```
+Animation::Builder::Frame MakeFrame(float time, float in, float value, float out) {
+    Animation::Builder::Frame result;
+
+    result.time = time;
+    result.in[0] = in;
+    result.value[0] = value;
+    result.out[0] = out;
+    return result;
+}
+// ...
+{
+    Animation::Builder::Clip curve;
+	blendCurve.SetName("New Curve");
+
+    Animation::Builder::Track track;
+	track.SetTarget(Animation::Data::Component::Position);
+	track.SetJointID(0);
+
+	track.PushFrame(MakeFrame(0, 0, 0, 0));
+	track.PushFrame(MakeFrame(0.4f, 0, 0, 0));
+	track.PushFrame(MakeFrame(0.6f, 0, 1.0f, 0));
+	track.PushFrame(MakeFrame(1.4f, 0, 1.0f, 0));
+	track.PushFrame(MakeFrame(1.6f, 0, 0, 0));
+	track.PushFrame(MakeFrame(2, 0, 0, 0));
+	
+	curve.PushTrack(track);
+	Animation::Data animationData = Animation::Builder::Convert(curve);
+}
+```
+
+
+Ideally the ```Animation::Builder``` namespace will be used by offline tools that convert the desired aniamtion to ```Animation::Data``` objects, which will then be serialized. The **Converter** project that is provided uses [cgltf](https://github.com/jkuhlmann/cgltf) to convert [gltf](https://www.khronos.org/gltf/) files to convert and serialize gltf files.
 
 ### Loading and saving Animation::Data
 
-Animation data can be serialized and de-serialized using the ```Animation::Serializer``` namespace, located in the ```AnimationSerializer[.h, .cpp]``` files. The serialization functions will not do any file handing, they will serialize the data into a provided area of memory. The following functions are important to serialize or de-serialize data:
+Animation data can be serialized and de-serialized using the ```Animation::Serializer``` namespace. The serialization functions will not do any file handing, they will serialize the data into a provided area of memory. The following functions are important to serialize or de-serialize data:
 
-* ```Animation::Serializer::SerializedDataSize``` - Returns how many bytes are needed to serialize an ```Animation::Data``` object. Usage: ```char* data = new char[SerializedDataSize(data)];```
-* ```Animation::Serializer::SerializeData``` - Serializes an ```Aniamtion::Data``` object into the provided memory. It's assumed that hte provided memory is large enough to hold the ```Aniamtion::data``` object.
+* ```Animation::Serializer::SerializedDataSize``` - Returns how many bytes are needed to serialize an ```Animation::Data``` object. Usage: ```char* d = new char[SerializedDataSize(data)];```
+* ```Animation::Serializer::SerializeData``` - Serializes an ```Aniamtion::Data``` object into the provided memory. It's assumed that the provided memory is large enough to hold the ```Aniamtion::Data``` object.
 * ```Animation::Serializer::DeserializeData``` - Deserializes a given chunk of data into an ```Aniamtion::Data``` object.
+
+
+The code below demonstrates how to deserialize animation data from a file
+
+```
+char* ReadFileContents(const char* filename) {
+	char* buffer = 0;
+	FILE* f = fopen(filename, "r");
+
+	if (f != 0) {
+		fseek(f, 0, SEEK_END);
+		unsigned int length = (unsigned int)ftell(f);
+		fseek(f, 0, SEEK_SET);
+		buffer = (char*)malloc((unsigned int)sizeof(char) * (length + 1));
+		if (buffer != 0) {
+			memset(buffer, 0, (unsigned int)sizeof(char) * (length + 1));
+			fread(buffer, 1, length, f);
+			buffer[length] = '\0';
+		}
+		fclose(f);
+	}
+
+	return buffer;
+}
+
+// ...
+
+Animation::Data runningAnimation;
+char* input = ReadFileContents("Assets/runningData.txt");
+Animation::Serializer::DeserializeData(runningAnimation, input);
+free(input);
+```
+
+And the code below demonstrates how to serialize that same animation data
+
+```
+unsigned int size = Animation::Serializer::SerializedDataSize(runningAnimation);
+
+char* outBuffer = outputBuffer = new char[size];
+Animation::Serializer::SerializeData(outBuffer, runningAnimation);
+
+std::ofstream out;
+out.open("Assets/runningData.txt");
+out << outBuffer;
+out.close();
+free[] outBuffer;
+```
 
 ### Sampling Animation::Data
 
-TODO
+Animation data can be sampled either manually, or directly into an ```Animation::State```. Sampling directly into a state object is the intended way for animations to be sampled, this system was written for character animation. However, there are situations where being able to sample a track is useful, so a way to sample a track manually is provided as well. The following functions can be used to sample ```Animation::Data```:
+
+```
+float Animation::Data::Sample(State& out, float time, bool looping) const;
+float Animation::Data::SampleTrack(float* out, unsigned int trackIndex, float time, bool looping) const;
+```
+
+Both functions take a ```time``` argument, the return value of the function is this input time, adjusted to be valid for this clip. For example, if the track is ```looping``` and ```time``` is greater than the clips ent time, ```time``` will be adjusted to loop with the clip.
+
+The ```Sample``` function takes an ```Animation::State``` which is where the track data will be sampled into, it takes the current playback time and a boolean to indicate if the animation is looping or not. 
+
+The ```SampleTrack``` function takes a float pointer, which is where the vector or quaternion, depending ont he track type will be written to. The second argument specifies track index, if a an animation was built using ```Animation::Builder```, the index is whatever index the track was pushed into the clip at. The last two arguments are time and looping, the same as the other sample function. The following code demonstrates how a ```Animation::Data``` can be sampled:
+
+```
+Animation::Data runningAnimation;
+Animation::State animatedPose;
+float animationTime;
+
+Animation::Data customCurve;
+float curveTime;
+
+// ...
+
+{
+	animationTime = runningAnimation.Sample(animatedPose, animationTime + dt, true);
+
+	float result[4] = { 0.0f }; // Store the blend result
+	curveTime = customCurve.SampleTrack(result, 0, curveTime + dt, true);
+	float value = result[0]; // We only care about the x track
+}
+```
 
 ## Animation::State
 
-The ```Animation::State``` object is analogous to a ```Pose``` class or something similar. The ```Aniamtion::State``` class is a wrapper for a simple hierarchy. This hierarchy is the animated scene, or in the case of character animation, the animates pose or skeleton.
+The ```Animation::State``` object is analogous to a ```Pose``` or ```Skeleton```. The ```Aniamtion::State``` class represents a hierarchy of ```Transform``` objects. A ```Transform``` object has a position, a rotation, and a scale. This hierarchy is an animated scene, or in the case of character animation, the animated pose or skeleton.
 
-> I've played around with the idea of removing ```Animation::State``` in favor of a descriptor type of scheme. Where ```Animation::Data::Sample``` would take an ```Animation::HierarchyDescriptor``` object that provides a mapping to where the transform data should be stored. This would make the animation code presented here much easier to integrate into existing code bases, and it would eliminate two spots in code that do memory allocation. I'm not sure how the descriptor would store the hierarchy relationship.
-
-The ```Animation::State``` class encodes a hierarchy using the following member variables:
+The ```Animation::State``` class encodes a transform hierarchy using the following member variables:
 
 ```
 namespace Animation {
@@ -297,7 +402,7 @@ namespace Animation {
         unsigned int mSize;
 ```
 
-The ```mTransforms``` array contain only floating point numbers. Conceptually, the data is stored as if it where an array of transform structures, like so:
+The ```mTransforms``` array contain only floating point numbers. Conceptually, the data is stored as if it where an array of transform structures, like this:
 
 ```
 struct Transform {
@@ -362,6 +467,10 @@ The ```mHierarchy``` array has the same size as the ```mTransforms``` array. The
 
 If a joint is a root node, it's parent in ```mHierarchy``` will be negative. There can be more than one root node. The joints are not stored in any particular order, it's possible to have a root node randomly in the middle of the array with children on both sides.  
 
+### Animation::State to matrix palette
+
+TODO
+
 ### Interpreting Animation::State
 
 The following code prints out the ```Animation::State``` class. It demonstrates how to access all important elements inside the ```Animation::State``` class.
@@ -419,44 +528,83 @@ Animation state is volatile, it is the result of sampling animation data at some
 * Bind State
 * Rest State
 
-The two are defined seperateley. The **bind state** is whatever the pose the skeleton was in when the mesh was skinned to it. The **rest state** is the default / reference state of the hierarchy. The bind and rest pose are often the same, but not always. Some file formats or 3DCC tools might not export the two poses as the same thing. 
+The **bind state** is whatever the pose the skeleton was in when the mesh was skinned to it. The **rest state** is the default / reference state of the hierarchy. The bind and rest pose are often the same, but not always.
 
-The ```Serialize``` and ```Deserialize``` functions are intended to save and load the bind and rest poses. 
+The ```Animation::Serialization``` namespace contains the following functions to serialize / deserialize ```Animation::State```.
 
-TODO: Function signatores are now off here and with data. Fix that.
+* ```Animation::Serializer::SerializedStateSize``` - Returns how many bytes are needed to serialize an ```Animation::State``` object. Usage: ```char* p = new char[SerializedStateSize(data)];```
+* ```Animation::Serializer::SerializeState``` - Serializes an ```Aniamtion::State``` object into the provided memory. It's assumed that the provided memory is large enough to hold the ```Aniamtion::State``` object.
+* ```Animation::Serializer::DeserializeState``` - Deserializes a given chunk of data into an ```Aniamtion::State``` object.
 
-### Animation::State functions
+The code sample below demonstrates how to serialize and de-serialize ```Animation::State``` objects.
 
-* ```State();``` - Default constructor, trivial
-* ```State(const State& other);``` - Copy constructor, trivial
-* ```State& operator=(const State& other);``` - ASsignment operator, trivial
-* ```~State();``` - Destructor - Trivial
-* ```bool ToMatrixPalette(float* outArray, unsigned int arraySize) const;``` - Write the global transform of each node in the hierarchy into a flat array of 4x4 matrices.
-* ```unsigned int Size() const;``` - Returns the number of transforms in the hierarchy
-* ```void Resize(unsigned int size);``` - Adjusts the total number of transforms in the hierarchy
-* ```int GetParent(unsigned int index) const;``` - Gets the parent index of a joint, -1 if joint has no parent.
-* ```void SetParent(unsigned int index, int parent);``` - Sets the parent index of a joint
-* ```const float* GetRelativePosition(unsigned int index) const;``` - Returns the local position (x, y, z) of a joint. Do not modify the target of the constant pointer.
-* ```const float* GetRelativeRotation(unsigned int index) const;``` - Returns the local rotation (x, y, z, w) of a joint. Do not modify the target of the constant pointer.
-* ```const float* GetRelativeScale(unsigned int index) const;``` - Returns the local scale (x, y, z) of a joint. Do not modify the target of the constant pointer.
-* ```void GetRelativePosition(unsigned int index, float* outVec3) const;``` - Writes the local position (x, y, z) of a joint into the provided array
-* ```void GetRelativeRotation(unsigned int index, float* outQuat) const;``` - Writes the local rotation (x, y, z, w) of a joint into the provided array
-* ```void GetRelativeScale(unsigned int index, float* outVec3) const;``` - Writes the local scale (x, y, z) of a joint into the provided array.
-* ```void SetRelativePosition(unsigned int index, const float* pos);``` - Sets the local position (x, y, z) of a joint.
-* ```void SetRelativeRotation(unsigned int index, const float* rot);``` - Sets the local rotation (x, y, z, w) of a joint.
-* ```void SetRelativeScale(unsigned int index, const float* scl);``` - Sets the local scale (x, y, z) of a joint.
-* ```void GetAbsolutePosition(unsigned int index, float* outVec3) const;``` - Writes the global position (x, y, z) of a joint into the provided array
-* ```void GetAbsoluteRotation(unsigned int index, float* outQuat) const;``` - Writes the global rotation (x, y, z, w) of a joint into the provided array
-* ```void GetAbsoluteScale(unsigned int index, float* outVec3) const;``` - Writes the global scale (x, y, z) of a joint into the provided array
-* ```void GetRelativeTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const;``` - Writes the local position (x, y, z), rotation (x, y, z, w) and scale (x, y, z) of a joint into the provided arrays.
-* ```void GetAbsoluteTransform(unsigned int index, float* outPos, float* outRot, float* outScl) const;``` - Writes the global position (x, y, z), rotation (x, y, z, w) and scale (x, y, z) of a joint into the provided arrays.
-* ```unsigned int Serialize(char* output, unsigned int outputSize) const;``` - Serializes the class into the output buffer. Size is expected in bytes
-* ```void DeSerialize(char* input, unsigned int inputSize);``` - De-Serializes class from the input buffer. Size is expected in bytes
-* ```unsigned int SerializedSize() const;``` - Returns how many bytes are needed to serialize this class.
+```
+Animation::State bindPose;
+
+// Serialize
+char* out = new char[Animation::Serializer::SerializedStateSize(bindPose)];
+Animation::Serializer::SerializeState(out, bindPose);
+out.open("bindState.txt");
+out << out;
+out.close();
+delete[] out;
+
+// De-Serialize
+char* input = ReadFileContents("Assets/bindState.txt");
+Animation::Serializer::DeserializeState(bindPose, input);
+free(input);
+```
 
 # Skinning
 
-TODO
+A sample CPU Skinning implementation is provided, however the focus of this library is animating a hierarchy, not skinning. The skinning code has no context to the formating of the mesh that it is skinning. I'm not going to go into the skinning algorithm here, but i did write about it on the [Landing Page](https://animationprogramming.com/) for [Hands-On C++ Game Animation Programming](https://animationprogramming.com/)
+
+To skin a mesh, create an ```Animation::Skin::Descriptor<float, 3>``` object for the position and normal of the vertices of a mesh. The ```Animation::Skin::Descriptor<float, 3>``` class describes a 3 dimensional vector that can be stored in memory either linearly or with a stride. The descriptor object describes how the position or normal data is laid out in memory.
+
+The ```Animation::Skin::Apply``` function does the actual skinning. The function has these two overloads
+
+```
+void Apply(Descriptor<float, 3>& output, const Descriptor<float, 3>& input, float w, const float* animationMatrixPalette, const float* invBindPalette, const Descriptor<unsigned int, 4>& influences, const Descriptor<float, 4>& weights);
+
+void Apply(Descriptor<float, 3>& output, const Descriptor<float, 3>& input, float w, const float* skinMatrixPalette, const Descriptor<unsigned int, 4>& influences, const Descriptor<float, 4>& weights);
+```
+
+The first three arguments are the same, a descriptor to write to, a descriptor to read from and a ```w``` component. The normals and vertices of a mesh are treated as three component vectors. To skin a mesh, these vectors are multiplied by the skin matrix. The ```w``` argument is used in this vector multiplication to controll if we're multiplying a position or a vector. So, vertex positions would have a ```w``` of 1 and vertex normals have a ```w``` of 0.
+
+The next argument is where the two functions split. The first implementation takes two seperatie matrices ```animationMatrixPalette``` and ```invBindPalette```. These matrix arrays represent the animated hierarchy and inverse bind pose respectivley. The other implementation takes only a single matrix array ```skinMatrixPalette```, this is the same as the other two matrices, but pre-multiplied, ```skinMatrixPalette = animationMatrixPalette * invBindPalette```.
+
+The last two arguments are again the same, a descriptor for the influences and weights of each vertex. These are expressed as ```float4``` and ```int4```, making the maximum number of bone influences per vertex 4. The code below shows a bare bones example of how the vertices of a mesh can be skinned using the provided skinning methods.
+
+```
+// Variables
+Animation::Skin::Descriptor<float, 3> readPositions;
+Animation::Skin::Descriptor<float, 3> readNormals;
+Animation::Skin::Descriptor<float, 3> writePositions;
+Animation::Skin::Descriptor<float, 3> writeNormals;
+Animation::Skin::Descriptor<unsigned int, 4> readInfluences;
+Animation::Skin::Descriptor<float, 4> readWeights;
+
+// Initialize
+void Initialize() {
+    readPositions.Set(mVertices[0].v, numVertices * 3, 0, 0);
+    readNormals.Set(mNormals[0].v, numVertices * 3, 0, 0);
+    readInfluences.Set(mInfluences[0].v, numVertices * 4, 0, 0);
+    readWeights.Set(mWeights[0].v, numVertices * 4, 0, 0);
+
+    writePositions.Set(mSkinned[0].v, numVertices * 3, 6 * sizeof(float), 0);
+    writeNormals.Set(mSkinned[0].v, numVertices * 3, 6 * sizeof(float), 3 * sizeof(float));
+}
+
+// Update
+void SkinnedSample::Update(float dt) {
+	playTime = aniamtionData.Sample(animatedPose, playTime + dt, true);
+	Animation::ToMatrixPalette(animatedPosePalette[0].v, animatedPose);
+
+	Animation::Skin::Apply(writePositions, readPositions, 1.0f, animatedPosePalette[0].v, invBindPosePalette[0].v, readInfluences, readWeights);
+
+	Animation::Skin::Apply(writeNormals, readNormals, 0.0f, animatedPosePalette[0].v, invBindPosePalette[0].v, readInfluences, readWeights);
+}
+```
 
 # Blending
 

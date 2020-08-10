@@ -4,13 +4,38 @@
 	<title></title>
 
 <script type="module">
-  async function init() {
-    const { instance } = await WebAssembly.instantiateStreaming(
-      fetch("./Animation.wasm")
-    );
-    console.log(instance.exports.add(4, 1));
-  }
-  init();
+	var gWasLoading = true;
+	var gInstance = null;
+
+	// gInstance.exports.Initialize();
+	// gInstance.exports.IsLoaded()
+	// gInstance.exports.Start();
+
+
+	async function init() {
+		const { instance } = await WebAssembly.instantiateStreaming(
+			fetch("./Animation.wasm")
+		);
+		//console.log(instance.exports.add(4, 1));
+
+		// Call the init function
+		// Shedule update loop
+
+		gInstance.exports.Initialize();
+		gWasLoading = true;
+		window.setInterval(load, 16);
+	}
+
+	function loop() {
+		if (gWasLoading) {
+			if (gInstance.exports.IsLoaded()) {
+				gInstance.exports.Start();
+				gWasLoading = false;
+			}
+			return;
+		}
+	}
+	init();
 </script>
 </head>
 <body>

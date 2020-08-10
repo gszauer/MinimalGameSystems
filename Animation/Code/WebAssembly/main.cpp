@@ -23,7 +23,6 @@ struct Sample {
 	Vector<vec3> normals; // Jacasript sets this
 	Vector<uivec4> influences; // Jacasript sets this
 	Vector<vec4> weights; // Jacasript sets this
-	Vector<vec3> skinned; // Javascript gets this
 
 	// Everything else is internal
 	Animation::Data aniamtionDataA;
@@ -48,11 +47,13 @@ struct Sample {
 	Animation::Skin::Descriptor<float, 4> readWeights;
 };
 
+vec3* gSkinnedVerts = 0; // Javascript read / write
 Sample* gSample = 0;
 
 Animation::Builder::Frame MakeFrame(float time, float in, float value, float out);
 
-extern "C" void Initialize() {
+extern "C" void Initialize(unsigned int numVerts) {
+	gSkinnedVerts = (vec3*)Animation::Internal::Allocate(sizeof(vec3) * numVerts * 2);
 	gSample = (Sample*)Animation::Internal::Allocate(sizeof(Sample));
 	new (gSample) Vector<Sample>();
 	gSample->playTimeA = 0.0f;
@@ -110,7 +111,7 @@ extern "C" void SetModelData(const char* input) {
 		input = Animation::Serializer::ReadUInt(input, gSample->influences[i].w);
 	}
 
-	gSample->skinned.Resize(gSample->vertices.Size() + gSample->normals.Size());
+	//gSample->skinned.Resize(gSample->vertices.Size() + gSample->normals.Size());
 }
 
 extern "C" void SetAnimationData(const char* bindState, const char* restState, const char* walkingData, const char* runningData) {
@@ -154,22 +155,20 @@ extern "C" void SetAnimationData(const char* bindState, const char* restState, c
 	gSample->readInfluences.Set(gSample->influences[0].v, gSample->influences.Size() * 4, 0, 0);
 	gSample->readWeights.Set(gSample->weights[0].v, gSample->weights.Size() * 4, 0, 0);
 
-	gSample->writePositions.Set(gSample->skinned[0].v, gSample->vertices.Size() * 3, 6 * sizeof(float), 0);
-	gSample->writeNormals.Set(gSample->skinned[0].v, gSample->vertices.Size() * 3, 6 * sizeof(float), 3 * sizeof(float));
+	gSample->writePositions.Set(gSkinnedVerts[0].v, gSample->vertices.Size() * 3, 6 * sizeof(float), 0);
+	gSample->writeNormals.Set(gSkinnedVerts[0].v, gSample->vertices.Size() * 3, 6 * sizeof(float), 3 * sizeof(float));
 }
 
 extern "C" void Update(float dt) {
 	
 }
 
-extern "C" void Render(float aspect) {
-	
-}
-
 extern "C" void Shutdown() {
 	gSample->~Sample();
 	Animation::Internal::Free(gSample);
+	Animation::Internal::Free(gSkinnedVerts);
 	gSample = 0;
+	gSkinnedVerts = 0;
 }
 
 void* MemCpy(void* dest, const void* src, unsigned int len) {
