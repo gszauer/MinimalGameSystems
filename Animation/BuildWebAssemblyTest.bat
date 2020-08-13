@@ -1,7 +1,7 @@
 copy /Y "C:\Users\gszauer\Documents\Git\MinimalGameSystems\Animation\Code\WebAssembly\DownloadTest.js" "C:\Users\gszauer\Documents\Git\MinimalGameSystems\Animation\WebAssembly\animation.js"
 
 REM 8388608 = [8 * 1024 * 1024]
-REM 	-W1,--export-dynamic^
+REM 	
 
 clang^
 	--target=wasm32^

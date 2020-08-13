@@ -4,6 +4,11 @@ var gImports = {};
 var gMemory = null;
 var gExports = null;
 
+const gUtf8Decoder = new TextDecoder();
+const gUtf8Encoder = new TextEncoder();
+
+const fileToLoad = "https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/char_vert.txt";
+
 function StartToLoadFile(address) {
 	if (gDownloadQueue[address] === undefined) {
 		gDownloadQueue[address] = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
@@ -44,32 +49,31 @@ function FileContents(address) {
 }
 
 function JS_StartToLoadFile(address, stringLen) {
-	let file = utf8decoder.decode(gMemory.subarray(address, address+stringLen));
+	let file = gUtf8Decoder.decode(gMemory.subarray(address, address+stringLen));
 	StartToLoadFile(file);
 }
 
 function JS_IsFileLoaded(address, stringLen) {
-	let file = utf8decoder.decode(gMemory.subarray(address, address+stringLen));
+	let file = gUtf8Decoder.decode(gMemory.subarray(address, address+stringLen));
 	return IsFileLoaded(file);
 }
 
 function JS_FileSize(address, stringLen) {
-	let file = utf8decoder.decode(gMemory.subarray(address, address+stringLen));
+	let file = gUtf8Decoder.decode(gMemory.subarray(address, address+stringLen));
 	return FileSize(file);
 }
 
 function JS_FileCopyContents(address, addressLen, target) {
-	let file = utf8decoder.decode(gMemory.subarray(address, address+stringLen));
+	let file = gUtf8Decoder.decode(gMemory.subarray(address, address+addressLen));
 	let content = FileContents(file);
 
-	const encoder = new TextEncoder();
-	let copyObject = gMemory.subarray(target, target+stringLen)
-	copyObject.set(encoder.encode(content));
+	let copyObject = gMemory.subarray(target, target+content.length)
+	copyObject.set(gUtf8Encoder.encode(content));
 }
 
 function JS_JavascriptLog(message, stringLen) {
 	let str = gMemory.subarray(message, message+stringLen);
-	console.log(utf8decoder.decode(str));
+	console.log(gUtf8Decoder.decode(str));
 }
 
 async function Initialize() {
@@ -90,7 +94,6 @@ async function Initialize() {
 	gExports = instance.exports;
 
 	// WASM is loaded fetch content and print result
-	let fileToLoad = "https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/char_vert.txt";
 	console.log("JS: Fetching: " + fileToLoad);
 	StartToLoadFile(fileToLoad);
 
