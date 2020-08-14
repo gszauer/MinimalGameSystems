@@ -1,11 +1,12 @@
 var gDownloadQueue = { };
 
+var gProgram = null;
 var gImports = {};
 var gMemory = null;
 var gExports = null;
 
-const gUtf8Decoder = new TextDecoder();
-const gUtf8Encoder = new TextEncoder();
+const gUtf8Decoder = new TextDecoder("utf-8");
+const gUtf8Encoder = new TextEncoder("utf-8");
 
 const fileToLoad = "https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/char_vert.txt";
 
@@ -73,7 +74,7 @@ function JS_FileCopyContents(address, addressLen, target) {
 
 function JS_JavascriptLog(message, stringLen) {
 	let str = gMemory.subarray(message, message+stringLen);
-	console.log(gUtf8Decoder.decode(str));
+	console.log("sub-array: " + gUtf8Decoder.decode(str));
 }
 
 async function Initialize() {
@@ -89,19 +90,20 @@ async function Initialize() {
 	gImports['JS_FileCopyContents'] = JS_FileCopyContents;
 	gImports['JS_JavascriptLog'] = JS_JavascriptLog;
 	gMemory = new Uint8Array(gImports.memory.buffer);
-	let program = await WebAssembly.instantiate( binary, { "env":gImports } );
-	let instance = program.instance;
-	gExports = instance.exports;
+	gProgram = await WebAssembly.instantiate( binary, { "env":gImports } );
+	gExports = gProgram.instance.exports;
 
 	// WASM is loaded fetch content and print result
-	console.log("JS: Fetching: " + fileToLoad);
-	StartToLoadFile(fileToLoad);
+	//console.log("JS: Fetching: " + fileToLoad);
+	//StartToLoadFile(fileToLoad);
 
 	// Do the same thing, but in C!
+	gMemory[1029] = 'x';
 	gExports["DownloadStart"]();
 
+
 	// Update Window
-	window.setInterval(Loop, 16);
+	//window.setInterval(Loop, 16);
 }
 
 var printed = false;

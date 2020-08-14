@@ -8,7 +8,7 @@ char* WriteUInt(char* target, unsigned int v);
 char* WriteFloat(char* target, float v);
 unsigned int CountDigits(unsigned int n);
 
-const char* gFileToDownload = "https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/char_vert.txt";
+const char* gFileToDownload = 0;
 int gIsLoaded = 0;
 
 #define export __attribute__((visibility("default")))
@@ -27,20 +27,26 @@ void* malloc(unsigned long n) {
 void free(void* p) { }
 
 export void DownloadStart() {
-	char printBuffer[512];
+    gIsLoaded = 0;
+    gFileToDownload = "https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/char_vert.txt";
+	/*char printBuffer[512]; // should be dynamic maybe...
 
 	char* print = printBuffer;
 	const char* label = "C: Fetching: ";
 	for (; (*print = *label); ++label, ++print); // StrCpy
 	*print = '\n';
 	print += 1;
-	*print = '\0';
-	JavascriptLog(printBuffer);
+	*print = '\0';*/
+    JavascriptLog(gFileToDownload);
+    JavascriptLog("test");
+	//JavascriptLog(printBuffer);
 
-	StartToLoadFile(gFileToDownload);
+	//StartToLoadFile(gFileToDownload);
 }
 
 export void DownloadLoop() {
+    return;
+
 	char printBuffer[1024];
 	if (gIsLoaded == 0 && IsFileLoaded(gFileToDownload)) {
 		gIsLoaded = 1;
@@ -144,34 +150,34 @@ char* WriteUInt(char* target, unsigned int v) {
     return target;
 }
 
-import void JS_StartToLoadFile(const char* address, unsigned int stringLen);
-import int JS_IsFileLoaded(const char* address, unsigned int stringLen);
-import int JS_FileSize(const char* address, unsigned int stringLen);
-import void JS_FileCopyContents(const char* address, unsigned int addressLen, char* target);
-import void JS_JavascriptLog(const char* message, unsigned int stringLen);
+import void JS_StartToLoadFile(int  address, int stringLen);
+import int JS_IsFileLoaded(int  address, int stringLen);
+import int JS_FileSize(int  address, int stringLen);
+import void JS_FileCopyContents(int  address, int addressLen, int target);
+import void JS_JavascriptLog(int  message, int stringLen);
 
-unsigned int StrLen(const char* str) {
+int StrLen(const char* str) {
     const char* s;
     for (s = str; *s; ++s);
-    return (unsigned int)(s - str);
+    return (int)(s - str);
 }
 
 void StartToLoadFile(const char* address) {
-	JS_StartToLoadFile(address, StrLen(address));
+	JS_StartToLoadFile((int)address, StrLen(address));
 }
 
 int IsFileLoaded(const char* address) {
-	return JS_IsFileLoaded(address, StrLen(address));
+	return JS_IsFileLoaded((int)address, StrLen(address));
 }
 
 int FileSize(const char* address) {
-	return JS_FileSize(address, StrLen(address));
+	return JS_FileSize((int)address, StrLen(address));
 }
 
 void FileCopyContents(const char* address, char* target) {
-	JS_FileCopyContents(address, StrLen(address), target);
+	JS_FileCopyContents((int)address, StrLen(address), (int)target);
 }
 
 void JavascriptLog(const char* message) {
-	JS_JavascriptLog(message, StrLen(message));
+	JS_JavascriptLog((int)message, StrLen(message));
 }
