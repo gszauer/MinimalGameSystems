@@ -8,7 +8,7 @@ char* WriteUInt(char* target, unsigned int v);
 char* WriteFloat(char* target, float v);
 unsigned int CountDigits(unsigned int n);
 
-const char* gFileToDownload = 0;
+const char* gFileToDownload = "this is a really really long string";
 int gIsLoaded = 0;
 
 #define export __attribute__((visibility("default")))
@@ -26,15 +26,19 @@ void* malloc(unsigned long n) {
 
 void free(void* p) { }
 
-int StrLen(const char* start) {
-    const char* end;
-    for (end = start; *end; ++end);
-    return (int)(end - start);
+int StrLen(const char* str) {
+    int i = 0;
+    for(; str[i]!='\0'; ++i);
+    return i;
 }
 
 export void DownloadStart() {
+    char buff[512];
+    char* term = WriteUInt(buff, (unsigned int)StrLen(gFileToDownload));
+    *term = '\0';
+    JavascriptLog(buff);
+    
     gIsLoaded = 0;
-    gFileToDownload = "this is a really really long string";
     const char* action = "C - Fetching: ";
 
     char* buffer = malloc((StrLen(action) + StrLen(gFileToDownload) + 1) * sizeof(char));
@@ -44,6 +48,8 @@ export void DownloadStart() {
         *print = *s;
         print += 1;
     }
+
+
     for (const char* s = gFileToDownload; *s; ++s) {
         *print = *s;
         print += 1;
@@ -53,10 +59,7 @@ export void DownloadStart() {
    
     JavascriptLog(buffer);
 
-    char buff[512];
-    char* term = WriteUInt(buff, (StrLen(gFileToDownload)));
-    *term = '\0';
-    JavascriptLog(buff);
+    
 
 	//StartToLoadFile(gFileToDownload);
 }
