@@ -74,7 +74,7 @@ function JS_FileCopyContents(address, addressLen, target) {
 
 function JS_JavascriptLog(message, stringLen) {
 	let str = gMemory.subarray(message, message+stringLen);
-	console.log("sub-array: " + gUtf8Decoder.decode(str));
+	console.log(gUtf8Decoder.decode(str));
 }
 
 async function Initialize() {

@@ -26,20 +26,37 @@ void* malloc(unsigned long n) {
 
 void free(void* p) { }
 
+int StrLen(const char* start) {
+    const char* end;
+    for (end = start; *end; ++end);
+    return (int)(end - start);
+}
+
 export void DownloadStart() {
     gIsLoaded = 0;
-    gFileToDownload = "https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/char_vert.txt";
-	/*char printBuffer[512]; // should be dynamic maybe...
+    gFileToDownload = "this is a really really long string";
+    const char* action = "C - Fetching: ";
 
-	char* print = printBuffer;
-	const char* label = "C: Fetching: ";
-	for (; (*print = *label); ++label, ++print); // StrCpy
-	*print = '\n';
-	print += 1;
-	*print = '\0';*/
-    JavascriptLog(gFileToDownload);
-    JavascriptLog("test");
-	//JavascriptLog(printBuffer);
+    char* buffer = malloc((StrLen(action) + StrLen(gFileToDownload) + 1) * sizeof(char));
+    char* print = buffer;
+
+    for (const char* s = action; *s; ++s) {
+        *print = *s;
+        print += 1;
+    }
+    for (const char* s = gFileToDownload; *s; ++s) {
+        *print = *s;
+        print += 1;
+    }
+    *print = '\0';
+   
+   
+    JavascriptLog(buffer);
+
+    char buff[512];
+    char* term = WriteUInt(buff, (StrLen(gFileToDownload)));
+    *term = '\0';
+    JavascriptLog(buff);
 
 	//StartToLoadFile(gFileToDownload);
 }
@@ -155,12 +172,6 @@ import int JS_IsFileLoaded(int  address, int stringLen);
 import int JS_FileSize(int  address, int stringLen);
 import void JS_FileCopyContents(int  address, int addressLen, int target);
 import void JS_JavascriptLog(int  message, int stringLen);
-
-int StrLen(const char* str) {
-    const char* s;
-    for (s = str; *s; ++s);
-    return (int)(s - str);
-}
 
 void StartToLoadFile(const char* address) {
 	JS_StartToLoadFile((int)address, StrLen(address));
