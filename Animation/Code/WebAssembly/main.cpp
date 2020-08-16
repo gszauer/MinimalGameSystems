@@ -23,6 +23,7 @@ struct Sample {
 	Vector<vec3> normals; // Jacasript sets this
 	Vector<uivec4> influences; // Jacasript sets this
 	Vector<vec4> weights; // Jacasript sets this
+	Vector<vec3> skinned; // Interleaved pos/rot. Set in c++, read by js
 
 	// Everything else is internal
 	Animation::Data aniamtionDataA;
@@ -47,21 +48,114 @@ struct Sample {
 	Animation::Skin::Descriptor<float, 4> readWeights;
 };
 
-vec3* gSkinnedVerts = 0; // Javascript read / write
 Sample* gSample = 0;
+bool gIsDownloading = false;
 
+void StartToLoadFile(const char* address);
+int IsFileLoaded(const char* address);
+int FileSize(const char* address);
+void FileCopyContents(const char* address, char* target);
+void JavascriptLog(const char* message);
 Animation::Builder::Frame MakeFrame(float time, float in, float value, float out);
+void SetModelData(const char* input);
+void SetAnimationData();
+extern "C" void JS_LogInt(int x);
 
-extern "C" void Initialize(unsigned int numVerts) {
-	gSkinnedVerts = (vec3*)Animation::Internal::Allocate(sizeof(vec3) * numVerts * 2);
+extern "C" void Initialize() {
 	gSample = (Sample*)Animation::Internal::Allocate(sizeof(Sample));
 	new (gSample) Vector<Sample>();
 	gSample->playTimeA = 0.0f;
 	gSample->playTimeB = 0.0f;
 	gSample->blendTime = 0.0f;
+
+	gIsDownloading = true;
+
+	StartToLoadFile("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/womanMesh.txt");
+	StartToLoadFile("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/bindState.txt");
+	StartToLoadFile("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/restState.txt");
+	StartToLoadFile("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/runningData.txt");
+	StartToLoadFile("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/walkingData.txt");
 }
 
-extern "C" void SetModelData(const char* input) {
+extern "C" void Update(float dt) {
+	if (gIsDownloading && 
+		IsFileLoaded("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/womanMesh.txt") &&
+		IsFileLoaded("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/bindState.txt") &&
+		IsFileLoaded("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/restState.txt") &&
+		IsFileLoaded("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/runningData.txt") &&
+		IsFileLoaded("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/walkingData.txt")
+		) {
+		// Downloads finished
+		JavascriptLog("All files downloaded");
+
+		int bufferSize = 0;
+		int womanMeshSize = FileSize("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/womanMesh.txt");
+		if (womanMeshSize > bufferSize) {
+			bufferSize = womanMeshSize;
+		}
+		int bindStateSize = FileSize("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/bindState.txt");
+		if (bindStateSize > bufferSize) {
+			bufferSize = bindStateSize;
+		}
+		int restStateSize = FileSize("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/restState.txt");
+		if (restStateSize > bufferSize) {
+			bufferSize = restStateSize;
+		}
+		int runningDataSize = FileSize("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/runningData.txt");
+		if (runningDataSize > bufferSize) {
+			bufferSize = runningDataSize;
+		}
+		int walkingDataSize = FileSize("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/walkingData.txt");
+		if (walkingDataSize > bufferSize) {
+			bufferSize = walkingDataSize;
+		}
+
+		JS_LogInt(bufferSize + 1);
+		char* readBuffer = (char*)Animation::Internal::Allocate(bufferSize + 1);
+		
+		FileCopyContents("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/womanMesh.txt", readBuffer);
+		readBuffer[womanMeshSize] = '\0';
+		SetModelData(readBuffer);
+
+		FileCopyContents("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/bindState.txt", readBuffer);
+		readBuffer[bindStateSize] = '\0';
+		//Animation::Serializer::DeserializeState(gSample->bindPose, readBuffer);
+
+		FileCopyContents("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/restState.txt", readBuffer);
+		readBuffer[restStateSize] = '\0';
+		//Animation::Serializer::DeserializeState(gSample->restPose, readBuffer);
+
+		FileCopyContents("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/runningData.txt", readBuffer);
+		readBuffer[runningDataSize] = '\0';
+		//Animation::Serializer::DeserializeData(gSample->aniamtionDataB, readBuffer);
+
+		FileCopyContents("https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/walkingData.txt", readBuffer);
+		readBuffer[walkingDataSize] = '\0';
+		//Animation::Serializer::DeserializeData(gSample->aniamtionDataA, readBuffer);
+
+		//SetAnimationData();
+
+		Animation::Internal::Free(readBuffer);
+
+		gIsDownloading = false;
+	}
+	if (gIsDownloading) {
+		//JavascriptLog("downloading");
+	}
+	else {
+		// Update
+	}
+}
+
+extern "C" void Shutdown() {
+	gSample->~Sample();
+	Animation::Internal::Free(gSample);
+	gSample = 0;
+}
+
+
+void SetModelData(const char* input) {
+	//JavascriptLog(input);
 	unsigned int posSize = 0;
 	unsigned int normSize = 0;
 	unsigned int texSize = 0;
@@ -70,9 +164,11 @@ extern "C" void SetModelData(const char* input) {
 	float ignore = 0.0f;
 	unsigned int pivot = 0;
 	input = Animation::Serializer::ReadUInt(input, pivot);
+	JS_LogInt(pivot);
 
 	input = Animation::Serializer::ReadUInt(input, posSize);
 	gSample->vertices.Resize(posSize);
+	//JS_LogInt(posSize);
 	for (unsigned int i = 0; i < posSize; ++i) {
 		input = Animation::Serializer::ReadFloat(input, gSample->vertices[i].x);
 		input = Animation::Serializer::ReadFloat(input, gSample->vertices[i].y);
@@ -111,15 +207,10 @@ extern "C" void SetModelData(const char* input) {
 		input = Animation::Serializer::ReadUInt(input, gSample->influences[i].w);
 	}
 
-	//gSample->skinned.Resize(gSample->vertices.Size() + gSample->normals.Size());
+	gSample->skinned.Resize(gSample->vertices.Size() + gSample->normals.Size());
 }
 
-extern "C" void SetAnimationData(const char* bindState, const char* restState, const char* walkingData, const char* runningData) {
-	Animation::Serializer::DeserializeState(gSample->bindPose, bindState);
-	Animation::Serializer::DeserializeState(gSample->restPose, restState);
-	Animation::Serializer::DeserializeData(gSample->aniamtionDataA, walkingData);
-	Animation::Serializer::DeserializeData(gSample->aniamtionDataB, runningData);
-
+void SetAnimationData() {
 	gSample->animatedPoseA = gSample->restPose;
 	gSample->animatedPoseB = gSample->restPose;
 	gSample->blendedPose = gSample->restPose;
@@ -155,20 +246,8 @@ extern "C" void SetAnimationData(const char* bindState, const char* restState, c
 	gSample->readInfluences.Set(gSample->influences[0].v, gSample->influences.Size() * 4, 0, 0);
 	gSample->readWeights.Set(gSample->weights[0].v, gSample->weights.Size() * 4, 0, 0);
 
-	gSample->writePositions.Set(gSkinnedVerts[0].v, gSample->vertices.Size() * 3, 6 * sizeof(float), 0);
-	gSample->writeNormals.Set(gSkinnedVerts[0].v, gSample->vertices.Size() * 3, 6 * sizeof(float), 3 * sizeof(float));
-}
-
-extern "C" void Update(float dt) {
-	
-}
-
-extern "C" void Shutdown() {
-	gSample->~Sample();
-	Animation::Internal::Free(gSample);
-	Animation::Internal::Free(gSkinnedVerts);
-	gSample = 0;
-	gSkinnedVerts = 0;
+	gSample->writePositions.Set(gSample->skinned[0].v, gSample->vertices.Size() * 3, 6 * sizeof(float), 0);
+	gSample->writeNormals.Set(gSample->skinned[0].v, gSample->vertices.Size() * 3, 6 * sizeof(float), 3 * sizeof(float));
 }
 
 void* MemCpy(void* dest, const void* src, unsigned int len) {
@@ -191,3 +270,35 @@ Animation::Builder::Frame MakeFrame(float time, float in, float value, float out
 }
 
 #include "../AnimationSkin.cpp"
+
+extern "C" void JS_StartToLoadFile(int  address, int stringLen);
+extern "C" int JS_IsFileLoaded(int  address, int stringLen);
+extern "C" int JS_FileSize(int  address, int stringLen);
+extern "C" void JS_FileCopyContents(int  address, int addressLen, int target);
+extern "C" void JS_JavascriptLog(int  message, int stringLen);
+
+int StrLen(const char* str) {
+    int i = 0;
+    for(; str[i]!='\0'; ++i);
+    return i;
+}
+
+void StartToLoadFile(const char* address) {
+	JS_StartToLoadFile((int)address, StrLen(address));
+}
+
+int IsFileLoaded(const char* address) {
+	return JS_IsFileLoaded((int)address, StrLen(address));
+}
+
+int FileSize(const char* address) {
+	return JS_FileSize((int)address, StrLen(address));
+}
+
+void FileCopyContents(const char* address, char* target) {
+	JS_FileCopyContents((int)address, StrLen(address), (int)target);
+}
+
+void JavascriptLog(const char* message) {
+	JS_JavascriptLog((int)message, StrLen(message));
+}

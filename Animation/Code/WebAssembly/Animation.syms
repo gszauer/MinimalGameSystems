@@ -1,0 +1,6 @@
+JS_StartToLoadFile
+JS_IsFileLoaded
+JS_FileSize
+JS_FileCopyContents
+JS_JavascriptLog
+JS_LogInt
