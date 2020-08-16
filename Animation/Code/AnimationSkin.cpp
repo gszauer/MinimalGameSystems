@@ -1,15 +1,6 @@
 #include "AnimationSkin.h"
 #include "AnimationInternal.h"
 
-template Animation::Skin::Descriptor<float, 4>;
-template Animation::Skin::Descriptor<float, 3>;
-template Animation::Skin::Descriptor<float, 2>;
-template Animation::Skin::Descriptor<float, 1>;
-template Animation::Skin::Descriptor<unsigned int, 4>;
-template Animation::Skin::Descriptor<unsigned int, 3>;
-template Animation::Skin::Descriptor<unsigned int, 2>;
-template Animation::Skin::Descriptor<unsigned int, 1>;
-
 template<typename T, unsigned int N>
 Animation::Skin::Descriptor<T, N>::Descriptor() {
 	mData = 0;
@@ -208,3 +199,12 @@ void Animation::Skin::Apply(Descriptor<float, 3>& output, const Descriptor<float
 		outputScalar[2] = result[2];
 	}
 }
+
+template class Animation::Skin::Descriptor<float, 4>;
+template class Animation::Skin::Descriptor<float, 3>;
+template class Animation::Skin::Descriptor<float, 2>;
+template class Animation::Skin::Descriptor<float, 1>;
+template class Animation::Skin::Descriptor<unsigned int, 4>;
+template class Animation::Skin::Descriptor<unsigned int, 3>;
+template class Animation::Skin::Descriptor<unsigned int, 2>;
+template class Animation::Skin::Descriptor<unsigned int, 1>;

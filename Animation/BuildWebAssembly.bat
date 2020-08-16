@@ -16,6 +16,7 @@ clang^
 	Code/WebAssembly/AnimationInternal.cpp^
 	Code/AnimationSerializer.cpp^
 	Code/AnimationBuilder.cpp^
+	Code/AnimationSkin.cpp^
 	Code/AnimationState.cpp^
 	Code/WebAssembly/math.cpp^
 	Code/WebAssembly/main.cpp

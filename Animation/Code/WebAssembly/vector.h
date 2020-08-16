@@ -3,11 +3,11 @@
 
 #include "../AnimationInternal.h"
 
-void* memcpy(void* dest, const void* src, unsigned int len);
-
-inline void * operator new (unsigned long, void * p)  { 
+#if !_WIN32
+inline void * operator new (unsigned long, void * p)  {
 	return p; 
 }
+#endif
 
 template<typename T>
 class Vector {
@@ -124,7 +124,7 @@ public:
 			Reserve(newSize);
 
 			for (unsigned int i = oldSize; i < newSize; ++i) {
-				new(&mData) T();
+				new(&mData[i]) T();
 			}
 
 			mSize = newSize;
