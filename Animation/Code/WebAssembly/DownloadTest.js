@@ -77,6 +77,10 @@ function JS_JavascriptLog(message, stringLen) {
 	console.log(gUtf8Decoder.decode(str));
 }
 
+function JS_LogInt(num) {
+	console.log(num);
+}
+
 async function Initialize() {
 	// Load WASM
 	let request = await fetch('animation.wasm');
@@ -89,21 +93,21 @@ async function Initialize() {
 	gImports['JS_FileSize'] = JS_FileSize;
 	gImports['JS_FileCopyContents'] = JS_FileCopyContents;
 	gImports['JS_JavascriptLog'] = JS_JavascriptLog;
+	gImports['JS_LogInt'] = JS_LogInt;
 	gMemory = new Uint8Array(gImports.memory.buffer);
 	gProgram = await WebAssembly.instantiate( binary, { "env":gImports } );
 	gExports = gProgram.instance.exports;
 
 	// WASM is loaded fetch content and print result
-	//console.log("JS: Fetching: " + fileToLoad);
-	//StartToLoadFile(fileToLoad);
+	console.log("JS: Fetching: " + fileToLoad);
+	StartToLoadFile(fileToLoad); 
 
 	// Do the same thing, but in C!
-	gMemory[1029] = 'x';
 	gExports["DownloadStart"]();
 
 
 	// Update Window
-	//window.setInterval(Loop, 16);
+	window.setInterval(Loop, 16);
 }
 
 var printed = false;

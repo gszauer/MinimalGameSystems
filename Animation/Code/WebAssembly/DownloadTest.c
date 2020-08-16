@@ -3,12 +3,13 @@ int IsFileLoaded(const char* address);
 int FileSize(const char* address);
 void FileCopyContents(const char* address, char* target);
 void JavascriptLog(const char* message);
+extern void JS_LogInt(int num);
 
 char* WriteUInt(char* target, unsigned int v);
 char* WriteFloat(char* target, float v);
 unsigned int CountDigits(unsigned int n);
 
-const char* gFileToDownload = "this is a really really long string";
+char* gFileToDownload = "https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/char_vert.txt";
 int gIsLoaded = 0;
 
 #define export __attribute__((visibility("default")))
@@ -33,11 +34,6 @@ int StrLen(const char* str) {
 }
 
 export void DownloadStart() {
-    char buff[512];
-    char* term = WriteUInt(buff, (unsigned int)StrLen(gFileToDownload));
-    *term = '\0';
-    JavascriptLog(buff);
-    
     gIsLoaded = 0;
     const char* action = "C - Fetching: ";
 
@@ -48,44 +44,41 @@ export void DownloadStart() {
         *print = *s;
         print += 1;
     }
-
-
     for (const char* s = gFileToDownload; *s; ++s) {
         *print = *s;
         print += 1;
     }
     *print = '\0';
    
-   
     JavascriptLog(buffer);
 
-    
-
-	//StartToLoadFile(gFileToDownload);
+	StartToLoadFile(gFileToDownload);
 }
 
 export void DownloadLoop() {
-    return;
-
-	char printBuffer[1024];
 	if (gIsLoaded == 0 && IsFileLoaded(gFileToDownload)) {
 		gIsLoaded = 1;
+
+        unsigned int fileSize = FileSize(gFileToDownload);
+        int bufferSize = StrLen("C - File is ") + StrLen("bytes.") + StrLen("C - File content:\n") + fileSize + 1;
+        char* printBuffer = malloc(bufferSize * sizeof(char));
 		
-		unsigned int fileSize = FileSize(gFileToDownload);
 		char* print = printBuffer;
-		const char* label = "C: File is ";
+		const char* label = "C - File is ";
 		for (; (*print = *label); ++label, ++print); // StrCpy
 		print = WriteUInt(print, fileSize);
-		label = "bytes.\n ";
+		label = "bytes.";
 		for (; (*print = *label); ++label, ++print); // StrCpy
 		*print = '\0';
 		JavascriptLog(printBuffer);
 
 		print = printBuffer;
-		label = "C: File content:\n";
+		label = "C - File content:\n";
 		for (; (*print = *label); ++label, ++print); // StrCpy
-		FileCopyContents(gFileToDownload, print); // Reads the file contents right into the print buffer
+		*print = '\0';
+        FileCopyContents(gFileToDownload, print); // Reads the file contents right into the print buffer
         print[fileSize] = '\0'; 
+        JavascriptLog(printBuffer);
 	}
 }
 

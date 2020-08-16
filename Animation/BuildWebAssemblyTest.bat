@@ -2,13 +2,11 @@ copy /Y "C:\Users\gszauer\Documents\Git\MinimalGameSystems\Animation\Code\WebAss
 
 clang^
 	--target=wasm32^
-	-O3^
-	-flto^
 	-nostdlib^
 	-Wl,--no-entry^
 	-Wl,--export-all^
 	-Wl,--allow-undefined-file=Code/WebAssembly/DownloadTest.syms^
 	-Wl,--import-memory^
-	-Wl,--lto-O3^
 	-Wl,-z,stack-size=4194304^
+	-Wl,--export-dynamic^
 	-o WebAssembly/animation.wasm Code/WebAssembly/DownloadTest.c
