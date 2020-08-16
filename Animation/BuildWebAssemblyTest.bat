@@ -1,4 +1,4 @@
-copy /Y "C:\Users\gszauer\Documents\Git\MinimalGameSystems\Animation\Code\WebAssembly\DownloadTest.js" "C:\Users\gszauer\Documents\Git\MinimalGameSystems\Animation\WebAssembly\animation.js"
+copy /Y "C:\Users\gszauer\Documents\Git\MinimalGameSystems\Animation\Code\WebAssembly\DownloadTest.js" "C:\Users\gszauer\Documents\Git\MinimalGameSystems\Animation\WebAssembly\WebAssembly.js"
 
 clang^
 	--target=wasm32^

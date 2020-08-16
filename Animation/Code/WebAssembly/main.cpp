@@ -104,7 +104,7 @@ extern "C" void Update(float dt) {
 		IsFileLoaded(gWalkingFile)
 		) {
 		// Downloads finished
-		JavascriptLog("All files downloaded");
+		JavascriptLog("C - Files finished downloading");
 
 		int bufferSize = 0;
 		int womanMeshSize = FileSize(gMeshFile);
