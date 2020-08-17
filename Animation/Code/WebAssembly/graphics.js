@@ -627,13 +627,6 @@ Mesh.prototype.CPUSkin = function(skeleton, pose) {
 			console.error("can't skin");
 		}
 	}
-
-	if (this.mPosition.length > 0) {
-		AttributeVec3(this.gl, this.mPosAttrib, this.mPosition);
-	}
-	if (this.mNormal.length > 0) {
-		AttributeVec3(this.gl, this.mNormAttrib, this.mNormal);
-	}
 }
 
 Mesh.prototype.GetPosition = function() {

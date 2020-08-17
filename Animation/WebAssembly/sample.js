@@ -11,6 +11,7 @@ function Sample(gl, canvas) {
 	this.mTimeMod = 1.0;
 	this.mFar = null;
 	this.mAspectRatio = 0;
+	this.mDeltaTime = 0.0;
 
 	this.mCanGPUSkinUsingTextures = IsExtensionSupported(gl, EXTENSION_TYPE.FLOATTEX);
 
@@ -162,9 +163,8 @@ Sample.prototype.Loop = function() {
 		deltaTime = 0.0333;
 	}
 
-	this.InvokeLoad();
-	this.InvokeUpdate(deltaTime);
-	this.InvokeRender(aspectRatio);
+	this.mDeltaTime = deltaTime;
+	this.mAspectRatio = aspectRatio;
 }
 
 /* Full screen sample */
@@ -301,6 +301,8 @@ FullPageAnimated.prototype.Render = function(gl, aspectRatio) {
 	UniformMat4(gl, this.mUniformModel, model);
 	UniformMat4(gl, this.mUniformMVP, mvp);
 	TextureBind(gl, this.mDisplayTexture, this.mUniformTex, 0);
+
+	this.mWomanMesh.UpdateOpenGLDisplayBuffersOnly();
 
 	this.mWomanMesh.Bind(this.mAttribPos, this.mAttribNorm, this.mAttribUV, -1, -1);
 	this.mWomanMesh.Draw();

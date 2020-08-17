@@ -155,9 +155,12 @@ async function Initialize() {
 }
 
 function Loop() {
-	const t0 = performance.now();
 	gApplication.Loop();
+	gApplication.InvokeLoad();
+	const t0 = performance.now();
+	gApplication.InvokeUpdate(gApplication.mDeltaTime);
 	const t1 = performance.now();
+	gApplication.InvokeRender(gApplication.mAspectRatio);
 
 	js_update_times[js_update_index++] = t1 - t0;
 	if (js_update_index == js_num_samples) {
