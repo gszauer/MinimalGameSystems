@@ -211,7 +211,7 @@ function AttributeInt(gl, attribHandle, arr) {
 	attribHandle.type = ATTRIB_TYPE.INT;
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, attribHandle.handle);
-	gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STREAM_DRAW);
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
@@ -225,7 +225,7 @@ function AttributeFloat(gl, attribHandle, arr) {
 	}
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, attribHandle.handle);
-	gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STREAM_DRAW);
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
@@ -239,7 +239,7 @@ function AttributeVec2(gl, attribHandle, arr) {
 	}
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, attribHandle.handle);
-	gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STREAM_DRAW);
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
@@ -253,7 +253,7 @@ function AttributeVec3(gl, attribHandle, arr) {
 	}
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, attribHandle.handle);
-	gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STREAM_DRAW);
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
@@ -267,7 +267,7 @@ function AttributeVec4(gl, attribHandle, arr) {
 	}
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, attribHandle.handle);
-	gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STREAM_DRAW);
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
@@ -281,7 +281,7 @@ function AttributeIVec4(gl, attribHandle, arr) {
 	}
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, attribHandle.handle);
-	gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STREAM_DRAW);
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
@@ -315,7 +315,7 @@ function IndexBufferData(gl, bufferHandle, arr) {
 	if (arr.constructor != Uint16Array && arr.constructor != Uint32Array) {
 		console.error("Bad Data Type");
 	}
-	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, arr, gl.STATIC_DRAW);
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, arr, gl.STREAM_DRAW);
 	
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 	bufferHandle.numIndices = arr.length;
@@ -659,6 +659,15 @@ Mesh.prototype.GetInfluences = function() {
 Mesh.prototype.GetIndices = function() {
 	return this.mIndices;
 };
+
+Mesh.prototype.UpdateOpenGLDisplayBuffersOnly = function() {
+	if (this.mPosition.length > 0) {
+		AttributeVec3(this.gl, this.mPosAttrib, this.mPosition);
+	}
+	if (this.mNormal.length > 0) {
+		AttributeVec3(this.gl, this.mNormAttrib, this.mNormal);
+	}
+}
 
 Mesh.prototype.UpdateOpenGLBuffers = function() {
 	if (this.mPosition.length > 0) {

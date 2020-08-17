@@ -10,6 +10,7 @@ function Sample(gl, canvas) {
 	this.mSkipClear = false;
 	this.mTimeMod = 1.0;
 	this.mFar = null;
+	this.mAspectRatio = 0;
 
 	this.mCanGPUSkinUsingTextures = IsExtensionSupported(gl, EXTENSION_TYPE.FLOATTEX);
 
@@ -277,12 +278,14 @@ FullPageAnimated.prototype.Update = function(gl, deltaTime) {
 	this.mWalkingPlaybackTime = this.mWalkingClip.Sample(this.mWalkingAnimatedPose, this.mWalkingPlaybackTime + deltaTime);
 	this.mRunningPlaybackTime = this.mRunningClip.Sample(this.mRunningAnimatedPose, this.mRunningPlaybackTime + deltaTime);
 
-	this.mBlendedPose.Blend(this.mWalkingAnimatedPose, this.mRunningAnimatedPose, 1.0);
+	this.mBlendedPose.Blend(this.mWalkingAnimatedPose, this.mRunningAnimatedPose, 0.75);
 
 	this.mWomanMesh.CPUSkin(this.mWomanSkeleton, this.mBlendedPose);
 };
 
 FullPageAnimated.prototype.Render = function(gl, aspectRatio) {
+	this.mAspectRatio = aspectRatio;
+
 	gl.clearColor(0.5, 0.6, 0.7, 1.0);
 	gl.scissor(0, 0, this.mCanvas.width / 2, this.mCanvas.height);
 	gl.viewport(0, 0, this.mCanvas.width / 2, this.mCanvas.height);

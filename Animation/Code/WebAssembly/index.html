@@ -7,6 +7,7 @@
 		<meta name="author" content="Gabor Szauer">
 		<link rel="icon" href="data:;base64,=">
 		<link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet"> 
+		<!--script src="http://benvanik.github.com/WebGL-Inspector/core/embed.js"></script-->
 
 		<title>Web Assembly Skinning Benchmark</title>
 		<script src="WebAssembly.js"></script>
@@ -18,57 +19,94 @@
 		<script src="sample.js"></script>
 
 		<style>
-		body {
-			border: 0px;
-			margin: 0px;
-			padding: 0px;
-		}
-		.container {
-			width: 100%; 
-			height:100vh; 
-			position:relative;
-			overflow:hidden;
-		}
-		#leftOverlay {
-			position: absolute;
-			padding: 20px;
-			padding-right: 40px;
-			margin: 0px;
-			left: 0px;
-			top: 30px;
-			width: 800px;
-			height: 50px;
-			overflow:hidden;
-		}
-		#jsLabel {
-			position: absolute;
-			font-family: 'Bangers', cursive;
-			font-size: 65px;
-			color: #8099b2;
-			min-width: 600px;
-			z-index: 9999;
-			left: 0px;
-			top: 0px;
-			padding-left: 30px;
-			padding-top: 10px;
-		}
-		.flare {
-			position: absolute;
-			background-color: #FFFFFF;
-			left: -450px;
-			top: -450px;
-			width: 900px;
-			height: 900px;
-			transform:rotate(45deg);
-		}
+			body {
+				border: 0px;
+				margin: 0px;
+				padding: 0px;
+			}
+			.container {
+				width: 100%; 
+				height:100vh; 
+				position:relative;
+				overflow:hidden;
+			}
+			#leftOverlay {
+				position: absolute;
+				padding: 20px;
+				padding-right: 40px;
+				margin: 0px;
+				left: 0px;
+				top: 30px;
+				width: 600px;
+				height: 50px;
+				overflow:hidden;
+			}
+			#jsLabel {
+				position: absolute;
+				font-family: 'Bangers', cursive;
+				font-size: 65px;
+				color: #8099b2;
+				min-width: 600px;
+				z-index: 9999;
+				left: 0px;
+				top: 0px;
+				padding-left: 30px;
+				padding-top: 10px;
+			}
+			#leftFlare {
+				position: absolute;
+				background-color: #FFFFFF;
+				left: -450px;
+				top: -450px;
+				width: 900px;
+				height: 900px;
+				transform:rotate(45deg);
+			}
+			#rightOverlay {
+				position: absolute;
+				padding: 20px;
+				padding-right: 40px;
+				margin: 0px;
+				right: 0px;
+				bottom: 30px;
+				width: 600px;
+				height: 50px;
+				overflow:hidden;
+			}
+			#cLabel {
+				position: absolute;
+				font-family: 'Bangers', cursive;
+				font-size: 65px;
+				color: #80b299;
+				min-width: 600px;
+				width: 100%;
+				z-index: 9999;
+				right: 30px;
+				top: 0px;
+				padding-top: 10px;
+				text-align: right;
+			}
+			#rightFlare {
+				position: absolute;
+				background-color: #FFFFFF;
+				left: 190px;
+				top: -450px;
+				width: 900px;
+				height: 900px;
+				transform:rotate(45deg);
+			}
 		</style>
 	</head>
 	<body>
 		<div class="container">
 			<canvas id="glCanvas" style="width: 100%; height:100%;"></canvas>
 			<div id="leftOverlay">
-				<div class="flare"></div>
+				<div id="leftFlare"></div>
 				<div id="jsLabel"> </div>
+			</div>
+			<div id="rightOverlay">
+				<div id="rightFlare"></div>
+				<div id="cLabel"> </div>
 			</div>
 		</div>
 	</body>

@@ -32,16 +32,17 @@ struct Sample {
 	Vector<mat4> invBindPosePalette;
 	Vector<mat4> animatedPosePalette;
 
-	Animation::Skin::Descriptor<float, 3u> readPositions;
-	Animation::Skin::Descriptor<float, 3u> readNormals;
-	Animation::Skin::Descriptor<float, 3u> writePositions;
-	Animation::Skin::Descriptor<float, 3u> writeNormals;
-	Animation::Skin::Descriptor<unsigned int, 4u> readInfluences;
-	Animation::Skin::Descriptor<float, 4u> readWeights;
+	Animation::Skin::Descriptor<float, 3> readPositions;
+	Animation::Skin::Descriptor<float, 3> readNormals;
+	Animation::Skin::Descriptor<float, 3> writePositions;
+	Animation::Skin::Descriptor<float, 3> writeNormals;
+	Animation::Skin::Descriptor<unsigned int, 4> readInfluences;
+	Animation::Skin::Descriptor<float, 4> readWeights;
 };
 
 Sample* gSample = 0;
 bool gIsDownloading = false;
+bool gIsRunning = false;
 
 void StartToLoadFile(const char* address);
 int IsFileLoaded(const char* address);
@@ -75,6 +76,10 @@ const char* gRunningFile = "https://raw.githubusercontent.com/gszauer/MinimalGam
 const char* gWalkingFile = "https://raw.githubusercontent.com/gszauer/MinimalGameSystems/master/Animation/Assets/walkingData.txt";
 #endif
 
+extern "C" int IsRunning() {
+	return (int)gIsRunning;
+}
+
 extern "C" int GetSkinnedVertexPointer() {
 	return (int)(gSample->skinned[0].v);
 }
@@ -87,6 +92,7 @@ extern "C" void Initialize() {
 	gSample->blendTime = 0.0f;
 
 	gIsDownloading = true;
+	gIsRunning = false;
 
 	StartToLoadFile(gMeshFile);
 	StartToLoadFile(gBindFile);
@@ -171,7 +177,8 @@ extern "C" void Update(float dt) {
 		Animation::ToMatrixPalette(gSample->animatedPosePalette[0].v, gSample->blendedPose);
 
 		Animation::Skin::Apply(gSample->writePositions, gSample->readPositions, 1.0f, gSample->animatedPosePalette[0].v, gSample->invBindPosePalette[0].v, gSample->readInfluences, gSample->readWeights);
-		Animation::Skin::Apply(gSample->writeNormals, gSample->readNormals, 0.0f, gSample->animatedPosePalette[0].v, gSample->invBindPosePalette[0].v, gSample->readInfluences, gSample->readWeights);
+		//Animation::Skin::Apply(gSample->writeNormals, gSample->readNormals, 0.0f, gSample->animatedPosePalette[0].v, gSample->invBindPosePalette[0].v, gSample->readInfluences, gSample->readWeights);
+		gIsRunning = true;
 	}
 }
 
@@ -267,12 +274,12 @@ void SetAnimationData() {
 	gSample->blendCurve = Animation::Builder::Convert(blendCurve);
 
 	gSample->readPositions.Set(gSample->vertices[0].v, gSample->vertices.Size() * 3, 0, 0);
-	/*gSample->readNormals.Set(gSample->normals[0].v, gSample->normals.Size() * 3, 0, 0);
+	gSample->readNormals.Set(gSample->normals[0].v, gSample->normals.Size() * 3, 0, 0);
 	gSample->readInfluences.Set(gSample->influences[0].v, gSample->influences.Size() * 4, 0, 0);
 	gSample->readWeights.Set(gSample->weights[0].v, gSample->weights.Size() * 4, 0, 0);
 
 	gSample->writePositions.Set(gSample->skinned[0].v, gSample->vertices.Size() * 3, 6 * sizeof(float), 0);
-	gSample->writeNormals.Set(gSample->skinned[0].v, gSample->vertices.Size() * 3, 6 * sizeof(float), 3 * sizeof(float));*/
+	gSample->writeNormals.Set(gSample->skinned[0].v, gSample->vertices.Size() * 3, 6 * sizeof(float), 3 * sizeof(float));
 }
 
 void* MemCpy(void* dest, const void* src, unsigned int len) {
