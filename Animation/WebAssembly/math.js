@@ -153,6 +153,15 @@ function v3_cross(l, r) {
 	];
 }
 
+
+function v3_copy(x) {
+	return [
+		x[0],
+		x[1],
+		x[2]
+	];
+}
+
 function v3_lerp(s, e, t) {
 	return [
 		s[0] + (e[0] - s[0]) * t,

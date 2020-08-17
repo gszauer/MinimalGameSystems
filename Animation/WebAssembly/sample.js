@@ -182,8 +182,12 @@ function FullPageAnimated(gl, canvas) {
 	this.mWomanSkeleton = null;
 
 	this.mWalkingClip = null;
-	this.mWomanAnimatedPose = null;
-	this.mWomanPlaybackTime = 0.0;
+	this.mRunningClip = null;
+	this.mBlendedPose = null;
+	this.mWalkingAnimatedPose = null;
+	this.mRunningAnimatedPose = null;
+	this.mWalkingPlaybackTime = 0.0;
+	this.mRunningPlaybackTime = 0.0;
 
 	this.mPosePalette = null;
 	this.mInvBindPalette = null;
@@ -214,26 +218,34 @@ FullPageAnimated.prototype.Initialize = function (gl) {
 	this.mWomanSkeleton = new Skeleton();
 	this.mWomanSkeleton.LoadFromFile("webgl_skeleton.txt");
 	this.mWalkingClip = new Clip();
-	this.mWalkingClip.LoadFromFile("webgl_running.txt");
+	this.mWalkingClip.LoadFromFile("webgl_walking.txt");
+	this.mRunningClip = new Clip();
+	this.mRunningClip.LoadFromFile("webgl_running.txt");
 };
 
 FullPageAnimated.prototype.Load = function(gl) {
 	if (ShaderIsDoneLoading(gl, this.mShader) && TextureIsDoneLoading(gl, this.mDisplayTexture) && this.mWomanMesh.IsLoaded() && this.mWomanSkeleton.IsLoaded() && this.mWalkingClip.IsLoaded()) {
 		this.mWalkingClip.RecalculateDuration();
+		this.mRunningClip.RecalculateDuration();
 		this.mWomanMesh.UpdateOpenGLBuffers();
 
 		this.mWomanRestPose = new Pose();
 		this.mWomanRestPose.Copy(this.mWomanSkeleton.mRestPose);
 		this.mWomanBindPose = new Pose();
 		this.mWomanBindPose.Copy(this.mWomanSkeleton.mBindPose);
-		this.mWomanAnimatedPose = new Pose();
-		this.mWomanAnimatedPose.Copy(this.mWomanSkeleton.mRestPose);
+		this.mWalkingAnimatedPose = new Pose();
+		this.mWalkingAnimatedPose.Copy(this.mWomanSkeleton.mRestPose);
+		this.mRunningAnimatedPose = new Pose();
+		this.mRunningAnimatedPose.Copy(this.mWomanSkeleton.mRestPose);
+		this.mBlendedPose = new Pose();
+		this.mBlendedPose.Copy(this.mWomanSkeleton.mRestPose);
 		
-		this.mWomanPlaybackTime = this.mWalkingClip.GetStartTime();
+		this.mWalkingPlaybackTime = this.mWalkingClip.GetStartTime();
+		this.mRunningPlaybackTime = this.mRunningClip.GetStartTime();
 		this.mPosePalette = [];
 		this.mCombinedPalette = [];
 		this.mInvBindPalette = [];
-		this.mWomanAnimatedPose.GetMatrixPalette(this.mPosePalette);
+		this.mWalkingAnimatedPose.GetMatrixPalette(this.mPosePalette);
 		this.mInvBindPalette = this.mWomanSkeleton.GetInvBindPose();
 		for (let i = 0; i < this.mPosePalette.length; ++i) {
 			this.mCombinedPalette.push(m4_identity());
@@ -262,8 +274,12 @@ FullPageAnimated.prototype.Load = function(gl) {
 };
 
 FullPageAnimated.prototype.Update = function(gl, deltaTime) {
-	this.mWomanPlaybackTime = this.mWalkingClip.Sample(this.mWomanAnimatedPose, this.mWomanPlaybackTime + deltaTime);
-	this.mWomanMesh.CPUSkin(this.mWomanSkeleton, this.mWomanAnimatedPose);
+	this.mWalkingPlaybackTime = this.mWalkingClip.Sample(this.mWalkingAnimatedPose, this.mWalkingPlaybackTime + deltaTime);
+	this.mRunningPlaybackTime = this.mRunningClip.Sample(this.mRunningAnimatedPose, this.mRunningPlaybackTime + deltaTime);
+
+	this.mBlendedPose.Blend(this.mWalkingAnimatedPose, this.mRunningAnimatedPose, 1.0);
+
+	this.mWomanMesh.CPUSkin(this.mWomanSkeleton, this.mBlendedPose);
 };
 
 FullPageAnimated.prototype.Render = function(gl, aspectRatio) {

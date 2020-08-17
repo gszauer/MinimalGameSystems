@@ -792,6 +792,65 @@ Pose.prototype.Copy = function(p) {
 	}
 };
 
+Pose.prototype.Blend = function(poseA, poseB, t) {
+	/*let numJoints = this.mJoints.length;
+	for (let i = 0; i < numJoints; ++i) {
+		this.mJoints[i] = t_mix(poseA.mJoints[i], poseB.mJoints[i], t);
+	}*/
+
+	let numJoints = this.mJoints.length;
+
+	let value_a = [0.0, 0.0, 0.0, 0.0];
+	let value_b = [0.0, 0.0, 0.0, 0.0];
+	let blend = [0.0, 0.0, 0.0, 0.0];
+	
+	for (let joint = 0; joint < numJoints; ++joint) {
+		this.mJoints[joint].position[0] = poseA.mJoints[joint].position[0] + (poseB.mJoints[joint].position[0] - poseA.mJoints[joint].position[0]) * t;
+		this.mJoints[joint].position[1] = poseA.mJoints[joint].position[1] + (poseB.mJoints[joint].position[1] - poseA.mJoints[joint].position[1]) * t;
+		this.mJoints[joint].position[2] = poseA.mJoints[joint].position[2] + (poseB.mJoints[joint].position[2] - poseA.mJoints[joint].position[2]) * t;
+
+		this.mJoints[joint].scale[0] = poseA.mJoints[joint].scale[0] + (poseB.mJoints[joint].scale[0] - poseA.mJoints[joint].scale[0]) * t;
+		this.mJoints[joint].scale[1] = poseA.mJoints[joint].scale[1] + (poseB.mJoints[joint].scale[1] - poseA.mJoints[joint].scale[1]) * t;
+		this.mJoints[joint].scale[2] = poseA.mJoints[joint].scale[2] + (poseB.mJoints[joint].scale[2] - poseA.mJoints[joint].scale[2]) * t;
+
+		value_a[0] = poseA.mJoints[joint].rotation[0];
+		value_a[1] = poseA.mJoints[joint].rotation[1];
+		value_a[2] = poseA.mJoints[joint].rotation[2];
+		value_a[3] = poseA.mJoints[joint].rotation[3];
+
+		value_b[0] = poseB.mJoints[joint].rotation[0];
+		value_b[1] = poseB.mJoints[joint].rotation[1];
+		value_b[2] = poseB.mJoints[joint].rotation[2];
+		value_b[3] = poseB.mJoints[joint].rotation[3];
+
+		let neighborhood = value_a[0] * value_b[0] + value_a[1] * value_b[1] + value_a[2] * value_b[2] + value_a[3] * value_b[3];
+		if (neighborhood < 0.0) {
+			value_b[0] = -value_b[0];
+			value_b[1] = -value_b[1];
+			value_b[2] = -value_b[2];
+			value_b[3] = -value_b[3];
+		}
+
+		blend[0] = value_a[0] + (value_b[0] - value_a[0]) * t;
+		blend[1] = value_a[1] + (value_b[1] - value_a[1]) * t;
+		blend[2] = value_a[2] + (value_b[2] - value_a[2]) * t;
+		blend[3] = value_a[3] + (value_b[3] - value_a[3]) * t;
+		let lenSquared = blend[0] * blend[0] + blend[1] * blend[1] + blend[2] * blend[2] + blend[3] * blend[3];
+		if (lenSquared < 1.0 - 0.000001 || lenSquared > 1.0 + 0.000001) {
+			let inverseLength = 1.0 / Math.sqrt(lenSquared);
+			blend[0] *= inverseLength;
+			blend[1] *= inverseLength;
+			blend[2] *= inverseLength;
+			blend[3] *= inverseLength;
+		}
+		
+		this.mJoints[joint].rotation[0] = blend[0];
+		this.mJoints[joint].rotation[1] = blend[1];
+		this.mJoints[joint].rotation[2] = blend[2];
+		this.mJoints[joint].rotation[3] = blend[3];
+	}
+}
+
 Pose.prototype.Resize = function(newSize) {
 	let oldSize = this.mParents.length;
 
