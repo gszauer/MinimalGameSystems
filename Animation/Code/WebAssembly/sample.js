@@ -205,6 +205,9 @@ function FullPageAnimated(gl, canvas) {
 	
 	this.mDebugName = "FullPageAnimated";
 	this.mSkipClear = true;
+
+	this.mBlendCurve = null;
+	this.mBlendTime = 0.0;
 }
 
 FullPageAnimated.prototype = Object.create(Sample.prototype);
@@ -222,6 +225,17 @@ FullPageAnimated.prototype.Initialize = function (gl) {
 	this.mWalkingClip.LoadFromFile("webgl_walking.txt");
 	this.mRunningClip = new Clip();
 	this.mRunningClip.LoadFromFile("webgl_running.txt");
+
+	this.mBlendCurve = new Track(1);
+	this.mBlendCurve.SetInterpolation(INTERPOLATION.CUBIC);
+	this.mBlendCurve.Resize(6);
+
+	this.mBlendCurve.SetAt(0, new Frame(1).SetTime(0.0 * 2.0).SetValue([0.0]));
+	this.mBlendCurve.SetAt(1, new Frame(1).SetTime(0.4 * 2.0).SetValue([0.0]));
+	this.mBlendCurve.SetAt(2, new Frame(1).SetTime(0.6 * 2.0).SetValue([1.0]));
+	this.mBlendCurve.SetAt(3, new Frame(1).SetTime(1.4 * 2.0).SetValue([1.0]));
+	this.mBlendCurve.SetAt(4, new Frame(1).SetTime(1.6 * 2.0).SetValue([0.0]));
+	this.mBlendCurve.SetAt(5, new Frame(1).SetTime(2.0 * 2.0).SetValue([0.0]));
 };
 
 FullPageAnimated.prototype.Load = function(gl) {
@@ -278,7 +292,18 @@ FullPageAnimated.prototype.Update = function(gl, deltaTime) {
 	this.mWalkingPlaybackTime = this.mWalkingClip.Sample(this.mWalkingAnimatedPose, this.mWalkingPlaybackTime + deltaTime);
 	this.mRunningPlaybackTime = this.mRunningClip.Sample(this.mRunningAnimatedPose, this.mRunningPlaybackTime + deltaTime);
 
-	this.mBlendedPose.Blend(this.mWalkingAnimatedPose, this.mRunningAnimatedPose, 0.75);
+	this.mBlendTime = this.mBlendTime + deltaTime;
+	let t = this.mBlendCurve.Sample(this.mBlendTime, true);
+	let endTime = this.mBlendCurve.GetEndTime();
+	let startTime = this.mBlendCurve.GetStartTime();
+	let duration = endTime - startTime;
+	while (this.mBlendTime > endTime) {
+		this.mBlendTime -= duration;
+	}
+	if (this.mBlendTime < startTime) {
+		this.mBlendTime = startTime;
+	}
+	this.mBlendedPose.Blend(this.mWalkingAnimatedPose, this.mRunningAnimatedPose, t);
 
 	this.mWomanMesh.CPUSkin(this.mWomanSkeleton, this.mBlendedPose);
 };

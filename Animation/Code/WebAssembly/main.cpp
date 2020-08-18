@@ -15,7 +15,7 @@ struct Sample {
 	Vector<vec3> normals;
 	Vector<uivec4> influences; 
 	Vector<vec4> weights;
-	Vector<vec3> skinned; 
+	vec3* skinned; 
 
 	// Everything else is internal
 	Animation::Data aniamtionDataA;
@@ -31,13 +31,6 @@ struct Sample {
 	float blendTime;
 	Vector<mat4> invBindPosePalette;
 	Vector<mat4> animatedPosePalette;
-
-	Animation::Skin::Descriptor<float, 3> readPositions;
-	Animation::Skin::Descriptor<float, 3> readNormals;
-	Animation::Skin::Descriptor<float, 3> writePositions;
-	Animation::Skin::Descriptor<float, 3> writeNormals;
-	Animation::Skin::Descriptor<unsigned int, 4> readInfluences;
-	Animation::Skin::Descriptor<float, 4> readWeights;
 };
 
 Sample* gSample = 0;
@@ -81,7 +74,9 @@ extern "C" int IsRunning() {
 }
 
 extern "C" int GetSkinnedVertexPointer() {
-	return (int)(gSample->skinned[0].v);
+	//JavascriptLog("int GetSkinnedVertexPointer();");
+	//JS_LogInt((int)&gSample->skinned[0].x);
+	return (int)(&gSample->skinned[0].x);
 }
 
 extern "C" void Initialize() {
@@ -176,14 +171,40 @@ extern "C" void Update(float dt) {
 
 		Animation::ToMatrixPalette(gSample->animatedPosePalette[0].v, gSample->blendedPose);
 
-		Animation::Skin::Apply(gSample->writePositions, gSample->readPositions, 1.0f, gSample->animatedPosePalette[0].v, gSample->invBindPosePalette[0].v, gSample->readInfluences, gSample->readWeights);
-		//Animation::Skin::Apply(gSample->writeNormals, gSample->readNormals, 0.0f, gSample->animatedPosePalette[0].v, gSample->invBindPosePalette[0].v, gSample->readInfluences, gSample->readWeights);
+		unsigned int numVerts = gSample->vertices.Size();
+		for (unsigned int i = 0; i < numVerts; ++i) {
+			vec4 weights = gSample->weights[i];
+			uivec4 influences = gSample->influences[i];
+
+			mat4 skin; skin.xx = skin.yy = skin.zz = skin.tw = 0.0f;
+
+			if (weights.x > 0.000001f) {
+				skin = skin + (gSample->animatedPosePalette[influences.x] * gSample->invBindPosePalette[influences.x]) * weights.x;
+			}
+			if (weights.y > 0.000001f) {
+				skin = skin + (gSample->animatedPosePalette[influences.y] * gSample->invBindPosePalette[influences.y]) * weights.y;
+			}
+			if (weights.z > 0.000001f) {
+				skin = skin + (gSample->animatedPosePalette[influences.z] * gSample->invBindPosePalette[influences.z]) * weights.z;
+			}
+			if (weights.w > 0.000001f) {
+				skin = skin + (gSample->animatedPosePalette[influences.w] * gSample->invBindPosePalette[influences.w]) * weights.w;
+			}
+
+			vec4 result = skin * vec4(gSample->vertices[i], 1.0f);
+			gSample->skinned[i * 2 + 0] = vec3(result.v);
+
+			result = skin * vec4(gSample->normals[i], 0.0f);
+			gSample->skinned[i * 2 + 1] = vec3(result.v);
+		}
+
 		gIsRunning = true;
 	}
 }
 
 extern "C" void Shutdown() {
 	gSample->~Sample();
+	Animation::Internal::Free(gSample->skinned);
 	Animation::Internal::Free(gSample);
 	gSample = 0;
 }
@@ -239,7 +260,13 @@ void SetModelData(const char* input) {
 		input = Animation::Serializer::ReadUInt(input, gSample->influences[i].w);
 	}
 
-	gSample->skinned.Resize(gSample->vertices.Size() + gSample->normals.Size());
+	unsigned int skinSize = gSample->vertices.Size() + gSample->normals.Size();
+	unsigned int numVerts = gSample->vertices.Size();
+	gSample->skinned = (vec3*)Animation::Internal::Allocate(sizeof(float) * skinSize * 3);
+	for (unsigned int i = 0; i < numVerts; ++i) {
+		gSample->skinned[i * 2 + 0] = gSample->vertices[i];
+		gSample->skinned[i * 2 + 1] = gSample->normals[i];
+	}
 }
 
 void SetAnimationData() {
@@ -272,14 +299,6 @@ void SetAnimationData() {
 	blendCurve.SetName("Blend Time");
 	blendCurve.PushTrack(blendTrack);
 	gSample->blendCurve = Animation::Builder::Convert(blendCurve);
-
-	gSample->readPositions.Set(gSample->vertices[0].v, gSample->vertices.Size() * 3, 0, 0);
-	gSample->readNormals.Set(gSample->normals[0].v, gSample->normals.Size() * 3, 0, 0);
-	gSample->readInfluences.Set(gSample->influences[0].v, gSample->influences.Size() * 4, 0, 0);
-	gSample->readWeights.Set(gSample->weights[0].v, gSample->weights.Size() * 4, 0, 0);
-
-	gSample->writePositions.Set(gSample->skinned[0].v, gSample->vertices.Size() * 3, 6 * sizeof(float), 0);
-	gSample->writeNormals.Set(gSample->skinned[0].v, gSample->vertices.Size() * 3, 6 * sizeof(float), 3 * sizeof(float));
 }
 
 void* MemCpy(void* dest, const void* src, unsigned int len) {

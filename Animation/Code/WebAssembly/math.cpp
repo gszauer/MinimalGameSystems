@@ -15,6 +15,16 @@ mat4 frustum(float l, float r, float b, float t, float n, float f) {
 
 #define pi 3.141592f
 
+mat4 operator+(const mat4& a, const mat4& b) {
+	return mat4(
+		a.xx + b.xx, a.xy + b.xy, a.xz + b.xz, a.xw + b.xw,
+		a.yx + b.yx, a.yy + b.yy, a.yz + b.yz, a.yw + b.yw,
+		a.zx + b.zx, a.zy + b.zy, a.zz + b.zz, a.zw + b.zw,
+		a.tx + b.tx, a.ty + b.ty, a.tz + b.tz, a.tw + b.tw
+		);
+}
+
+
 float absf(float x) {
 	return x < 0.0f? -x : x;
 }
@@ -164,6 +174,21 @@ mat4 operator*(const mat4& a, const mat4& b) {
 		M4D(0, 1), M4D(1, 1), M4D(2, 1), M4D(3, 1), // Column 1
 		M4D(0, 2), M4D(1, 2), M4D(2, 2), M4D(3, 2), // Column 2
 		M4D(0, 3), M4D(1, 3), M4D(2, 3), M4D(3, 3)  // Column 3
+		);
+}
+
+#define M4V4D(mRow, x, y, z, w) \
+    x * m.v[0 * 4 + mRow] + \
+    y * m.v[1 * 4 + mRow] + \
+    z * m.v[2 * 4 + mRow] + \
+    w * m.v[3 * 4 + mRow]
+
+vec4 operator*(const mat4& m, const vec4& v) {
+	return vec4(
+		M4V4D(0, v.x, v.y, v.z, v.w),
+		M4V4D(1, v.x, v.y, v.z, v.w),
+		M4V4D(2, v.x, v.y, v.z, v.w),
+		M4V4D(3, v.x, v.y, v.z, v.w)
 		);
 }
 

@@ -53,6 +53,7 @@ struct TVec4 {
 		x(_x), y(_y), z(_z), w(_w) { }
 	inline TVec4(T* fv) :
 		x(fv[0]), y(fv[1]), z(fv[2]), w(fv[3]) { }
+	inline TVec4(const vec3& v, float _w) : x((T)v.x), y((T)v.y), z((T)v.z), w(_w) { }
 };
 
 typedef TVec4<float> vec4;
@@ -131,5 +132,7 @@ mat4 inverse(const mat4& m);
 mat4 adjugate(const mat4& m);
 float determinant(const mat4& m);
 mat4 transposed(const mat4& m);
+mat4 operator+(const mat4& a, const mat4& b);
+vec4 operator*(const mat4& m, const vec4& v);
 
 #endif

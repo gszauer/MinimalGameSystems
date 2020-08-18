@@ -2,9 +2,10 @@ var gDownloadQueue = { };
 
 var gProgram = null;
 var gImports = {};
-var gMemory = null;
-var gFMemory = null;
+var gMemoryU8 = null;
+var gMemoryF32 = null;
 var gExports = null;
+var gLastTime = 0.0;
 
 const gUtf8Decoder = new TextDecoder("utf-8");
 const gUtf8Encoder = new TextEncoder("utf-8");
@@ -67,30 +68,30 @@ function FileContents(address) {
 }
 
 function JS_StartToLoadFile(address, strLen) {
-	let file = gUtf8Decoder.decode(gMemory.subarray(address, address+strLen));
+	let file = gUtf8Decoder.decode(gMemoryU8.subarray(address, address+strLen));
 	StartToLoadFile(file);
 }
 
 function JS_IsFileLoaded(address, strLen) {
-	let file = gUtf8Decoder.decode(gMemory.subarray(address, address+strLen));
+	let file = gUtf8Decoder.decode(gMemoryU8.subarray(address, address+strLen));
 	return IsFileLoaded(file);
 }
 
 function JS_FileSize(address, strLen) {
-	let file = gUtf8Decoder.decode(gMemory.subarray(address, address+strLen));
+	let file = gUtf8Decoder.decode(gMemoryU8.subarray(address, address+strLen));
 	return FileSize(file);
 }
 
 function JS_FileCopyContents(address, addressLen, target) {
-	let file = gUtf8Decoder.decode(gMemory.subarray(address, address+addressLen));
+	let file = gUtf8Decoder.decode(gMemoryU8.subarray(address, address+addressLen));
 	let content = FileContents(file);
 
-	let copyObject = gMemory.subarray(target, target+content.length)
+	let copyObject = gMemoryU8.subarray(target, target+content.length)
 	copyObject.set(gUtf8Encoder.encode(content));
 }
 
 function JS_JavascriptLog(message, strLen) {
-	let str = gMemory.subarray(message, message+strLen);
+	let str = gMemoryU8.subarray(message, message+strLen);
 	console.log(gUtf8Decoder.decode(str));
 }
 
@@ -111,7 +112,8 @@ async function Initialize() {
 	gImports['JS_FileCopyContents'] = JS_FileCopyContents;
 	gImports['JS_JavascriptLog'] = JS_JavascriptLog;
 	gImports['JS_LogInt'] = JS_LogInt;
-	gMemory = new Uint8Array(gImports.memory.buffer);
+	gMemoryU8 = new Uint8Array(gImports.memory.buffer);
+	gMemoryF32 = new Float32Array(gImports.memory.buffer);
 	gProgram = await WebAssembly.instantiate( binary, { "env":gImports } );
 	gExports = gProgram.instance.exports;
 	
@@ -151,6 +153,7 @@ async function Initialize() {
 	}
 
 	// Update Window
+	gLastTime = performance.now();
 	window.setInterval(Loop, 16);
 }
 
@@ -174,7 +177,14 @@ function Loop() {
 	}
 
 	const t2 = performance.now();
-	gExports.Update(1.0 / 60.0); // TODO: actual delta time
+
+	let deltaTime = (t2 - gLastTime) * 0.001;
+	if (deltaTime >= 0.0333) {
+		deltaTime = 0.0333;
+	}
+	gLastTime = t2;
+	
+	gExports.Update(deltaTime); // TODO: actual delta time
 	const t3 = performance.now();
 
 	c_update_times[c_update_index++] = t3 - t2;
@@ -208,19 +218,18 @@ function Loop() {
 		let numVerts = gApplication.mWomanMesh.mPosition.length;
 		numVerts = numVerts / 3;
 
-		if (gFMemory === null) {
-			gFMemory = Float32Array.from(gMemory.subarray(gExports.GetSkinnedVertexPointer()));
-		}
+		let baseIndex = gExports.GetSkinnedVertexPointer() / 4;
 
 		for (let i = 0; i < numVerts; ++i) {
-			gApplication.mWomanMesh.mPosition[i * 3 + 0] = gFMemory[i * 6 + 0];
-			gApplication.mWomanMesh.mPosition[i * 3 + 1] = gFMemory[i * 6 + 1];
-			gApplication.mWomanMesh.mPosition[i * 3 + 2] = gFMemory[i * 6 + 2];
+			gApplication.mWomanMesh.mPosition[i * 3 + 0] = gMemoryF32[baseIndex + i * 6 + 0];
+			gApplication.mWomanMesh.mPosition[i * 3 + 1] = gMemoryF32[baseIndex + i * 6 + 1];
+			gApplication.mWomanMesh.mPosition[i * 3 + 2] = gMemoryF32[baseIndex + i * 6 + 2];
 
-			//gApplication.mWomanMesh.mNormal[i * 3 + 0] = gFMemory[i * 6 + 3];
-			//gApplication.mWomanMesh.mNormal[i * 3 + 1] = gFMemory[i * 6 + 4];
-			//gApplication.mWomanMesh.mNormal[i * 3 + 2] = gFMemory[i * 6 + 5];
+			gApplication.mWomanMesh.mNormal[i * 3 + 0] = gMemoryF32[baseIndex + i * 6 + 3];
+			gApplication.mWomanMesh.mNormal[i * 3 + 1] = gMemoryF32[baseIndex + i * 6 + 4];
+			gApplication.mWomanMesh.mNormal[i * 3 + 2] = gMemoryF32[baseIndex + i * 6 + 5];
 		}
+
 		gApplication.mWomanMesh.UpdateOpenGLDisplayBuffersOnly();
 
 		gApplication.mWomanMesh.Bind(gApplication.mAttribPos, gApplication.mAttribNorm, gApplication.mAttribUV, -1, -1);
@@ -232,8 +241,6 @@ function Loop() {
 		ShaderUnbind(gGl);
 	}
 }
-
-
 
 window.onload = Initialize();
 

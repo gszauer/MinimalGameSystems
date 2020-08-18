@@ -33,6 +33,77 @@ function Frame(numComponents) {
 	}
 }
 
+Frame.prototype.SetValue = function(val) {
+	if (this.mType == ANIMBASETYPE.FLOAT) {
+		this.mValue[0] = val[0];
+	}
+	else if (this.mType == ANIMBASETYPE.VEC3) {
+		this.mValue[0] = this.mValue[0];
+		this.mValue[1] = this.mValue[1];
+		this.mValue[2] = this.mValue[2];
+	}
+	else if (this.mType == ANIMBASETYPE.QUAT) {
+		this.mValue[0] = this.mValue[0];
+		this.mValue[1] = this.mValue[1];
+		this.mValue[2] = this.mValue[2];
+		this.mValue[3] = this.mValue[3];
+	}
+	else {
+		console.error("Wrong number frame type");
+	}
+
+	return this;
+}
+
+Frame.prototype.SetIn = function(val) {
+	if (this.mType == ANIMBASETYPE.FLOAT) {
+		this.mIn[0] = val[0];
+	}
+	else if (this.mType == ANIMBASETYPE.VEC3) {
+		this.mIn[0] = this.mValue[0];
+		this.mIn[1] = this.mValue[1];
+		this.mIn[2] = this.mValue[2];
+	}
+	else if (this.mType == ANIMBASETYPE.QUAT) {
+		this.mIn[0] = this.mValue[0];
+		this.mIn[1] = this.mValue[1];
+		this.mIn[2] = this.mValue[2];
+		this.mIn[3] = this.mValue[3];
+	}
+	else {
+		console.error("Wrong number frame type");
+	}
+
+	return this;
+}
+
+Frame.prototype.SetOut = function(val) {
+	if (this.mType == ANIMBASETYPE.FLOAT) {
+		this.mOut[0] = val[0];
+	}
+	else if (this.mType == ANIMBASETYPE.VEC3) {
+		this.mOut[0] = this.mValue[0];
+		this.mOut[1] = this.mValue[1];
+		this.mOut[2] = this.mValue[2];
+	}
+	else if (this.mType == ANIMBASETYPE.QUAT) {
+		this.mOut[0] = this.mValue[0];
+		this.mOut[1] = this.mValue[1];
+		this.mOut[2] = this.mValue[2];
+		this.mOut[3] = this.mValue[3];
+	}
+	else {
+		console.error("Wrong number frame type");
+	}
+
+	return this;
+}
+
+Frame.prototype.SetTime = function(val) {
+	this.mTime = val;
+	return this;
+}
+
 Clip.prototype.InterpolationFromString = function(st) {
 	if (st == "cubic") {
 		return INTERPOLATION.CUBIC;
@@ -552,6 +623,10 @@ Track.prototype.Sample = function(time, looping) {
 
 Track.prototype.At = function(index) { 
 	return this.mFrames[index];
+};
+
+Track.prototype.SetAt = function(index, frame) { 
+	this.mFrames[index] = frame;
 };
 
 Track.prototype.GetStartTime = function() { 

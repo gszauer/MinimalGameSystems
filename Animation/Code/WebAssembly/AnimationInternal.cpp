@@ -5,6 +5,10 @@ unsigned int bump_pointer = (unsigned int)&__heap_base;
 
 void* Animation::Internal::Allocate(unsigned int bytes) {
     unsigned int r = bump_pointer;
+    while (r % 4 != 0) {
+        bump_pointer += 1;
+        r = bump_pointer;
+    }
     bump_pointer += bytes;
     return (void *)r;
 }
