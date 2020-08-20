@@ -6,7 +6,7 @@ namespace Animation {
 		float StepTangent = Animation::Data::StepLimit * 2.0f;
 
 		namespace Internal {
-			void* MemCpy(void* dest, const void* src, unsigned int len) {
+			static void* MemCpy(void* dest, const void* src, unsigned int len) {
 				char* d = (char*)dest;
 				const char* s = (const char*)src;
 				while (len--) {
@@ -17,6 +17,7 @@ namespace Animation {
 		}
 	}
 }
+
 Animation::Builder::Frame::Frame() {
 	time = 0.0f;
 	in[0] = in[1] = in[2] = in[3] = 0.0f;

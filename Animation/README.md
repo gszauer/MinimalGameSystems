@@ -638,7 +638,3 @@ The **Converter** solution builds to an executable which provides an easy way to
 * ```bindState.txt``` -  The bind pose of the character.
 * ```restState.txt``` - The rest pose of the character. This pose provides the default skeleton configuration, if a clip doesn't animate a track, the information for that joints transform should come from the rest pose.
 * ```CLIP_[0 ... N]Data.txt``` or ```[clip name]Data.txt``` - Contains an animation clip. If the clips in the GLTF file are named, the name of the clip will be used for the file name. If clips in the GLTF file don't have a name, a default name of ```CLIP_[N]Data.txt``` will be used.
-
-# Web Assembly
-
-TODO

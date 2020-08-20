@@ -210,15 +210,14 @@ float Animation::Data::SampleTrack(float* out, unsigned int trackIndex, float ti
 		unsigned int thisFrame = 0;
 		unsigned int nextFrame = 0;
 		{
-#if 0
+#if 0 // Not optimal linear search
 			for (int frameIndex = frameView.GetNumFrames() - 1; frameIndex >= 0; frameIndex -= 1) {
 				if (trackTime >= frameView.GetTime(frameIndex)) {
 					thisFrame = frameIndex;
 					break;
 				}
 			}
-#else
-			//Since time only ever increases, use a binary search
+#else //Since time only ever increases, use a binary search
 			int l = 0;
 			int r = (int)numFrames;
 			while (l <= r) {
@@ -269,9 +268,6 @@ float Animation::Data::SampleTrack(float* out, unsigned int trackIndex, float ti
 		}
 
 		// Find frame delta and interpolation t
-
-		;
-
 		float frameDelta = frames[nextFrame * frameStride] - frames[thisFrame * frameStride];
 		float t = 0.0f;
 		if (frameDelta > 0.0f) {

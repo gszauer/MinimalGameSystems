@@ -2,11 +2,11 @@
 
 void* Animation::Internal::Allocate(unsigned int bytes) {
     char* data = new char[bytes];
-    if (data != 0) {
+    /*if (data != 0) {
         for (unsigned int i = 0; i < bytes; ++i) {
             data[i] = 0;
         }
-    }
+    }*/
     return data;
 }
 
