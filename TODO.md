@@ -1,8 +1,9 @@
 # Done
+* Animation
 
 # In Progress
+* Rendering
 
-* Animation
 
 # TODO
 
@@ -14,6 +15,6 @@
 * Scripting Language
 * Path Finding
 * State Machine
-* Rendering
 * Audio
 * File Loading
+* Event System
