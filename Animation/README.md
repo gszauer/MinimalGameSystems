@@ -638,3 +638,9 @@ The **Converter** solution builds to an executable which provides an easy way to
 * ```bindState.txt``` -  The bind pose of the character.
 * ```restState.txt``` - The rest pose of the character. This pose provides the default skeleton configuration, if a clip doesn't animate a track, the information for that joints transform should come from the rest pose.
 * ```CLIP_[0 ... N]Data.txt``` or ```[clip name]Data.txt``` - Contains an animation clip. If the clips in the GLTF file are named, the name of the clip will be used for the file name. If clips in the GLTF file don't have a name, a default name of ```CLIP_[N]Data.txt``` will be used.
+
+# Web Assemly
+
+Since this library doesn't rely on any of the standard lirary, it's easy to combile to Web Assembly either with emscripten or with clang. Tthe only function that needs to change is the memory allocation function. Check out the [Web Assembly demo here](https://gabormakesgames.com/MinimalGameSystems/Animation/index.html)
+
+![Curve Sample](Images/webgl_sample.png)

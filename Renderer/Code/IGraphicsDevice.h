@@ -1,20 +1,22 @@
 #ifndef _H_IGRAPHICSDEVICE_
 #define _H_IGRAPHICSDEVICE_
 
+#include "IBufferData.h"
+#include "ITexture.h"
+
 namespace Renderer {
 	class IFrameBuffer;
 	class IGPUTimer;
 	class ITexture;
 	class IRasterState;
-	class IVertexBuffer;
-	class IIndexBuffer;
+	class IBufferData;
 	class IShader;
 	class ISampler;
 
 	enum class Clear {
-		Color = 2,
-		Depth = 4,
-		Stencil = 8,
+		Color = (1 << 1),
+		Depth = (1 << 2),
+		Stencil = (1 << 3),
 		ColorDepth = (1 << 1) | (1 << 2),
 		All = (1 << 1) | (1 << 2) | (1 << 3)
 	};
@@ -38,30 +40,6 @@ namespace Renderer {
 		Bottom = 5
 	};
 
-#ifndef _H_RENDERER_IBUFFERTYPE_
-#define _H_RENDERER_IBUFFERTYPE_
-	enum class IBufferType {
-		Array = 0,
-		ElementArray = 1
-	};
-#endif
-#ifndef _H_RENDERER_BUFFERUSAGE_
-#define _H_RENDERER_BUFFERUSAGE_
-	enum class BufferUsageType {
-		Static = 0,
-		Dynamic = 1
-	};
-#endif
-#ifndef _H_RENDERER_TEXTURETYPE_
-#define _H_RENDERER_TEXTURETYPE_
-	enum class TextureType {
-		RGB = 0,
-		RGBA = 1,
-		Depth = 2,
-		Stencil = 3
-	};
-#endif
-	
 	class IGraphicsDevice {
 	private:
 		IGraphicsDevice(const IGraphicsDevice&);
@@ -82,11 +60,8 @@ namespace Renderer {
 		virtual IFrameBuffer* MakeFrameBuffer(ITexture* colorAttachment = 0, ITexture* depthAttachment = 0, ITexture* stencilAttachment = 0) = 0;
 		virtual void DestroyFrameBuffer(IFrameBuffer* buffer) = 0;
 
-		virtual IIndexBuffer* MakeIndexBuffer(BufferUsageType usageType = BufferUsageType::Static) = 0;
-		virtual void DestroyIndexBuffer(IIndexBuffer* buffer) = 0;
-
-		virtual IVertexBuffer* MakeVertexBuffer(BufferUsageType usageType = BufferUsageType::Static) = 0;
-		virtual void DestroyVertexBuffer(IVertexBuffer* buffer) = 0;
+		virtual IBufferData* MakeBuffer(BufferUsageType usageType = BufferUsageType::Static) = 0;
+		virtual void DestroyBuffer(IBufferData* buffer) = 0;
 
 		virtual ITexture* MakeTexture() = 0;
 		virtual ITexture* MakeTexture(unsigned char* data, unsigned int width, unsigned int height, TextureType type) = 0;
@@ -108,20 +83,20 @@ namespace Renderer {
 		virtual void BindFrameBuffer(const IFrameBuffer* buffer) = 0;
 		virtual void UnbindFrameBuffer() = 0;
 
-		virtual void BindShader(IShader* shader) = 0;
+		virtual void BindShader(const IShader* shader) = 0;
 		virtual void UnbindShader() = 0;
 
 		virtual void ApplyRasterState(const IRasterState* state) = 0;
 		virtual void Clear(Clear clear) = 0;
 
 		// Drawing geometry
-		virtual void Draw(DrawMode mode, const IIndexBuffer* buffer) const = 0;
+		virtual void Draw(DrawMode mode, const IIndexBufferView* buffer) const = 0;
 		virtual void Draw(DrawMode mode, unsigned int first, unsigned int numVerts) const = 0;
-		virtual void Draw(DrawMode mode, const IIndexBuffer* buffer, unsigned int first, unsigned int numVerts) const = 0;
+		virtual void Draw(DrawMode mode, const IIndexBufferView* buffer, unsigned int first, unsigned int numVerts) const = 0;
 
-		virtual void DrawInstanced(DrawMode mode, const IIndexBuffer* buffer, unsigned int instanceCount) const = 0;
+		virtual void DrawInstanced(DrawMode mode, const IIndexBufferView* buffer, unsigned int instanceCount) const = 0;
 		virtual void DrawInstanced(DrawMode mode, unsigned int first, unsigned int numVerts, unsigned int instanceCount) const = 0;
-		virtual void DrawInstanced(DrawMode mode, const IIndexBuffer* buffer, unsigned int first, unsigned int numVerts, unsigned int instanceCount) const = 0;
+		virtual void DrawInstanced(DrawMode mode, const IIndexBufferView* buffer, unsigned int first, unsigned int numVerts, unsigned int instanceCount) const = 0;
 
 		// Timers
 		virtual IGPUTimer* CreateTimer() = 0;
@@ -154,8 +129,9 @@ namespace Renderer {
 		virtual unsigned int GetNumUnInstancedDrawCalls() const = 0;
 
 		virtual unsigned int GetFrameBufferCount() const = 0;
-		virtual unsigned int GetIndexBufferCount() const = 0;
-		virtual unsigned int GetVertexBufferCount() const = 0;
+		virtual unsigned int GetBufferDataCount() const = 0;
+		virtual unsigned int GetIndexViewCount() const = 0;
+		virtual unsigned int GetVertexViewCount() const = 0;
 		virtual unsigned int GetTextureCount() const = 0;
 		virtual unsigned int GetSamplerCuont() const = 0;
 		virtual unsigned int GetShaderCount() const = 0;

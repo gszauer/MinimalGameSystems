@@ -25,13 +25,13 @@ namespace Renderer {
 		MirroredClampToEdge = 11
 	};
 	
-	class ISampler {
+	class ITextureSampler {
 	private:
-		ISampler(const ISampler&);
-		ISampler& operator=(const ISampler&);
+		ITextureSampler(const ITextureSampler&);
+		ITextureSampler& operator=(const ITextureSampler&);
 	protected:
-		inline ISampler() { }
-		virtual inline ~ISampler() { };
+		inline ITextureSampler() { }
+		virtual inline ~ITextureSampler() { };
 	public:
 		virtual TextureWrapMode GetWrapS() const = 0;
 		virtual TextureWrapMode GetWrapT() const = 0;

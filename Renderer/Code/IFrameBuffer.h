@@ -21,6 +21,8 @@ namespace Renderer {
 
 		virtual void SetStencilTarget(const ITexture* target) = 0;
 		virtual const ITexture* GetStencilTarget() const = 0;
+
+		// Bind and Unbind is done in Graphics Device
 	};
 }
 

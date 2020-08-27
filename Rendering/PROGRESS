@@ -1,5 +1,0 @@
-Raster State is fully implemented
-Working my way trough the Samples flooh has
-Currently drawing triangles
-Look at graphics device for what is and isn't implemented
-Need to get a triangle up next. That means botht the shader and vertex buffers will need to work.

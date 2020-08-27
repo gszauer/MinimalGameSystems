@@ -10,13 +10,8 @@ namespace Renderer {
 		inline IGPUTimer() { }
 		virtual inline ~IGPUTimer() { }
 	public:
-		virtual void Initialize() = 0;
-		virtual void Destroy() = 0;
-		virtual bool IsValid() const = 0;
-
-		virtual void SampleStart() = 0;
-		virtual void SampleEnd() = 0;
-		virtual bool IsDone() const = 0;
+		virtual void Start() = 0;
+		virtual void End() = 0;
 		virtual float GetMilliseconds() const = 0;
 	};
 }
