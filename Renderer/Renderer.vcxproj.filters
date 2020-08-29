@@ -72,9 +72,6 @@
     <ClInclude Include="Code\khrplatform.h">
       <Filter>Header Files\Samples</Filter>
     </ClInclude>
-    <ClInclude Include="Code\IBufferData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Code\ITextureSampler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -84,14 +81,23 @@
     <ClInclude Include="Code\IIndexBufferView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\OpenGL33\OGL33BufferData.h">
-      <Filter>Header Files\OpenGL33</Filter>
-    </ClInclude>
     <ClInclude Include="Code\OpenGL33\OGL33VertexBufferView.h">
       <Filter>Header Files\OpenGL33</Filter>
     </ClInclude>
     <ClInclude Include="Code\OpenGL33\OGL33IndexBufferView.h">
       <Filter>Header Files\OpenGL33</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\OpenGL33\OGL33Loader.h">
+      <Filter>Header Files\OpenGL33</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\IVertexBufferData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\OpenGL33\OGL33VertexBufferData.h">
+      <Filter>Header Files\OpenGL33</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\IIndexBufferData.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -128,10 +134,10 @@
     <ClCompile Include="Code\OpenGL33\OGL33Texture.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
-    <ClCompile Include="Code\OpenGL33\OGL33VertexBuffer.cpp">
+    <ClCompile Include="Code\OpenGL33\RendererOpenGL33.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
-    <ClCompile Include="Code\OpenGL33\RendererOpenGL33.cpp">
+    <ClCompile Include="Code\OpenGL33\OGL33VertexBufferData.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
   </ItemGroup>

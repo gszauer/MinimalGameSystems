@@ -10,19 +10,18 @@ namespace Renderer {
 		UShort = 4
 	};
 
-	class IBufferData;
+	class IVertexBufferData;
 
 	class IVertexBufferView {	
 	protected:
-		inline IVertexBufferView() { }
+		IVertexBufferView(); // Disabled
+		IVertexBufferView(const IVertexBufferView&); // Disabled
+		IVertexBufferView& operator=(const IVertexBufferView&); // Disabled
+		inline IVertexBufferView(const IVertexBufferData& data, unsigned int numComponents = 1, VertexBufferDataType type = VertexBufferDataType::Float, unsigned int stride = 0, unsigned int offset = 0) { }
 	public:
-		inline IVertexBufferView(const IBufferData& data, unsigned int numComponents = 1, VertexBufferDataType type = VertexBufferDataType::Float, unsigned int stride = 0, unsigned int offset = 0) { }
-
-		inline IVertexBufferView(const IVertexBufferView&) { }
-		inline virtual IVertexBufferView& operator=(const IVertexBufferView&) { return *this; }
 		inline virtual ~IVertexBufferView() { }
 		
-		virtual const IBufferData* GetBuffer() const = 0;
+		virtual const IVertexBufferData* GetBuffer() const = 0;
 		virtual unsigned int GetNumComponents() const = 0;
 		virtual VertexBufferDataType GetType() const = 0;
 		virtual unsigned int GetStride() const = 0;
