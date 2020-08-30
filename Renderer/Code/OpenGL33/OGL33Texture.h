@@ -15,7 +15,7 @@ namespace Renderer {
 		unsigned int mHeight;
 		TextureType mType;
 		GLuint mTexture;
-		unsigned int mMipCount;
+		bool mHasMips;
 	protected:
 		OGL33Texture(); // Disabled
 		OGL33Texture(const OGL33Texture&); // Disabled
@@ -23,11 +23,11 @@ namespace Renderer {
 		OGL33Texture(const IGraphicsDevice&);
 	public:
 		~OGL33Texture();
-		void Set(unsigned int width, unsigned int height, TextureType type, void* data);
+		void Set(unsigned int width, unsigned int height, TextureType type, const void* data, bool mips = false);
+		void Update(unsigned int x, unsigned int y, unsigned int width, unsigned int height, TextureType type, const void* data);
 
 		bool HasMips() const;
-		void GenerateMips() const;
-		void ClearMips() const;
+		void GenerateMips();
 
 		unsigned int GetWidth() const;
 		unsigned int GetHeight() const;

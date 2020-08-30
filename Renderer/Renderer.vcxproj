@@ -172,7 +172,6 @@
     <ClCompile Include="Code\OpenGL33\OGL33FrameBuffer.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33GPUTimer.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33GraphicsDevice.cpp" />
-    <ClCompile Include="Code\OpenGL33\OGL33IndexBuffer.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33IndexBufferData.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33IndexBufferView.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33RasterState.cpp" />

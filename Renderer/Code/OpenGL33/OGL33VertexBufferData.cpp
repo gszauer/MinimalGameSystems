@@ -11,6 +11,7 @@ Renderer::OGL33VertexBufferData::OGL33VertexBufferData(const IGraphicsDevice& ow
 
 Renderer::OGL33VertexBufferData::~OGL33VertexBufferData() {
 	glDeleteBuffers(1, &mBuffer);
+	mOwner = 0;
 }
 
 void Renderer::OGL33VertexBufferData::Set(unsigned int bytes, const void* data, VertexBufferUsageType type) {

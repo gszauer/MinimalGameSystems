@@ -125,9 +125,6 @@
     <ClCompile Include="Code\OpenGL33\OGL33GraphicsDevice.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
-    <ClCompile Include="Code\OpenGL33\OGL33IndexBuffer.cpp">
-      <Filter>Source Files\OpenGL33</Filter>
-    </ClCompile>
     <ClCompile Include="Code\OpenGL33\OGL33RasterState.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>

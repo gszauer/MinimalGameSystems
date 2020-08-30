@@ -4,14 +4,17 @@
 #include "ITextureSampler.h"
 
 namespace Renderer {
+	// Internal and external formats are always the same.
+	// Other types, like BGR are not supported.
 	enum class TextureType {
-		RGB = 0,
-		RGBA = 1,
-		RGB32 = 2,
-		RGBA32 = 3,
-		Depth = 4,
-		Stencil = 5,
-		DepthStencil = 6
+		R = 0,
+		R32 = 1,
+		RGB = 2,
+		RGBA = 3,
+		RGB32 = 4,
+		RGBA32 = 5,
+		Depth = 6,
+		DepthStencil = 7
 	};
 
 	class IGraphicsDevice;
@@ -24,11 +27,11 @@ namespace Renderer {
 		inline ITexture(const IGraphicsDevice&) {}
 	public:
 		virtual inline ~ITexture() { }
-		virtual void Set(unsigned int width, unsigned int height, TextureType type, void* data) = 0;
+		virtual void Set(unsigned int width, unsigned int height, TextureType type, const void* data, bool mips = false) = 0;
+		virtual void Update(unsigned int x, unsigned int y, unsigned int width, unsigned int height, TextureType type, const void* data) = 0;
 		
 		virtual bool HasMips() const = 0;
-		virtual void GenerateMips() const = 0;
-		virtual void ClearMips() const = 0;
+		virtual void GenerateMips() = 0;
 
 		virtual unsigned int GetWidth() const = 0;
 		virtual unsigned int GetHeight() const = 0;

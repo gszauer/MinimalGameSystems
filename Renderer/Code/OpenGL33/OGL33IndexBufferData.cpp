@@ -2,7 +2,7 @@
 #include "OGL33IndexBufferView.h"
 #include "OGL33Internal.h"
 
-Renderer::OGL33IndexBufferData::OGL33IndexBufferData(const OGL33GraphicsDevice& owner) {
+Renderer::OGL33IndexBufferData::OGL33IndexBufferData(const IGraphicsDevice& owner) {
 	mUsageType = IndexBufferUsageType::Static;
 	mSize = 0;
 	glGenBuffers(1, &mBuffer);
@@ -11,6 +11,7 @@ Renderer::OGL33IndexBufferData::OGL33IndexBufferData(const OGL33GraphicsDevice& 
 
 Renderer::OGL33IndexBufferData::~OGL33IndexBufferData() {
 	glDeleteBuffers(1, &mBuffer);
+	mOwner = 0;
 }
 
 void Renderer::OGL33IndexBufferData::Set(unsigned int bytes, const void* data, IndexBufferUsageType type = IndexBufferUsageType::Static) {
