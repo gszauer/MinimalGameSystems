@@ -5,16 +5,19 @@
 #include "OGL33Loader.h"
 
 namespace Renderer {
+	class OGL33GraphicsDevice;
 	class OGL33IndexBufferData : public IIndexBufferData {
 		friend class OGL33GraphicsDevice;
 	protected:
 		IndexBufferUsageType mUsageType;
 		unsigned int mSize;
 		GLuint mBuffer;
+		const OGL33GraphicsDevice* mOwner;
 	protected:
-		OGL33IndexBufferData();
+		OGL33IndexBufferData(); // Disabled
 		OGL33IndexBufferData(const OGL33IndexBufferData&); // Disabled
 		OGL33IndexBufferData& operator=(const OGL33IndexBufferData&); // Disabled
+		OGL33IndexBufferData(const IGraphicsDevice& owner);
 	public:
 		~OGL33IndexBufferData();
 
@@ -23,8 +26,11 @@ namespace Renderer {
 
 		IndexBufferUsageType GetUsage() const;
 		unsigned int Size() const;
+
 		const IIndexBufferView* CreateView(unsigned int count = 0, IndexBufferDataType type = IndexBufferDataType::UShort, unsigned int offset = 0) const;
-		void DestroyView(const IIndexBufferView* view);
+		void DestroyView(const IIndexBufferView* view) const;
+
+		const IGraphicsDevice* GetOwner() const;
 	};
 }
 

@@ -21,7 +21,7 @@ namespace Renderer {
 	public:
 		~OGL33IndexBufferView();
 
-		const IIndexBufferData* GetBuffer() const;
+		const IIndexBufferData* GetOwner() const;
 		unsigned int GetCount() const;
 		IndexBufferDataType GetType() const;
 		unsigned int GetOffset() const;

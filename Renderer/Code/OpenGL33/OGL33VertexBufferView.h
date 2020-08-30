@@ -22,7 +22,7 @@ namespace Renderer {
 	public:
 		~OGL33VertexBufferView();
 		
-		const IVertexBufferData* GetBuffer() const;
+		const IVertexBufferData* GetOwner() const;
 		unsigned int GetNumComponents() const;
 		VertexBufferDataType GetType() const;
 		unsigned int GetStride() const;

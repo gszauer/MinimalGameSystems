@@ -12,7 +12,7 @@ Renderer::OGL33IndexBufferView::~OGL33IndexBufferView() {
 	mOwner = 0;
 }
 
-const Renderer::IIndexBufferData* Renderer::OGL33IndexBufferView::GetBuffer() const {
+const Renderer::IIndexBufferData* Renderer::OGL33IndexBufferView::GetOwner() const {
 	return mOwner;
 }
 

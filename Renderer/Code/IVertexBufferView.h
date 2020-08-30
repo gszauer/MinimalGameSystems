@@ -21,7 +21,7 @@ namespace Renderer {
 	public:
 		inline virtual ~IVertexBufferView() { }
 		
-		virtual const IVertexBufferData* GetBuffer() const = 0;
+		virtual const IVertexBufferData* GetOwner() const = 0;
 		virtual unsigned int GetNumComponents() const = 0;
 		virtual VertexBufferDataType GetType() const = 0;
 		virtual unsigned int GetStride() const = 0;

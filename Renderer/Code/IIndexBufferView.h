@@ -19,7 +19,7 @@ namespace Renderer {
 	public:
 		inline virtual ~IIndexBufferView() { }
 		
-		virtual const IIndexBufferData* GetBuffer() const = 0;
+		virtual const IIndexBufferData* GetOwner() const = 0;
 		virtual unsigned int GetCount() const = 0;
 		virtual IndexBufferDataType GetType() const = 0;
 		virtual unsigned int GetOffset() const = 0;

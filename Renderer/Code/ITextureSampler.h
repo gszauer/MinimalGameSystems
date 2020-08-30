@@ -24,15 +24,18 @@ namespace Renderer {
 		MirroredRepeat = 10,
 		MirroredClampToEdge = 11
 	};
+
+	class ITexutre;
 	
 	class ITextureSampler {
-	private:
-		ITextureSampler(const ITextureSampler&);
-		ITextureSampler& operator=(const ITextureSampler&);
 	protected:
-		inline ITextureSampler() { }
-		virtual inline ~ITextureSampler() { };
+		ITextureSampler(); // Disabled
+		ITextureSampler(const ITextureSampler&); // Disabled
+		ITextureSampler& operator=(const ITextureSampler&); // Disabled
+		ITextureSampler(const ITexutre& owner);
 	public:
+		virtual inline ~ITextureSampler() { };
+		
 		virtual TextureWrapMode GetWrapS() const = 0;
 		virtual TextureWrapMode GetWrapT() const = 0;
 		virtual MinFilterType GetMinFilter() const = 0;
@@ -47,7 +50,6 @@ namespace Renderer {
 		virtual void SetMinFilter(MinFilterType filter) = 0;
 		virtual void SetMagFilter(MagFilterType filter) = 0;
 		virtual void SetBorderColor(float r, float g, float b, float a) = 0;
-		virtual void SetBorderColor(float* rgba) = 0;
 		virtual void SetMinLod(float value) = 0;
 		virtual void SetMaxLod(float value) = 0;
 	};

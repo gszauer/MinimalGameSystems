@@ -2,10 +2,11 @@
 #include "OGL33VertexBufferView.h"
 #include "OGL33Internal.h"
 
-Renderer::OGL33VertexBufferData::OGL33VertexBufferData() {
+Renderer::OGL33VertexBufferData::OGL33VertexBufferData(const IGraphicsDevice& owner) {
 	mUsageType = VertexBufferUsageType::Static;
 	mSize = 0;
 	glGenBuffers(1, &mBuffer);
+	mOwner = &owner;
 }
 
 Renderer::OGL33VertexBufferData::~OGL33VertexBufferData() {
@@ -41,9 +42,13 @@ const Renderer::IVertexBufferView* Renderer::OGL33VertexBufferData::CreateView(u
 	return view;
 }
 
-void Renderer::OGL33VertexBufferData::DestroyView(const IVertexBufferView* view) {
+void Renderer::OGL33VertexBufferData::DestroyView(const IVertexBufferView* view) const {
 	if (view != 0) {
 		const OGL33VertexBufferView* oglView = (const OGL33VertexBufferView*)view;
 		oglView->~OGL33VertexBufferView();
 	}
+}
+
+const Renderer::IGraphicsDevice* Renderer::OGL33VertexBufferData::GetOwner() const {
+	return mOwner;
 }

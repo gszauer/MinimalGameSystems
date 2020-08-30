@@ -2,19 +2,22 @@
 #define _H_OGL33VERTEXBUFFERDATA_
 
 #include "../IVertexBufferData.h"
-#include "OGL33Win32Loader.h"
+#include "OGL33Loader.h"
 
 namespace Renderer {
+	class OGL33GraphicsDevice;
 	class OGL33VertexBufferData : public IVertexBufferData {
 		friend class OGL33GraphicsDevice;
 	protected:
 		VertexBufferUsageType mUsageType;
 		unsigned int mSize;
 		GLuint mBuffer;
+		const OGL33GraphicsDevice* mOwner;
 	protected:
-		OGL33VertexBufferData();
+		OGL33VertexBufferData(); // Disabled
 		OGL33VertexBufferData(const OGL33VertexBufferData&); // Disabled
 		OGL33VertexBufferData& operator=(const OGL33VertexBufferData&); // Disabled
+		OGL33VertexBufferData(const IGraphicsDevice&);
 	public:
 		~OGL33VertexBufferData();
 
@@ -23,8 +26,11 @@ namespace Renderer {
 
 		VertexBufferUsageType GetUsage() const;
 		unsigned int Size() const;
+
 		const IVertexBufferView* CreateView(unsigned int numComponents = 1, VertexBufferDataType type = VertexBufferDataType::Float, unsigned int stride = 0, unsigned int offset = 0) const;
-		void DestroyView(const IVertexBufferView* view);
+		void DestroyView(const IVertexBufferView* view) const;
+		
+		const IGraphicsDevice* GetOwner() const;
 	};
 }
 

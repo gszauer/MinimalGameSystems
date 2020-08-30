@@ -40,7 +40,7 @@ namespace Renderer {
 		Bottom = 5
 	};
 
-	class IGraphicsDevice {
+	class IGraphicsDevice { // TODO: Rename to context, not device
 	private:
 		IGraphicsDevice(const IGraphicsDevice&);
 		IGraphicsDevice& operator=(const IGraphicsDevice&);

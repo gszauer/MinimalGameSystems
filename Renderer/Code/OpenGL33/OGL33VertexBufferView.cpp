@@ -13,7 +13,7 @@ Renderer::OGL33VertexBufferView::~OGL33VertexBufferView() {
 	mOwner = 0;
 }
 
-const Renderer::IVertexBufferData* Renderer::OGL33VertexBufferView::GetBuffer() const {
+const Renderer::IVertexBufferData* Renderer::OGL33VertexBufferView::GetOwner() const {
 	return mOwner;
 }
 

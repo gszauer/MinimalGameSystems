@@ -9,11 +9,14 @@ namespace Renderer {
 		Dynamic = 1
 	};
 
+	class IGraphicsDevice;
+
 	class IIndexBufferData {
 	protected:
-		inline IIndexBufferData() { }
+		IIndexBufferData(); // Disabled
 		IIndexBufferData(const IIndexBufferData&); // Disabled
 		IIndexBufferData& operator=(const IIndexBufferData&); // Disabled
+		inline IIndexBufferData(const IGraphicsDevice&) { }
 	public:
 		virtual inline ~IIndexBufferData() { }
 
@@ -24,6 +27,9 @@ namespace Renderer {
 		virtual unsigned int Size() const = 0;
 
 		virtual const IIndexBufferView* CreateView(unsigned int count = 0, IndexBufferDataType type = IndexBufferDataType::UShort, unsigned int offset = 0) const = 0;
+		virtual void DestroyView(const IIndexBufferView* view) const = 0;
+
+		virtual const IGraphicsDevice* GetOwner() const = 0;
 	};
 }
 
