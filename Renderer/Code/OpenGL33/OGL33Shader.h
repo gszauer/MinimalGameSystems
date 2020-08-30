@@ -1,26 +1,39 @@
 #ifndef _H_OGL33SHADER_
 #define _H_OGL33SHADER_
 
-#include "../Renderer/IShader.h"
+#include "../IShader.h"
+#include "OGL33Loader.h"
+
+#include <map>
+#include<string>
 
 namespace Renderer {
+	class OGL33GraphicsDevice;
+	class OGL33ShaderAttribute;
+
 	class OGL33Shader : public IShader {
 		friend class OGL33GraphicsDevice;
 	protected:
-		inline OGL33Shader() { }
-		inline ~OGL33Shader() { }
+		const OGL33GraphicsDevice* mOwner;
+		char* mError;
+		GLuint mProgram;
+		std::map<std::string, OGL33ShaderAttribute*> mAttributes;
+		std::map<std::string, > mUniforms;
+	protected:
+		OGL33Shader(); // Disabled
+		OGL33Shader(const OGL33Shader&); // Disabled
+		virtual OGL33Shader& operator=(const OGL33Shader&); // Disabled
+		OGL33Shader(const IGraphicsDevice& device, const char* vertex, const char* fragment);
 	public:
-		inline void CompileNative(const char* vertex, const char* fragment) {}
-		inline void CompileGeneric(const char* vertex, const char* fragment) {}
-		inline void SetFloat(unsigned int numComponents, float* inputArray, unsigned int arrayLength) {}
-		inline void SetInt(unsigned int numComponents, int* inputArray, unsigned int arrayLength) {}
-		inline void SetUInt(unsigned int numComponents, unsigned int* inputArray, unsigned int arrayLength) {}
-		inline void SetFloatMatrix(unsigned int numRows, unsigned int numCols, float* inputArray, unsigned int arrayLength) {}
+		~OGL33Shader();
 
-		inline int GetAttribLocation(const char* name) const { return 0; }
-		inline int GetUniformLocation(const char* name) const { return 0; }
-		inline bool IsValid() const { return false; }
-		inline ShaderCompileStatus GetcompileStatus() { return ShaderCompileStatus::NotStarted;  }
+		bool IsValid() const = 0;
+		const char* GetError() const = 0;
+
+		const IShaderAttribute* GetAttribute(const char* name) const;
+		const IShaderUniform* GetUniform(const char* name) const;
+
+		const IGraphicsDevice* GetOwner() const;
 	};
 }
 

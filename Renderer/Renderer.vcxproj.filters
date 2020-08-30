@@ -105,6 +105,18 @@
     <ClInclude Include="Code\OpenGL33\OGL33TextureSampler.h">
       <Filter>Header Files\OpenGL33</Filter>
     </ClInclude>
+    <ClInclude Include="Code\IShaderAttribute.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\IShaderUniform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\OpenGL33\OGL33ShaderAttribute.h">
+      <Filter>Header Files\OpenGL33</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\OpenGL33\OGL33ShaderUniform.h">
+      <Filter>Header Files\OpenGL33</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\glad.c">
@@ -147,6 +159,12 @@
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
     <ClCompile Include="Code\OpenGL33\OGL33TextureSampler.cpp">
+      <Filter>Source Files\OpenGL33</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\OpenGL33\OGL33ShaderAttribute.cpp">
+      <Filter>Source Files\OpenGL33</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\OpenGL33\OGL33ShaderUniform.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
   </ItemGroup>
