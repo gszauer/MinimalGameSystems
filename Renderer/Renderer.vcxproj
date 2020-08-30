@@ -155,7 +155,9 @@
     <ClInclude Include="Code\OpenGL33\OGL33FrameBuffer.h" />
     <ClInclude Include="Code\OpenGL33\OGL33GPUTimer.h" />
     <ClInclude Include="Code\OpenGL33\OGL33GraphicsDevice.h" />
+    <ClInclude Include="Code\OpenGL33\OGL33IndexBufferData.h" />
     <ClInclude Include="Code\OpenGL33\OGL33IndexBufferView.h" />
+    <ClInclude Include="Code\OpenGL33\OGL33Internal.h" />
     <ClInclude Include="Code\OpenGL33\OGL33Loader.h" />
     <ClInclude Include="Code\OpenGL33\OGL33RasterState.h" />
     <ClInclude Include="Code\OpenGL33\OGL33Sampler.h" />
@@ -171,11 +173,14 @@
     <ClCompile Include="Code\OpenGL33\OGL33GPUTimer.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33GraphicsDevice.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33IndexBuffer.cpp" />
+    <ClCompile Include="Code\OpenGL33\OGL33IndexBufferData.cpp" />
+    <ClCompile Include="Code\OpenGL33\OGL33IndexBufferView.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33RasterState.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33Sampler.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33Shader.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33Texture.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33VertexBufferData.cpp" />
+    <ClCompile Include="Code\OpenGL33\OGL33VertexBufferView.cpp" />
     <ClCompile Include="Code\OpenGL33\RendererOpenGL33.cpp" />
     <ClCompile Include="Code\WinMain.cpp" />
   </ItemGroup>

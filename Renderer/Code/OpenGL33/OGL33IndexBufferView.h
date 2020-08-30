@@ -4,27 +4,27 @@
 #include "../IIndexBufferView.h"
 
 namespace Renderer {
-	class OGL33BufferData;
+	class OGL33IndexBufferData;
 
-	class OGL33IndexBufferView {
-		friend class OGL33BufferData;
+	class OGL33IndexBufferView : public IIndexBufferView {
+		friend class OGL33IndexBufferData;
 	protected:
-		const OGL33BufferData* mOwner;
+		const OGL33IndexBufferData* mOwner;
 		unsigned int mCount;
 		IndexBufferDataType mType;
 		unsigned int mOffset;
 	protected:
-		OGL33IndexBufferView();
+		OGL33IndexBufferView(); // Disabled
+		OGL33IndexBufferView(const OGL33IndexBufferView& other); // Disabled
+		OGL33IndexBufferView& operator=(const OGL33IndexBufferView& other); // Disabled
+		OGL33IndexBufferView(const IIndexBufferData& data, unsigned int count = 0, IndexBufferDataType type = IndexBufferDataType::UShort, unsigned int offset = 0);
 	public:
-		OGL33IndexBufferView(const IBufferData& data, unsigned int count = 0, IndexBufferDataType type = IndexBufferDataType::UShort, unsigned int offset = 0);
-		OGL33IndexBufferView(const OGL33IndexBufferView& other);
-		OGL33IndexBufferView& operator=(const OGL33IndexBufferView& other);
 		~OGL33IndexBufferView();
 
-		const IBufferData* GetBuffer();
-		unsigned int GetCount();
-		IndexBufferDataType GetType();
-		unsigned int GetOffset();
+		const IIndexBufferData* GetBuffer() const;
+		unsigned int GetCount() const;
+		IndexBufferDataType GetType() const;
+		unsigned int GetOffset() const;
 	};
 }
 

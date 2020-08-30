@@ -8,18 +8,18 @@ namespace Renderer {
 		UInt = 4,
 	};
 
-	class IBufferData;
+	class IIndexBufferData;
 
 	class IIndexBufferView {
 	protected:
-		inline IIndexBufferView() { }
+		IIndexBufferView(); // Disabled
+		IIndexBufferView(const IIndexBufferView&); // Disabled
+		IIndexBufferView& operator=(const IIndexBufferView&); // Disabled
+		inline IIndexBufferView(const IIndexBufferData& data, unsigned int count = 0, IndexBufferDataType type = IndexBufferDataType::UShort, unsigned int offset = 0) { }
 	public:
-		inline IIndexBufferView(const IBufferData& data, unsigned int count = 0, IndexBufferDataType type = IndexBufferDataType::UShort, unsigned int offset = 0)) { }
-		inline IIndexBufferView(const IIndexBufferView&) { }
-		inline virtual IIndexBufferView& operator=(const IIndexBufferView&) { return *this; }
 		inline virtual ~IIndexBufferView() { }
 		
-		virtual const IBufferData* GetBuffer() const = 0;
+		virtual const IIndexBufferData* GetBuffer() const = 0;
 		virtual unsigned int GetCount() const = 0;
 		virtual IndexBufferDataType GetType() const = 0;
 		virtual unsigned int GetOffset() const = 0;

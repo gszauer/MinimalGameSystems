@@ -6,7 +6,7 @@
 namespace Renderer {
 	class OGL33VertexBufferData;
 
-	class OGL33VertexBufferView {
+	class OGL33VertexBufferView : public IVertexBufferView {
 		friend class OGL33VertexBufferData;
 	protected:
 		const OGL33VertexBufferData* mOwner;
@@ -15,11 +15,11 @@ namespace Renderer {
 		unsigned int mStride;
 		unsigned int mOffset;
 	protected:
-		OGL33VertexBufferView();
-	public:
+		OGL33VertexBufferView(); // Disabled
+		OGL33VertexBufferView(const OGL33VertexBufferView& other); // Disbled
+		OGL33VertexBufferView& operator=(const OGL33VertexBufferView& other); // Disabled
 		OGL33VertexBufferView(const IVertexBufferData& data, unsigned int numComponents = 1, VertexBufferDataType type = VertexBufferDataType::Float, unsigned int stride = 0, unsigned int offset = 0);
-		OGL33VertexBufferView(const OGL33VertexBufferView& other);
-		OGL33VertexBufferView& operator=(const OGL33VertexBufferView& other);
+	public:
 		~OGL33VertexBufferView();
 		
 		const IVertexBufferData* GetBuffer() const;

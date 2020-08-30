@@ -87,9 +87,6 @@
     <ClInclude Include="Code\OpenGL33\OGL33IndexBufferView.h">
       <Filter>Header Files\OpenGL33</Filter>
     </ClInclude>
-    <ClInclude Include="Code\OpenGL33\OGL33Loader.h">
-      <Filter>Header Files\OpenGL33</Filter>
-    </ClInclude>
     <ClInclude Include="Code\IVertexBufferData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -98,6 +95,15 @@
     </ClInclude>
     <ClInclude Include="Code\IIndexBufferData.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\OpenGL33\OGL33Internal.h">
+      <Filter>Header Files\OpenGL33</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\OpenGL33\OGL33IndexBufferData.h">
+      <Filter>Header Files\OpenGL33</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\OpenGL33\OGL33Loader.h">
+      <Filter>Header Files\OpenGL33</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -138,6 +144,15 @@
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
     <ClCompile Include="Code\OpenGL33\OGL33VertexBufferData.cpp">
+      <Filter>Source Files\OpenGL33</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\OpenGL33\OGL33VertexBufferView.cpp">
+      <Filter>Source Files\OpenGL33</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\OpenGL33\OGL33IndexBufferData.cpp">
+      <Filter>Source Files\OpenGL33</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\OpenGL33\OGL33IndexBufferView.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
   </ItemGroup>
