@@ -160,9 +160,9 @@
     <ClInclude Include="Code\OpenGL33\OGL33Internal.h" />
     <ClInclude Include="Code\OpenGL33\OGL33Loader.h" />
     <ClInclude Include="Code\OpenGL33\OGL33RasterState.h" />
-    <ClInclude Include="Code\OpenGL33\OGL33Sampler.h" />
     <ClInclude Include="Code\OpenGL33\OGL33Shader.h" />
     <ClInclude Include="Code\OpenGL33\OGL33Texture.h" />
+    <ClInclude Include="Code\OpenGL33\OGL33TextureSampler.h" />
     <ClInclude Include="Code\OpenGL33\OGL33VertexBufferData.h" />
     <ClInclude Include="Code\OpenGL33\OGL33VertexBufferView.h" />
   </ItemGroup>
@@ -175,12 +175,11 @@
     <ClCompile Include="Code\OpenGL33\OGL33IndexBufferData.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33IndexBufferView.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33RasterState.cpp" />
-    <ClCompile Include="Code\OpenGL33\OGL33Sampler.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33Shader.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33Texture.cpp" />
+    <ClCompile Include="Code\OpenGL33\OGL33TextureSampler.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33VertexBufferData.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33VertexBufferView.cpp" />
-    <ClCompile Include="Code\OpenGL33\RendererOpenGL33.cpp" />
     <ClCompile Include="Code\WinMain.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

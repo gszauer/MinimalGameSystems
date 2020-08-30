@@ -1,5 +1,5 @@
-#ifndef _H_ISAMPLER_
-#define _H_ISAMPLER_
+#ifndef _H_ITEXTURESAMPLER_
+#define _H_ITEXTURESAMPLER_
 
 // https://www.geeks3d.com/20110908/opengl-3-3-sampler-objects-control-your-texture-units/]
 
@@ -31,8 +31,8 @@ namespace Renderer {
 	protected:
 		ITextureSampler(); // Disabled
 		ITextureSampler(const ITextureSampler&); // Disabled
-		ITextureSampler& operator=(const ITextureSampler&); // Disabled
-		ITextureSampler(const ITexutre& owner);
+		virtual ITextureSampler& operator=(const ITextureSampler&); // Disabled
+		inline ITextureSampler(const ITexutre& owner) { }
 	public:
 		virtual inline ~ITextureSampler() { };
 		
@@ -40,18 +40,14 @@ namespace Renderer {
 		virtual TextureWrapMode GetWrapT() const = 0;
 		virtual MinFilterType GetMinFilter() const = 0;
 		virtual MagFilterType GetMagFilter() const = 0;
-		virtual const float* GetBorderColor() const = 0;
-		virtual float GetMinLod() const = 0;
-		virtual float GetMaxLod() const = 0;
 
 		virtual void SetWrapS(TextureWrapMode mode) = 0;
 		virtual void SetWrapT(TextureWrapMode mode) = 0;
 		virtual void SetWrapST(TextureWrapMode mode) = 0;
 		virtual void SetMinFilter(MinFilterType filter) = 0;
 		virtual void SetMagFilter(MagFilterType filter) = 0;
-		virtual void SetBorderColor(float r, float g, float b, float a) = 0;
-		virtual void SetMinLod(float value) = 0;
-		virtual void SetMaxLod(float value) = 0;
+
+		virtual const ITexutre* GetOwner() const = 0;
 	};
 }
 

@@ -4,7 +4,7 @@
 #include <new>
 
 namespace Renderer {
-	namespace Internal {
+	namespace OGL33Internal {
 		void* Alloc(unsigned int numBytes);
 		void Free(void* mem);
 	}

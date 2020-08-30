@@ -3,26 +3,27 @@
 
 namespace Renderer {
 	class ITexture;
+	class IGraphicsDevice;
 
 	class IFrameBuffer {
-	private:
-		IFrameBuffer();
-		IFrameBuffer(const IFrameBuffer&);
-		IFrameBuffer& operator=(const IFrameBuffer&);
 	protected:
-		inline IFrameBuffer(const ITexture* color, const ITexture* depth, const ITexture* stencil) { }
-		virtual inline ~IFrameBuffer() {}
+		IFrameBuffer(); // Disabled
+		IFrameBuffer(const IFrameBuffer&); // Disabled
+		virtual IFrameBuffer& operator=(const IFrameBuffer&); // Disabled
+		inline IFrameBuffer(const IGraphicsDevice& owner) { }
 	public:
+		virtual inline ~IFrameBuffer() {}
+
 		virtual void SetColorTarget(const ITexture* target) = 0;
 		virtual const ITexture* GetColorTarget() const = 0;
 
 		virtual void SetDepthTarget(const ITexture* target) = 0;
 		virtual const ITexture* GetDepthTarget() const = 0;
 
-		virtual void SetStencilTarget(const ITexture* target) = 0;
-		virtual const ITexture* GetStencilTarget() const = 0;
+		virtual void SetDepthStencilTarget(const ITexture* target) = 0;
+		virtual const ITexture* GetDepthStencilTarget() const = 0;
 
-		// Bind and Unbind is done in Graphics Device
+		virtual const IGraphicsDevice* GetOwner() const = 0;
 	};
 }
 

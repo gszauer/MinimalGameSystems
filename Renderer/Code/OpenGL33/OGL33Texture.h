@@ -7,7 +7,7 @@
 namespace Renderer {
 	class OGL33GraphicsDevice;
 
-	class OGL33Texture : ITexture {
+	class OGL33Texture : public ITexture {
 		friend class OGL33GraphicsDevice;
 	protected:
 		OGL33GraphicsDevice* mOwner;
@@ -26,6 +26,8 @@ namespace Renderer {
 		void Set(unsigned int width, unsigned int height, TextureType type, const void* data, bool mips = false);
 		void Update(unsigned int x, unsigned int y, unsigned int width, unsigned int height, TextureType type, const void* data);
 
+		// TODO: Maybe add a "Pull Data" option to like save screenshots or whatever?
+
 		bool HasMips() const;
 		void GenerateMips();
 
@@ -33,7 +35,7 @@ namespace Renderer {
 		unsigned int GetHeight() const;
 		TextureType GetType() const;
 
-		const ITextureSampler* CreateSampler() const;
+		const ITextureSampler* CreateSampler(TextureWrapMode s = TextureWrapMode::Repeat, TextureWrapMode t = TextureWrapMode::Repeat, MinFilterType min = MinFilterType::NearestMipMapLinear, MagFilterType mag = MagFilterType::Linear) const;
 		void DestroySampler(const ITextureSampler* sampler) const;
 
 		const IGraphicsDevice* GetOwner() const;

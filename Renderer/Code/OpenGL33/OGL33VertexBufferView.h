@@ -1,5 +1,5 @@
-#ifndef _H_OGL33_VERTEXBUFFERVIEW_
-#define _H_OGL33_VERTEXBUFFERVIEW_
+#ifndef _H_OGL33VERTEXBUFFERVIEW_
+#define _H_OGL33VERTEXBUFFERVIEW_
 
 #include "../IVertexBufferView.h"
 

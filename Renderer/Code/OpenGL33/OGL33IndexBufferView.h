@@ -1,5 +1,5 @@
-#ifndef _H_OGL33_INDEXBUFFERVIEW_
-#define _H_OGL33_INDEXBUFFERVIEW_
+#ifndef _H_OGL33INDEXBUFFERVIEW_
+#define _H_OGL33INDEXBUFFERVIEW_
 
 #include "../IIndexBufferView.h"
 

@@ -37,7 +37,7 @@ namespace Renderer {
 		virtual unsigned int GetHeight() const = 0;
 		virtual TextureType GetType() const = 0;
 
-		virtual const ITextureSampler* CreateSampler() const = 0;
+		virtual const ITextureSampler* CreateSampler(TextureWrapMode s = TextureWrapMode::Repeat, TextureWrapMode t = TextureWrapMode::Repeat, MinFilterType min = MinFilterType::NearestMipMapLinear, MagFilterType mag = MagFilterType::Linear) const = 0;
 		virtual void DestroySampler(const ITextureSampler* sampler) const = 0;
 
 		virtual const IGraphicsDevice* GetOwner() const = 0;

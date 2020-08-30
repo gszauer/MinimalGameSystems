@@ -1,6 +1,8 @@
 #ifndef _H_OGL33LOADER_
 #define _H_OGL33LOADER_
 
+// TODO: Make sure these are not double defed in other loaders
+
 #ifdef _WIN64
 typedef signed   long long int khronos_intptr_t;
 typedef unsigned long long int khronos_uintptr_t;
@@ -19,6 +21,8 @@ typedef unsigned int GLenum;
 typedef khronos_ssize_t GLsizeiptr;
 typedef khronos_intptr_t GLintptr;
 typedef int GLint;
+
+// TODO: namespace ALL of thse to avoid collisions with actual types
 
 typedef void (*PFNGLGENBUFFERSPROC)(GLsizei n, GLuint* buffers);
 extern PFNGLGENBUFFERSPROC glGenBuffers;
@@ -50,6 +54,24 @@ extern PFNGLBINDTEXTUREPROC glBindTexture;
 typedef void (*PFNGLTEXIMAGE2DPROC)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void* pixels);
 extern PFNGLTEXIMAGE2DPROC glTexImage2D;
 
+typedef void (*PFNGLTEXSUBIMAGE2DPROC)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
+
+typedef void (*PFNGLTEXPARAMETERIPROC)(GLenum target, GLenum pname, GLint param);
+extern PFNGLTEXPARAMETERIPROC glTexParameteri;
+
+typedef void (*PFNGLGENFRAMEBUFFERSPROC)(GLsizei n, GLuint* framebuffers);
+extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
+
+typedef void (*PFNGLDELETEFRAMEBUFFERSPROC)(GLsizei n, const GLuint* framebuffers);
+extern PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers;
+
+typedef void (*PFNGLBINDFRAMEBUFFERPROC)(GLenum target, GLuint framebuffer);
+extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
+
+typedef GLenum(*PFNGLCHECKFRAMEBUFFERSTATUSPROC)(GLenum target);
+extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
+
 #define GL_STREAM_DRAW 0x88E0
 #define GL_STREAM_READ 0x88E1
 #define GL_STREAM_COPY 0x88E2
@@ -72,5 +94,8 @@ extern PFNGLTEXIMAGE2DPROC glTexImage2D;
 #define GL_RGB32F 0x8815
 #define GL_RGBA32F 0x8814
 #define GL_R32F 0x822E
+#define GL_DRAW_FRAMEBUFFER 0x8CA9
+#define GL_READ_FRAMEBUFFER 0x8CA8
+#define GL_FRAMEBUFFER 0x8D40
 
 #endif // !_H_OGL33LOADER_

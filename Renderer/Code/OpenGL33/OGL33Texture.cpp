@@ -1,5 +1,6 @@
 #include "OGL33Texture.h"
 #include "OGL33Internal.h"
+#include "OGL33TextureSampler.h"
 
 Renderer::OGL33Texture::OGL33Texture(const IGraphicsDevice& owner) {
 	mOwner = &owner;
@@ -71,7 +72,37 @@ void Renderer::OGL33Texture::Set(unsigned int width, unsigned int height, Textur
 }
 
 void Renderer::OGL33Texture::Update(unsigned int x, unsigned int y, unsigned int width, unsigned int height, TextureType type, const void* data) {
-	// TODO: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexSubImage2D.xhtml
+	GLenum format = 0;
+	GLenum dataType = GL_UNSIGNED_BYTE;
+	
+	if (type == TextureType::RGB) {
+		format = GL_RGB;
+	}
+	else if (type == TextureType::RGB32) {
+		format = GL_RGB32F;
+	}
+	else if (type == TextureType::RGBA) {
+		format = GL_RGBA;
+	}
+	else if (type == TextureType::RGBA32) {
+		format = GL_RGBA32F;
+	}
+	else if (type == TextureType::R) {
+		format = GL_RED;
+	}
+	else if (type == TextureType::R32) {
+		format = GL_R32F;
+	}
+	else if (mType == TextureType::Depth) {
+		format = GL_DEPTH_COMPONENT;
+	}
+	else { // type == TextureType::DepthStencil
+		format = GL_DEPTH_STENCIL;
+	}
+	
+	glBindTexture(GL_TEXTURE_2D, mTexture);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, format, dataType, data);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 bool Renderer::OGL33Texture::HasMips() const {
@@ -99,12 +130,21 @@ Renderer::TextureType Renderer::OGL33Texture::GetType() const {
 	return mType;
 }
 
-const Renderer::ITextureSampler* Renderer::OGL33Texture::CreateSampler() const {
-	// TODO
+const Renderer::ITextureSampler* Renderer::OGL33Texture::CreateSampler(TextureWrapMode s, TextureWrapMode t, MinFilterType min, MagFilterType mag) const {
+	OGL33TextureSampler* sampler = (OGL33TextureSampler*)Renderer::Internal::Alloc(sizeof(OGL33TextureSampler));
+	new(sampler)OGL33TextureSampler(*this);
+	sampler->SetWrapS(s);
+	sampler->SetWrapT(t);
+	sampler->SetMinFilter(min);
+	sampler->SetMagFilter(mag);
+	return sampler;
 }
 
 void Renderer::OGL33Texture::DestroySampler(const ITextureSampler* sampler) const {
-	// TODO
+	if (sampler != 0) {
+		const OGL33TextureSampler* oglSampler = (const OGL33TextureSampler*)sampler;
+		oglSampler->~OGL33TextureSampler();
+	}
 }
 
 const Renderer::IGraphicsDevice* Renderer::OGL33Texture::GetOwner() const {

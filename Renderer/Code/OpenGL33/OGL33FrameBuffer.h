@@ -1,23 +1,37 @@
 #ifndef _H_OGL33FRAMEBUFFER_
 #define _H_OGL33FRAMEBUFFER_
 
-#include "../Renderer/IFrameBuffer.h"
+#include "../IFrameBuffer.h"
+#include "OGL33Loader.h"
 
 namespace Renderer {
+	class OGL33GraphicsDevice;
 	class OGL33FrameBuffer : IFrameBuffer {
 		friend class OGL33GraphicsDevice;
 	protected:
-		inline OGL33FrameBuffer(const ITexture* color, const ITexture* depth, const ITexture* stencil) : IFrameBuffer(color, depth, stencil) { }
-		virtual inline ~OGL33FrameBuffer() {}
+		const OGL33GraphicsDevice* mOwner;
+		const ITexture* mColorAttachment;
+		const ITexture* mDepthAttachment;
+		bool mHasStancil;
+		GLuint mFrameBuffer;
+	protected:
+		OGL33FrameBuffer(); // Disabled
+		OGL33FrameBuffer(const OGL33FrameBuffer&); // Disabled
+		OGL33FrameBuffer& operator=(const OGL33FrameBuffer&); // Disabled
+		OGL33FrameBuffer(const IGraphicsDevice& owner);
 	public:
-		inline void SetColorTarget(const ITexture* target) { }
-		inline const ITexture* GetColorTarget() const { return 0; }
-		
-		inline void SetDepthTarget(const ITexture* target) { }
-		inline const ITexture* GetDepthTarget() const { return 0; }
+		~OGL33FrameBuffer();
 
-		inline void SetStencilTarget(const ITexture* target) { }
-		inline const ITexture* GetStencilTarget() const { return 0; }
+		void SetColorTarget(const ITexture* target);
+		const ITexture* GetColorTarget() const;
+
+		void SetDepthTarget(const ITexture* target);
+		const ITexture* GetDepthTarget() const;
+
+		void SetDepthStencilTarget(const ITexture* target);
+		const ITexture* GetDepthStencilTarget() const;
+
+		const IGraphicsDevice* GetOwner() const;
 	};
 }
 
