@@ -4,12 +4,10 @@
 #include "../IShader.h"
 #include "OGL33Loader.h"
 
-#include <map>
-#include<string>
-
 namespace Renderer {
 	class OGL33GraphicsDevice;
 	class OGL33ShaderAttribute;
+	class OGL33ShaderUniform;
 
 	class OGL33Shader : public IShader {
 		friend class OGL33GraphicsDevice;
@@ -17,8 +15,12 @@ namespace Renderer {
 		const OGL33GraphicsDevice* mOwner;
 		char* mError;
 		GLuint mProgram;
-		std::map<std::string, OGL33ShaderAttribute*> mAttributes;
-		std::map<std::string, > mUniforms;
+		unsigned int mAttribCount;
+		char** mAttribNames;
+		OGL33ShaderAttribute* mAttribs;
+		unsigned int mUniformCount;
+		char** mUniformNames;
+		OGL33ShaderUniform* mUniforms;
 	protected:
 		OGL33Shader(); // Disabled
 		OGL33Shader(const OGL33Shader&); // Disabled
@@ -27,11 +29,17 @@ namespace Renderer {
 	public:
 		~OGL33Shader();
 
-		bool IsValid() const = 0;
-		const char* GetError() const = 0;
+		bool IsValid() const;
+		const char* GetError() const;
 
 		const IShaderAttribute* GetAttribute(const char* name) const;
 		const IShaderUniform* GetUniform(const char* name) const;
+
+		unsigned int AttributesSize() const;
+		unsigned int UniformsSize() const;
+
+		const IShaderAttribute* GetAttribute(unsigned int index) const;
+		const IShaderUniform* GetUniform(unsigned int index) const;
 
 		const IGraphicsDevice* GetOwner() const;
 	};

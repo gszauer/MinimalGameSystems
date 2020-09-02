@@ -21,6 +21,12 @@ namespace Renderer {
 		virtual const IShaderAttribute* GetAttribute(const char* name) const = 0;
 		virtual const IShaderUniform* GetUniform(const char* name) const = 0;
 
+		virtual unsigned int AttributesSize() const = 0;
+		virtual unsigned int UniformsSize() const = 0;
+
+		virtual const IShaderAttribute* GetAttribute(unsigned int index) const = 0;
+		virtual const IShaderUniform* GetUniform(unsigned int index) const = 0;
+
 		virtual const IGraphicsDevice* GetOwner() const = 0;
 	};
 }

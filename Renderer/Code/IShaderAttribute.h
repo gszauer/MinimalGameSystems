@@ -3,40 +3,40 @@
 
 namespace Renderer {
 	enum class ShaderAttributeType {
-		FLOAT, 
-		FLOAT_VEC2, 
-		FLOAT_VEC3, 
-		FLOAT_VEC4, 
-		FLOAT_MAT2, 
-		FLOAT_MAT3, 
-		FLOAT_MAT4, 
-		FLOAT_MAT2x3, 
-		FLOAT_MAT2x4, 
-		FLOAT_MAT3x2, 
-		FLOAT_MAT3x4, 
-		FLOAT_MAT4x2, 
-		FLOAT_MAT4x3, 
-		INT,
-		INT_VEC2, 
-		INT_VEC3, 
-		INT_VEC4, 
-		UNSIGNED_INT, 
-		UNSIGNED_INT_VEC2, 
-		UNSIGNED_INT_VEC3, 
-		UNSIGNED_INT_VEC4, 
-		DOUBLE, 
-		DOUBLE_VEC2, 
-		DOUBLE_VEC3, 
-		DOUBLE_VEC4, 
-		DOUBLE_MAT2, 
-		DOUBLE_MAT3, 
-		DOUBLE_MAT4, 
-		DOUBLE_MAT2x3, 
-		DOUBLE_MAT2x4, 
-		DOUBLE_MAT3x2, 
-		DOUBLE_MAT3x4, 
-		DOUBLE_MAT4x2,
-		DOUBLE_MAT4x3
+		Float,
+		Vec2F,
+		Vec3F,
+		Vec4F,
+		Mat2F,
+		Mat4F,
+		Mat4F,
+		Mat2x3F,
+		Mat2x4F,
+		Mat3x2F,
+		Mat3x4F,
+		Mat4X2F,
+		Mat4X3F,
+		Int,
+		Vec2I,
+		Vec3I,
+		Vec4I,
+		UnsignedInt,
+		Vec2U,
+		Vec3U,
+		Vec4U,
+		Double,
+		Vec2D,
+		Vec3D,
+		Vec4D,
+		Mat2D,
+		Mat3D,
+		Mat4D,
+		Mat2x3D,
+		Mat2x4D,
+		Mat3x2D,
+		Mat3x4D,
+		Mat4x2D,
+		Mat4x3D
 	};
 
 	class IShader;
@@ -46,7 +46,7 @@ namespace Renderer {
 		IShaderAttribute(); // Disabled
 		IShaderAttribute(const IShaderAttribute&); // Disabled
 		virtual IShaderAttribute& operator=(const IShaderAttribute&); // Disabled
-		inline IShaderAttribute(const IShader& shader, unsigned int index, unsigned int size, ShaderAttributeType type, bool isArray, unsigned int length) { }
+		inline IShaderAttribute(const IShader& shader, const char* name, unsigned int index, unsigned int size, ShaderAttributeType type, bool isArray, unsigned int length) { }
 	public:
 		virtual inline ~IShaderAttribute() { }
 		virtual unsigned int GetIndex() const = 0;
@@ -58,6 +58,8 @@ namespace Renderer {
 		virtual unsigned int Length() const = 0;
 
 		virtual const IShader* GetOwner() const = 0;
+
+		virtual const char* GetName() const = 0;
 	};
 }
 

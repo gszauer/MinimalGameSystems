@@ -1,12 +1,13 @@
 #include "OGL33ShaderUniform.h"
 
-Renderer::OGL33ShaderUniform::OGL33ShaderUniform(const IShader& shader, unsigned int index, unsigned int size, ShaderUniformType type, bool isArray, unsigned int length) {
+Renderer::OGL33ShaderUniform::OGL33ShaderUniform(const IShader& shader, const char* name, unsigned int index, unsigned int size, ShaderUniformType type, bool isArray, unsigned int length) {
 	mOwner = &shader;
 	mIndex = index;
 	mSize = size;
 	mType = type;
 	mIsArray = isArray;
 	mLengt = length;
+	mName = name;
 }
 
 Renderer::OGL33ShaderUniform::~OGL33ShaderUniform() {
@@ -31,6 +32,10 @@ bool Renderer::OGL33ShaderUniform::IsArray() const {
 
 unsigned int Renderer::OGL33ShaderUniform::Length() const {
 	return mLengt;
+}
+
+const char* Renderer::OGL33ShaderUniform::GetName() const {
+	return mName;
 }
 
 const Renderer::IShader* Renderer::OGL33ShaderUniform::GetOwner() const {

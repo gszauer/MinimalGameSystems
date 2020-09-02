@@ -9,6 +9,7 @@ namespace Renderer {
 		friend class OGL33Shader;
 	protected:
 		const OGL33Shader* mOwner;
+		const char* mName;
 		unsigned int mIndex;
 		unsigned int mSize;
 		ShaderAttributeType mType;
@@ -18,7 +19,7 @@ namespace Renderer {
 		OGL33ShaderAttribute(); // Disabled
 		OGL33ShaderAttribute(const OGL33ShaderAttribute&); // Disabled
 		virtual OGL33ShaderAttribute& operator=(const OGL33ShaderAttribute&); // Disabled
-		OGL33ShaderAttribute(const IShader& shader, unsigned int index, unsigned int size, ShaderAttributeType type, bool isArray, unsigned int length);
+		OGL33ShaderAttribute(const IShader& shader, const char* name, unsigned int index, unsigned int size, ShaderAttributeType type, bool isArray, unsigned int length);
 	public:
 		~OGL33ShaderAttribute();
 		unsigned int GetIndex() const;
@@ -30,6 +31,7 @@ namespace Renderer {
 		unsigned int Length() const;
 
 		const IShader* GetOwner() const;
+		const char* GetName() const;
 	};
 }
 
