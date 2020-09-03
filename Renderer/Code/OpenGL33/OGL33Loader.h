@@ -21,6 +21,7 @@ typedef unsigned int GLenum;
 typedef khronos_ssize_t GLsizeiptr;
 typedef khronos_intptr_t GLintptr;
 typedef int GLint;
+typedef char GLchar;
 
 // TODO: namespace ALL of thse to avoid collisions with actual types
 
@@ -72,6 +73,57 @@ extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
 typedef GLenum(*PFNGLCHECKFRAMEBUFFERSTATUSPROC)(GLenum target);
 extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
 
+typedef GLuint(* PFNGLCREATEPROGRAMPROC)(void);
+extern PFNGLCREATEPROGRAMPROC glCreateProgram;
+
+typedef GLuint(* PFNGLCREATESHADERPROC)(GLenum type);
+extern PFNGLCREATESHADERPROC glCreateShader;
+
+typedef void (* PFNGLDELETEPROGRAMPROC)(GLuint program);
+extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
+
+typedef void (* PFNGLUSEPROGRAMPROC)(GLuint program);
+extern PFNGLUSEPROGRAMPROC glUseProgram;
+
+typedef void (* PFNGLGETPROGRAMIVPROC)(GLuint program, GLenum pname, GLint* params);
+extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
+
+typedef void (* PFNGLGETACTIVEATTRIBPROC)(GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLint* size, GLenum* type, GLchar* name);
+extern PFNGLGETACTIVEATTRIBPROC glGetActiveAttrib;
+
+typedef GLint(* PFNGLGETATTRIBLOCATIONPROC)(GLuint program, const GLchar* name);
+extern PFNGLGETATTRIBLOCATIONPROC glGetAttribLocation;
+
+typedef void (* PFNGLGETACTIVEUNIFORMPROC)(GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLint* size, GLenum* type, GLchar* name);
+extern PFNGLGETACTIVEUNIFORMPROC glGetActiveUniform;
+
+typedef void (* PFNGLDELETESHADERPROC)(GLuint shader);
+extern PFNGLDELETESHADERPROC glDeleteShader;
+
+typedef void (* PFNGLSHADERSOURCEPROC)(GLuint shader, GLsizei count, const GLchar* const* string, const GLint* length);
+extern PFNGLSHADERSOURCEPROC glShaderSource;
+
+typedef void (* PFNGLCOMPILESHADERPROC)(GLuint shader);
+extern PFNGLCOMPILESHADERPROC glCompileShader;
+
+typedef void (* PFNGLGETSHADERIVPROC)(GLuint shader, GLenum pname, GLint* params);
+extern PFNGLGETSHADERIVPROC glGetShaderiv;
+
+typedef void (* PFNGLGETSHADERINFOLOGPROC)(GLuint shader, GLsizei bufSize, GLsizei* length, GLchar* infoLog);
+extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
+
+typedef void (* PFNGLATTACHSHADERPROC)(GLuint program, GLuint shader);
+extern PFNGLATTACHSHADERPROC glAttachShader;
+
+typedef void (* PFNGLLINKPROGRAMPROC)(GLuint program);
+extern PFNGLLINKPROGRAMPROC glLinkProgram;
+
+typedef void (* PFNGLGETPROGRAMIVPROC)(GLuint program, GLenum pname, GLint* params);
+extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
+
+typedef void (* PFNGLGETPROGRAMINFOLOGPROC)(GLuint program, GLsizei bufSize, GLsizei* length, GLchar* infoLog);
+extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
+
 #define GL_STREAM_DRAW 0x88E0
 #define GL_STREAM_READ 0x88E1
 #define GL_STREAM_COPY 0x88E2
@@ -97,5 +149,44 @@ extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
 #define GL_DRAW_FRAMEBUFFER 0x8CA9
 #define GL_READ_FRAMEBUFFER 0x8CA8
 #define GL_FRAMEBUFFER 0x8D40
+#define GL_ACTIVE_ATTRIBUTES 0x8B89
+#define GL_ACTIVE_UNIFORMS 0x8B86
+#define GL_DOUBLE 0x140A
+
+#define GL_FLOAT 0x1406
+#define GL_INT 0x1404
+#define GL_UNSIGNED_INT 0x1405
+
+#define GL_FLOAT_VEC2 0x8B50
+#define GL_FLOAT_VEC3 0x8B51
+#define GL_FLOAT_VEC4 0x8B52
+
+#define GL_INT_VEC2 0x8B53
+#define GL_INT_VEC3 0x8B54
+#define GL_INT_VEC4 0x8B55
+
+#define GL_UNSIGNED_INT_VEC2 0x8DC6
+#define GL_UNSIGNED_INT_VEC3 0x8DC7
+#define GL_UNSIGNED_INT_VEC4 0x8DC8
+
+#define GL_FLOAT_MAT2 0x8B5A
+#define GL_FLOAT_MAT3 0x8B5B
+#define GL_FLOAT_MAT4 0x8B5C
+
+#define GL_FLOAT_MAT2x3 0x8B65
+#define GL_FLOAT_MAT2x4 0x8B66
+#define GL_FLOAT_MAT3x2 0x8B67
+#define GL_FLOAT_MAT3x4 0x8B68
+#define GL_FLOAT_MAT4x2 0x8B69
+#define GL_FLOAT_MAT4x3 0x8B6A
+
+#define GL_SAMPLER_1D 0x8B5D
+#define GL_SAMPLER_2D 0x8B5E
+#define GL_SAMPLER_3D 0x8B5F
+
+#define GL_VERTEX_SHADER 0x8B31
+#define GL_COMPILE_STATUS 0x8B81
+#define GL_FRAGMENT_SHADER 0x8B30
+#define GL_LINK_STATUS 0x8B82
 
 #endif // !_H_OGL33LOADER_

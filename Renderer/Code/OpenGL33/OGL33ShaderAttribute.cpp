@@ -1,12 +1,10 @@
 #include "OGL33ShaderAttribute.h"
 
-Renderer::OGL33ShaderAttribute::OGL33ShaderAttribute(const IShader& shader, const char* name, unsigned int index, unsigned int size, ShaderAttributeType type, bool isArray, unsigned int length) {
+Renderer::OGL33ShaderAttribute::OGL33ShaderAttribute(const IShader& shader, const char* name, unsigned int index, unsigned int size, ShaderAttributeType type) {
 	mOwner = &shader;
 	mIndex = index;
 	mSize = size;
 	mType = type;
-	mIsArray = isArray;
-	mLengt = length;
 	mName = name;
 }
 
@@ -24,14 +22,6 @@ unsigned int Renderer::OGL33ShaderAttribute::Size() const {
 
 Renderer::ShaderAttributeType Renderer::OGL33ShaderAttribute::GetType() const {
 	return mType;
-}
-
-bool Renderer::OGL33ShaderAttribute::IsArray() const {
-	return mIsArray;
-}
-
-unsigned int Renderer::OGL33ShaderAttribute::Length() const {
-	return mLengt;
 }
 
 const char* Renderer::OGL33ShaderAttribute::GetName() const {
