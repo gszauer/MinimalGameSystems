@@ -1,5 +1,9 @@
 #include "OGL33FrameBuffer.h"
 
+const Renderer::IGraphicsDevice* Renderer::OGL33FrameBuffer::GetOwner() const {
+	return mOwner;
+}
+
 Renderer::OGL33FrameBuffer::OGL33FrameBuffer(const IGraphicsDevice& owner) {
 	OGL33GraphicsDevice* mOwner = &owner;
 	mColorAttachment = 0;
@@ -43,8 +47,4 @@ const Renderer::ITexture* Renderer::OGL33FrameBuffer::GetDepthStencilTarget() co
 		return mDepthAttachment;
 	}
 	return 0;
-}
-
-const Renderer::IGraphicsDevice* Renderer::OGL33FrameBuffer::GetOwner() const {
-	return mOwner;
 }

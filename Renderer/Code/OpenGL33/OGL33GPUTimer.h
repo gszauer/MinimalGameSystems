@@ -1,19 +1,26 @@
 #ifndef _H_OGL33TIMER_
 #define _H_OGL33TIMER_
 
-#include "../Renderer/IGPUTimer.h"
+#include "../IGPUTimer.h"
+#include "OGL33Loader.h"
 
 namespace Renderer {
-	class OGL33GPUTimer : public IGPUTimer {
-	public:
-		inline void Initialize() { }
-		inline void Destroy() { }
-		inline bool IsValid() { return true; }
+	class OGL33GraphicsDevice;
 
-		inline void SampleStart() { }
-		inline void SampleEnd() { }
-		inline bool IsDone() { return true; }
-		inline float GetMilliseconds() { return 0.0f; }
+	class OGL33GPUTimer : public IGPUTimer {
+	protected:
+		GLuint mCounter;
+	protected:
+		const OGL33GraphicsDevice* mOwner;
+		OGL33GPUTimer(const IGraphicsDevice* owner);
+	public:
+		~OGL33GPUTimer();
+
+		void Insert();
+		bool IsDone();
+		float operator-(const IGPUTimer& other);
+
+		const IGraphicsDevice* GetOwner() const;
 	};
 }
 

@@ -10,12 +10,15 @@ namespace Renderer {
 	namespace OGL33Internal {
 		GLuint CreateVertexShader(const char* shader, char** error);
 		GLuint CreateFragmentShader(const char* shader, char** error);
-		void LinkShaders(GLuint program, GLuint vertex, GLuint fragment);
+		void LinkShaders(GLuint program, GLuint vertex, GLuint fragment, char** error);
 		ShaderAttributeType EnumToAttrib(GLenum enumeration);
 		ShaderUniformType EnumToUniform(GLenum enumeration);
 	}
 }
 
+const Renderer::IGraphicsDevice* Renderer::OGL33Shader::GetOwner() const {
+	return mOwner;
+}
 
 Renderer::OGL33Shader::OGL33Shader(const IGraphicsDevice& device, const char* vertex, const char* fragment) {
 	//////////////////////////////////////////////////////////////
@@ -55,7 +58,7 @@ Renderer::OGL33Shader::OGL33Shader(const IGraphicsDevice& device, const char* ve
 
 	//////////////////////////////////////////////////////////////
 	// Link program and delete shaders
-	Renderer::OGL33Internal::LinkShaders(vertexShader, fragmentShader);
+	Renderer::OGL33Internal::LinkShaders(mProgram, vertexShader, fragmentShader, &mError);
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 	if (mError != 0) {
@@ -223,10 +226,6 @@ const Renderer::IShaderUniform* Renderer::OGL33Shader::GetUniform(unsigned int i
 	return &mUniforms[index];
 }
 
-const Renderer::IGraphicsDevice* Renderer::OGL33Shader::GetOwner() const {
-	return mOwner;
-}
-
 Renderer::ShaderAttributeType Renderer::OGL33Internal::EnumToAttrib(GLenum enumeration) {
 	Renderer::ShaderAttributeType result = ShaderAttributeType::Error;
 
@@ -359,7 +358,12 @@ GLuint Renderer::OGL33Internal::CreateVertexShader(const char* shader, char** er
 	if (!success) {
 		char infoLog[512];
 		glGetShaderInfoLog(v_shader, 512, NULL, infoLog);
-		// TODO: Handle error
+
+		unsigned int bytes = sizeof(char) * (Renderer::OGL33Internal::StrLen(infoLog) + 1);
+		*error = (char*)Renderer::OGL33Internal::Alloc(bytes);
+		Renderer::OGL33Internal::MemSet(*error, 0, bytes);
+		Renderer::OGL33Internal::StrCpy(*error, infoLog);
+
 		return 0;
 	};
 	return v_shader;
@@ -375,13 +379,18 @@ GLuint Renderer::OGL33Internal::CreateFragmentShader(const char* shader, char** 
 	if (!success) {
 		char infoLog[512];
 		glGetShaderInfoLog(f_shader, 512, NULL, infoLog);
-		// TODO: Handle error
+		
+		unsigned int bytes = sizeof(char) * (Renderer::OGL33Internal::StrLen(infoLog) + 1);
+		*error = (char*)Renderer::OGL33Internal::Alloc(bytes);
+		Renderer::OGL33Internal::MemSet(*error, 0, bytes);
+		Renderer::OGL33Internal::StrCpy(*error, infoLog);
+
 		return 0;
 	};
 	return f_shader;
 }
 
-void Renderer::OGL33Internal::LinkShaders(GLuint program, GLuint vertex, GLuint fragment) {
+void Renderer::OGL33Internal::LinkShaders(GLuint program, GLuint vertex, GLuint fragment, char** error) {
 	glAttachShader(program, vertex);
 	glAttachShader(program, fragment);
 	glLinkProgram(program);
@@ -392,6 +401,13 @@ void Renderer::OGL33Internal::LinkShaders(GLuint program, GLuint vertex, GLuint 
 		char infoLog[512];
 		glGetProgramInfoLog(program, 512, NULL, infoLog);
 		
-		// TODO: Handle error
+		unsigned int bytes = sizeof(char) * (Renderer::OGL33Internal::StrLen(infoLog) + 1);
+		*error = (char*)Renderer::OGL33Internal::Alloc(bytes);
+		Renderer::OGL33Internal::MemSet(*error, 0, bytes);
+		Renderer::OGL33Internal::StrCpy(*error, infoLog);
+
+		return;
 	}
+
+
 }

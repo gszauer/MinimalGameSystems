@@ -14,6 +14,7 @@ typedef unsigned long  int     khronos_uintptr_t;
 typedef signed   long  int     khronos_ssize_t;
 typedef unsigned long  int     khronos_usize_t;
 #endif
+typedef __int64                 khronos_int64_t;
 
 typedef unsigned int GLuint;
 typedef int GLsizei;
@@ -22,6 +23,7 @@ typedef khronos_ssize_t GLsizeiptr;
 typedef khronos_intptr_t GLintptr;
 typedef int GLint;
 typedef char GLchar;
+typedef khronos_int64_t GLint64;
 
 // TODO: namespace ALL of thse to avoid collisions with actual types
 
@@ -124,6 +126,21 @@ extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
 typedef void (* PFNGLGETPROGRAMINFOLOGPROC)(GLuint program, GLsizei bufSize, GLsizei* length, GLchar* infoLog);
 extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
 
+typedef void (* PFNGLGENQUERIESPROC)(GLsizei n, GLuint* ids);
+extern PFNGLGENQUERIESPROC glGenQueries;
+
+typedef void (* PFNGLDELETEQUERIESPROC)(GLsizei n, const GLuint* ids);
+extern PFNGLDELETEQUERIESPROC glDeleteQueries;
+
+typedef void (* PFNGLQUERYCOUNTERPROC)(GLuint id, GLenum target);
+extern PFNGLQUERYCOUNTERPROC glQueryCounter;
+
+typedef void (* PFNGLGETQUERYOBJECTIVPROC)(GLuint id, GLenum pname, GLint* params);
+extern PFNGLGETQUERYOBJECTIVPROC glGetQueryObjectiv;
+
+typedef void (* PFNGLGETQUERYOBJECTUI64VPROC)(GLuint id, GLenum pname, GLuint64* params);
+extern PFNGLGETQUERYOBJECTUI64VPROC glGetQueryObjectui64v;
+
 #define GL_STREAM_DRAW 0x88E0
 #define GL_STREAM_READ 0x88E1
 #define GL_STREAM_COPY 0x88E2
@@ -188,5 +205,8 @@ extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
 #define GL_COMPILE_STATUS 0x8B81
 #define GL_FRAGMENT_SHADER 0x8B30
 #define GL_LINK_STATUS 0x8B82
+#define GL_TIMESTAMP 0x8E28
+#define GL_QUERY_RESULT_AVAILABLE 0x8867
+#define GL_QUERY_RESULT 0x8866
 
 #endif // !_H_OGL33LOADER_
