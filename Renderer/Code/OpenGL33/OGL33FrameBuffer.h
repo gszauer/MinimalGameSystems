@@ -5,11 +5,11 @@
 #include "OGL33Loader.h"
 
 namespace Renderer {
-	class OGL33GraphicsDevice;
+	class OGL33Context;
 	class OGL33FrameBuffer : IFrameBuffer {
-		friend class OGL33GraphicsDevice;
+		friend class OGL33Context;
 	protected:
-		const OGL33GraphicsDevice* mOwner;
+		const OGL33Context* mOwner;
 		const ITexture* mColorAttachment;
 		const ITexture* mDepthAttachment;
 		bool mHasStancil;

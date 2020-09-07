@@ -152,9 +152,7 @@
     <ClInclude Include="Code\IBufferView.h" />
     <ClInclude Include="Code\khrplatform.h" />
     <ClInclude Include="Code\OpenGL33\OGL33FrameBuffer.h" />
-    <ClInclude Include="Code\OpenGL33\OGL33GraphicsDevice.h" />
-    <ClInclude Include="Code\OpenGL33\OGL33IndexBufferData.h" />
-    <ClInclude Include="Code\OpenGL33\OGL33IndexBufferView.h" />
+    <ClInclude Include="Code\OpenGL33\OGL33Context.h" />
     <ClInclude Include="Code\OpenGL33\OGL33Internal.h" />
     <ClInclude Include="Code\OpenGL33\OGL33Loader.h" />
     <ClInclude Include="Code\OpenGL33\OGL33RasterState.h" />
@@ -163,8 +161,8 @@
     <ClInclude Include="Code\OpenGL33\OGL33ShaderUniform.h" />
     <ClInclude Include="Code\OpenGL33\OGL33Texture.h" />
     <ClInclude Include="Code\OpenGL33\OGL33TextureSampler.h" />
-    <ClInclude Include="Code\OpenGL33\OGL33VertexBufferData.h" />
-    <ClInclude Include="Code\OpenGL33\OGL33VertexBufferView.h" />
+    <ClInclude Include="Code\OpenGL33\OGL33BufferData.h" />
+    <ClInclude Include="Code\OpenGL33\OGL33BufferView.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\Application.cpp" />

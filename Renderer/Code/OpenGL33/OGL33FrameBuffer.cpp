@@ -5,7 +5,7 @@ const Renderer::IContext* Renderer::OGL33FrameBuffer::GetOwner() const {
 }
 
 Renderer::OGL33FrameBuffer::OGL33FrameBuffer(const IContext& owner) {
-	OGL33GraphicsDevice* mOwner = &owner;
+	mOwner = &owner;
 	mColorAttachment = 0;
 	mDepthAttachment = 0;
 	mHasStancil = false;

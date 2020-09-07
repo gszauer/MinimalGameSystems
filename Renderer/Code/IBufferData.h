@@ -32,6 +32,7 @@ namespace Renderer {
 		virtual unsigned int Size() const = 0;
 
 		virtual const IBufferView* CreateView(unsigned int numComponents = 1, BufferDataType type = BufferDataType::Float, unsigned int stride = 0, unsigned int offset = 0) const = 0;
+		virtual void DestroyView(const IBufferView* view) const = 0;
 
 		virtual const IContext* GetOwner() const = 0;
 	};

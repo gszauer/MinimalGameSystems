@@ -5,14 +5,14 @@
 #include "OGL33Loader.h"
 
 namespace Renderer {
-	class OGL33GraphicsDevice;
+	class OGL33Context;
 	class OGL33ShaderAttribute;
 	class OGL33ShaderUniform;
 
 	class OGL33Shader : public IShader {
-		friend class OGL33GraphicsDevice;
+		friend class OGL33Context;
 	protected:
-		const OGL33GraphicsDevice* mOwner;
+		const OGL33Context* mOwner;
 		char* mError;
 		GLuint mProgram;
 		unsigned int mAttribCount;

@@ -5,12 +5,12 @@
 #include "OGL33Loader.h"
 
 namespace Renderer {
-	class OGL33GraphicsDevice;
+	class OGL33Context;
 
 	class OGL33RasterState : public IRasterState {
-		friend class OGL33GraphicsDevice;
+		friend class OGL33Context;
 	protected:
-		OGL33GraphicsDevice* mOwner;
+		OGL33Context* mOwner;
 		FillMode mFillMode;
 		FillFace mFillFace;
 		CullMode mCullMode;
