@@ -52,6 +52,7 @@ namespace Renderer {
 		virtual ShaderUniformType GetType() const = 0;
 
 		virtual bool IsArray() const = 0;
+		virtual unsigned int Length() const = 0;
 
 		virtual const IShader* GetOwner() const = 0;
 		virtual const char* GetName() const = 0;

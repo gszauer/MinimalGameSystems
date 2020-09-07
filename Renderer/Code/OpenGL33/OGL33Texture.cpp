@@ -1,6 +1,7 @@
 #include "OGL33Texture.h"
 #include "OGL33Internal.h"
 #include "OGL33TextureSampler.h"
+#include "OGL33Context.h"
 
 namespace Renderer {
 	namespace OGL33Internal {
@@ -9,7 +10,7 @@ namespace Renderer {
 }
 
 Renderer::OGL33Texture::OGL33Texture(const IContext& owner) {
-	mOwner = &owner;
+	mOwner = (const OGL33Context*)&owner;
 	mWidth = 0;
 	mHeight = 0;
 	mType = TextureType::RGB;
@@ -146,8 +147,9 @@ Renderer::TextureType Renderer::OGL33Texture::GetType() const {
 }
 
 const Renderer::ITextureSampler* Renderer::OGL33Texture::CreateSampler(TextureWrapMode s, TextureWrapMode t, MinFilterType min, MagFilterType mag) const {
-	OGL33TextureSampler* sampler = (OGL33TextureSampler*)Renderer::Internal::Alloc(sizeof(OGL33TextureSampler));
-	new(sampler)OGL33TextureSampler(*this);
+	const ITexture& thisTexture = *this;
+	OGL33TextureSampler* sampler = (OGL33TextureSampler*)Renderer::OGL33Internal::Alloc(sizeof(OGL33TextureSampler));
+	new(sampler)OGL33TextureSampler(thisTexture);
 	sampler->SetWrapS(s);
 	sampler->SetWrapT(t);
 	sampler->SetMinFilter(min);

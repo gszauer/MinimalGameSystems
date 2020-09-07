@@ -10,7 +10,7 @@ namespace Renderer {
 	class OGL33RasterState : public IRasterState {
 		friend class OGL33Context;
 	protected:
-		OGL33Context* mOwner;
+		const OGL33Context* mOwner;
 		FillMode mFillMode;
 		FillFace mFillFace;
 		CullMode mCullMode;

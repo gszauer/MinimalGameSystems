@@ -1,11 +1,12 @@
 #include "OGL33FrameBuffer.h"
+#include "OGL33Context.h"
 
 const Renderer::IContext* Renderer::OGL33FrameBuffer::GetOwner() const {
 	return mOwner;
 }
 
 Renderer::OGL33FrameBuffer::OGL33FrameBuffer(const IContext& owner) {
-	mOwner = &owner;
+	mOwner = (const OGL33Context*)&owner;
 	mColorAttachment = 0;
 	mDepthAttachment = 0;
 	mHasStancil = false;

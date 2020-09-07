@@ -7,10 +7,10 @@
 namespace Renderer {
 	class OGL33Context;
 
-	class OGL33Texture : public ITexture {
+	class OGL33Texture : public Renderer::ITexture {
 		friend class OGL33Context;
 	protected:
-		OGL33Context* mOwner;
+		const OGL33Context* mOwner;
 		unsigned int mWidth;
 		unsigned int mHeight;
 		TextureType mType;
@@ -20,7 +20,7 @@ namespace Renderer {
 		OGL33Texture(); // Disabled
 		OGL33Texture(const OGL33Texture&); // Disabled
 		OGL33Texture& operator=(const OGL33Texture&); // Disabled
-		OGL33Texture(const IContext&);
+		OGL33Texture(const IContext& owner);
 	public:
 		~OGL33Texture();
 		void Set(unsigned int width, unsigned int height, TextureType type, const void* data = 0, bool mips = false); // Data CAN be 0 to create an empty texture

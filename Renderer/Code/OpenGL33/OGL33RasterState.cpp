@@ -1,11 +1,12 @@
 #include "OGL33RasterState.h"
+#include "OGL33Context.h"
 
 const Renderer::IContext* Renderer::OGL33RasterState::GetOwner() const {
 	return mOwner;
 }
 
 Renderer::OGL33RasterState::OGL33RasterState(const IContext& owner) {
-	mOwner = owner;
+	mOwner = (const OGL33Context*)&owner;
 	mFillMode = FillMode::Fill;
 	mFillFace = FillFace::Front;
 	mCullMode = CullMode::Back;
@@ -109,7 +110,6 @@ void Renderer::OGL33RasterState::SetBlend(BlendFactor src, BlendFactor dst) {
 	mSrcBlend = src;
 	mDstBlend = dst;
 }
-
 
 float Renderer::OGL33RasterState::GetPointSize() const {
 	return mPointSize;

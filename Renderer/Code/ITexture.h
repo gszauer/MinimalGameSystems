@@ -24,7 +24,7 @@ namespace Renderer {
 		ITexture(); // Disabled
 		ITexture(const ITexture&); // Disabled
 		virtual ITexture& operator=(const ITexture&); // Disabled
-		inline ITexture(const IContext&) {}
+		inline ITexture(const IContext& owner) {}
 	public:
 		virtual inline ~ITexture() { }
 		virtual void Set(unsigned int width, unsigned int height, TextureType type, const void* data = 0, bool mips = false) = 0; // Data CAN be 0 to make empty texture

@@ -3,6 +3,7 @@
 #include "OGL33Loader.h"
 #include "OGL33ShaderAttribute.h"
 #include "OGL33ShaderUniform.h"
+#include "OGL33Context.h"
 
 #include <new>
 
@@ -23,7 +24,7 @@ const Renderer::IContext* Renderer::OGL33Shader::GetOwner() const {
 Renderer::OGL33Shader::OGL33Shader(const IContext& device, const char* vertex, const char* fragment) {
 	//////////////////////////////////////////////////////////////
 	// Assign trivial variables
-	mOwner = &device;
+	mOwner = (const OGL33Context*)&device;
 	mError = 0;
 
 	//////////////////////////////////////////////////////////////

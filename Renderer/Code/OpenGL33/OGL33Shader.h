@@ -24,7 +24,7 @@ namespace Renderer {
 	protected:
 		OGL33Shader(); // Disabled
 		OGL33Shader(const OGL33Shader&); // Disabled
-		virtual OGL33Shader& operator=(const OGL33Shader&); // Disabled
+		OGL33Shader& operator=(const OGL33Shader&); // Disabled
 		OGL33Shader(const IContext& device, const char* vertex, const char* fragment);
 	public:
 		~OGL33Shader();

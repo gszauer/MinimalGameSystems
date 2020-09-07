@@ -16,9 +16,12 @@ typedef unsigned long  int     khronos_usize_t;
 #endif
 
 typedef __int64                 khronos_int64_t;
+typedef unsigned __int64        khronos_uint64_t;
+
 typedef float GLfloat;
 
 typedef unsigned int GLuint;
+typedef khronos_uint64_t GLuint64;
 typedef int GLsizei;
 typedef unsigned int GLenum;
 typedef khronos_ssize_t GLsizeiptr;

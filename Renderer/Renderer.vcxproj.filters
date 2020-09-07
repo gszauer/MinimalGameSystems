@@ -99,6 +99,9 @@
     <ClInclude Include="Code\OpenGL33\OGL33Context.h">
       <Filter>Header Files\OpenGL33</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\glad.c">
@@ -113,9 +116,6 @@
     <ClCompile Include="Code\OpenGL33\OGL33FrameBuffer.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
-    <ClCompile Include="Code\OpenGL33\OGL33GraphicsDevice.cpp">
-      <Filter>Source Files\OpenGL33</Filter>
-    </ClCompile>
     <ClCompile Include="Code\OpenGL33\OGL33RasterState.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
@@ -125,18 +125,6 @@
     <ClCompile Include="Code\OpenGL33\OGL33Texture.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
-    <ClCompile Include="Code\OpenGL33\OGL33VertexBufferData.cpp">
-      <Filter>Source Files\OpenGL33</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\OpenGL33\OGL33VertexBufferView.cpp">
-      <Filter>Source Files\OpenGL33</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\OpenGL33\OGL33IndexBufferData.cpp">
-      <Filter>Source Files\OpenGL33</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\OpenGL33\OGL33IndexBufferView.cpp">
-      <Filter>Source Files\OpenGL33</Filter>
-    </ClCompile>
     <ClCompile Include="Code\OpenGL33\OGL33TextureSampler.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
@@ -144,6 +132,15 @@
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
     <ClCompile Include="Code\OpenGL33\OGL33ShaderUniform.cpp">
+      <Filter>Source Files\OpenGL33</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\OpenGL33\OGL33BufferData.cpp">
+      <Filter>Source Files\OpenGL33</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\OpenGL33\OGL33BufferView.cpp">
+      <Filter>Source Files\OpenGL33</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\OpenGL33\OGL33Context.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
   </ItemGroup>

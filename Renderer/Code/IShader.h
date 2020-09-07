@@ -7,7 +7,7 @@ namespace Renderer {
 	class IShaderUniform;
 
 	class IShader {
-	private:
+	protected:
 		IShader(); // Disabled
 		IShader(const IShader&); // Disabled
 		virtual IShader& operator=(const IShader&); // Disabled

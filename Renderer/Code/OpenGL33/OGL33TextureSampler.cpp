@@ -1,6 +1,10 @@
 #include "OGL33TextureSampler.h"
 #include "OGL33Texture.h"
 
+const Renderer::ITexutre* Renderer::OGL33TextureSampler::GetOwner() const {
+	return mOwner;
+}
+
 Renderer::OGL33TextureSampler::OGL33TextureSampler(const ITexutre& owner) {
 	mOwner = &owner;
 	mWrapS = TextureWrapMode::Repeat;
@@ -47,8 +51,4 @@ void Renderer::OGL33TextureSampler::SetMinFilter(MinFilterType filter) {
 
 void Renderer::OGL33TextureSampler::SetMagFilter(MagFilterType filter) {
 	mMagFilter = filter;
-}
-
-const Renderer::ITexutre* Renderer::OGL33TextureSampler::GetOwner() const {
-	return mOwner;
 }

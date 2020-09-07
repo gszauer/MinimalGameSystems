@@ -16,11 +16,12 @@ namespace Renderer {
 		unsigned int mSize;
 		ShaderUniformType mType;
 		bool mIsArray;
+		unsigned int mLength;
 	protected:
 		OGL33ShaderUniform(); // Disabled
 		OGL33ShaderUniform(const OGL33ShaderUniform&); // Disabled
 		OGL33ShaderUniform& operator=(const OGL33ShaderUniform&); // Disabled
-		OGL33ShaderUniform(const IShader& shader, const char* name, unsigned int index, unsigned int size, ShaderUniformType type, bool isArray);
+		OGL33ShaderUniform(const IShader& shader, const char* name, unsigned int index, unsigned int size, ShaderUniformType type, bool isArray, unsigned int length);
 	public:
 		~OGL33ShaderUniform();
 		unsigned int GetIndex() const;
@@ -29,6 +30,7 @@ namespace Renderer {
 		ShaderUniformType GetType() const;
 
 		bool IsArray() const;
+		unsigned int Length() const;
 
 		const IShader* GetOwner() const;
 		const char* GetName() const;

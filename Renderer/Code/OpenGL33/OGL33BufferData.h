@@ -7,7 +7,7 @@
 namespace Renderer {
 	class OGL33Context;
 
-	class OGL33VertexBufferData : public IBufferData {
+	class OGL33BufferData : public IBufferData {
 		friend class OGL33Context;
 	protected:
 		BufferDataUsage mUsageType;
@@ -15,12 +15,12 @@ namespace Renderer {
 		GLuint mBuffer;
 		const OGL33Context* mOwner;
 	protected:
-		OGL33VertexBufferData(); // Disabled
-		OGL33VertexBufferData(const OGL33VertexBufferData&); // Disabled
-		OGL33VertexBufferData& operator=(const OGL33VertexBufferData&); // Disabled
-		OGL33VertexBufferData(const IContext&);
+		OGL33BufferData(); // Disabled
+		OGL33BufferData(const OGL33BufferData&); // Disabled
+		OGL33BufferData& operator=(const OGL33BufferData&); // Disabled
+		OGL33BufferData(const IContext&);
 	public:
-		~OGL33VertexBufferData();
+		~OGL33BufferData();
 
 		void Set(BufferDataIntent intent, unsigned int bytes, const void* data, BufferDataUsage type = BufferDataUsage::Static);
 		void Update(BufferDataIntent intent, unsigned int offset, unsigned int bytes, const void* data);
