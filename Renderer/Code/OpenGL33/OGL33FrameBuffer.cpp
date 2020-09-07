@@ -1,10 +1,10 @@
 #include "OGL33FrameBuffer.h"
 
-const Renderer::IGraphicsDevice* Renderer::OGL33FrameBuffer::GetOwner() const {
+const Renderer::IContext* Renderer::OGL33FrameBuffer::GetOwner() const {
 	return mOwner;
 }
 
-Renderer::OGL33FrameBuffer::OGL33FrameBuffer(const IGraphicsDevice& owner) {
+Renderer::OGL33FrameBuffer::OGL33FrameBuffer(const IContext& owner) {
 	OGL33GraphicsDevice* mOwner = &owner;
 	mColorAttachment = 0;
 	mDepthAttachment = 0;

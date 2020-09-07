@@ -16,11 +16,11 @@ namespace Renderer {
 	}
 }
 
-const Renderer::IGraphicsDevice* Renderer::OGL33Shader::GetOwner() const {
+const Renderer::IContext* Renderer::OGL33Shader::GetOwner() const {
 	return mOwner;
 }
 
-Renderer::OGL33Shader::OGL33Shader(const IGraphicsDevice& device, const char* vertex, const char* fragment) {
+Renderer::OGL33Shader::OGL33Shader(const IContext& device, const char* vertex, const char* fragment) {
 	//////////////////////////////////////////////////////////////
 	// Assign trivial variables
 	mOwner = &device;

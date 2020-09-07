@@ -141,7 +141,7 @@
     <ClInclude Include="Code\Application.h" />
     <ClInclude Include="Code\glad.h" />
     <ClInclude Include="Code\IFrameBuffer.h" />
-    <ClInclude Include="Code\IGraphicsDevice.h" />
+    <ClInclude Include="Code\IContext.h" />
     <ClInclude Include="Code\IRasterState.h" />
     <ClInclude Include="Code\IShaderAttribute.h" />
     <ClInclude Include="Code\IShaderUniform.h" />

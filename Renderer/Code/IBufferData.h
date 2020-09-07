@@ -14,14 +14,14 @@ namespace Renderer {
 		Element = 1
 	};
 
-	class IGraphicsDevice;
+	class IContext;
 
 	class IBufferData {
 	protected:
 		IBufferData(); // Disabled
 		IBufferData(const IBufferData&); // Disabled
 		IBufferData& operator=(const IBufferData&); // Disabled
-		inline IBufferData(const IGraphicsDevice& owner) { }
+		inline IBufferData(const IContext& owner) { }
 	public:
 		virtual inline ~IBufferData() { }
 
@@ -33,7 +33,7 @@ namespace Renderer {
 
 		virtual const IBufferView* CreateView(unsigned int numComponents = 1, BufferDataType type = BufferDataType::Float, unsigned int stride = 0, unsigned int offset = 0) const = 0;
 
-		virtual const IGraphicsDevice* GetOwner() const = 0;
+		virtual const IContext* GetOwner() const = 0;
 	};
 }
 

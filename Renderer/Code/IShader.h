@@ -2,7 +2,7 @@
 #define _H_ISHADER_
 
 namespace Renderer {
-	class IGraphicsDevice;
+	class IContext;
 	class IShaderAttribute;
 	class IShaderUniform;
 
@@ -11,7 +11,7 @@ namespace Renderer {
 		IShader(); // Disabled
 		IShader(const IShader&); // Disabled
 		virtual IShader& operator=(const IShader&); // Disabled
-		inline IShader(const IGraphicsDevice& device, const char* vertex, const char* fragment) { }
+		inline IShader(const IContext& device, const char* vertex, const char* fragment) { }
 	public:
 		virtual inline ~IShader() { }
 
@@ -27,7 +27,7 @@ namespace Renderer {
 		virtual const IShaderAttribute* GetAttribute(unsigned int index) const = 0;
 		virtual const IShaderUniform* GetUniform(unsigned int index) const = 0;
 
-		virtual const IGraphicsDevice* GetOwner() const = 0;
+		virtual const IContext* GetOwner() const = 0;
 	};
 }
 

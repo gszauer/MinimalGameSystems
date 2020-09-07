@@ -1,5 +1,5 @@
-#ifndef _H_IGRAPHICSDEVICE_
-#define _H_IGRAPHICSDEVICE_
+#ifndef _H_ICONTEXT_
+#define _H_ICONTEXT_
 
 namespace Renderer {
 	enum class Clear {
@@ -31,13 +31,13 @@ namespace Renderer {
 	class ITexture;
 	class ITextureSampler;
 
-	class IGraphicsDevice { // TODO: Rename to context, not device
+	class IContext { // TODO: Rename to context, not device
 	protected:
-		IGraphicsDevice(const IGraphicsDevice&); // Disabled
-		virtual IGraphicsDevice& operator=(const IGraphicsDevice&); // Disabled
-		inline IGraphicsDevice() { } // Private
+		IContext(const IContext&); // Disabled
+		virtual IContext& operator=(const IContext&); // Disabled
+		inline IContext() { } // Private
 	public:
-		virtual inline ~IGraphicsDevice() { }
+		virtual inline ~IContext() { }
 
 		// Get functions
 		virtual const char* GetName() const = 0;

@@ -17,14 +17,14 @@ namespace Renderer {
 		DepthStencil = 7
 	};
 
-	class IGraphicsDevice;
+	class IContext;
 
 	class ITexture {
 	protected:
 		ITexture(); // Disabled
 		ITexture(const ITexture&); // Disabled
 		virtual ITexture& operator=(const ITexture&); // Disabled
-		inline ITexture(const IGraphicsDevice&) {}
+		inline ITexture(const IContext&) {}
 	public:
 		virtual inline ~ITexture() { }
 		virtual void Set(unsigned int width, unsigned int height, TextureType type, const void* data = 0, bool mips = false) = 0; // Data CAN be 0 to make empty texture
@@ -40,7 +40,7 @@ namespace Renderer {
 		virtual const ITextureSampler* CreateSampler(TextureWrapMode s = TextureWrapMode::Repeat, TextureWrapMode t = TextureWrapMode::Repeat, MinFilterType min = MinFilterType::NearestMipMapLinear, MagFilterType mag = MagFilterType::Linear) const = 0;
 		virtual void DestroySampler(const ITextureSampler* sampler) const = 0;
 
-		virtual const IGraphicsDevice* GetOwner() const = 0;
+		virtual const IContext* GetOwner() const = 0;
 	};
 }
 

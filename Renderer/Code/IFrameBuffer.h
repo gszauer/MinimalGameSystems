@@ -3,14 +3,14 @@
 
 namespace Renderer {
 	class ITexture;
-	class IGraphicsDevice;
+	class IContext;
 
 	class IFrameBuffer {
 	protected:
 		IFrameBuffer(); // Disabled
 		IFrameBuffer(const IFrameBuffer&); // Disabled
 		virtual IFrameBuffer& operator=(const IFrameBuffer&); // Disabled
-		inline IFrameBuffer(const IGraphicsDevice& owner) { }
+		inline IFrameBuffer(const IContext& owner) { }
 	public:
 		virtual inline ~IFrameBuffer() {}
 
@@ -23,7 +23,7 @@ namespace Renderer {
 		virtual void SetDepthStencilTarget(const ITexture* target) = 0;
 		virtual const ITexture* GetDepthStencilTarget() const = 0;
 
-		virtual const IGraphicsDevice* GetOwner() const = 0;
+		virtual const IContext* GetOwner() const = 0;
 	};
 }
 

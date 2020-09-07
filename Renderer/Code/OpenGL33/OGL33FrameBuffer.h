@@ -18,7 +18,7 @@ namespace Renderer {
 		OGL33FrameBuffer(); // Disabled
 		OGL33FrameBuffer(const OGL33FrameBuffer&); // Disabled
 		OGL33FrameBuffer& operator=(const OGL33FrameBuffer&); // Disabled
-		OGL33FrameBuffer(const IGraphicsDevice& owner);
+		OGL33FrameBuffer(const IContext& owner);
 	public:
 		~OGL33FrameBuffer();
 
@@ -31,7 +31,7 @@ namespace Renderer {
 		void SetDepthStencilTarget(const ITexture* target);
 		const ITexture* GetDepthStencilTarget() const;
 
-		const IGraphicsDevice* GetOwner() const;
+		const IContext* GetOwner() const;
 	};
 }
 

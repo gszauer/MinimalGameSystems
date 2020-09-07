@@ -23,7 +23,7 @@ namespace Renderer {
 		GLfloat mPointSize;
 	protected:
 		OGL33RasterState(); // Disabled
-		OGL33RasterState(const IGraphicsDevice&);
+		OGL33RasterState(const IContext&);
 	public:
 		OGL33RasterState(const OGL33RasterState&);
 		IRasterState& operator=(const OGL33RasterState& other);
@@ -57,7 +57,7 @@ namespace Renderer {
 		float GetLineWidth() const;
 		void SetLineWidth(float width);
 
-		const IGraphicsDevice* GetOwner() const;
+		const IContext* GetOwner() const;
 	};
 }
 

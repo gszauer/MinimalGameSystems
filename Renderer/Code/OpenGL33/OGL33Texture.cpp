@@ -8,7 +8,7 @@ namespace Renderer {
 	}
 }
 
-Renderer::OGL33Texture::OGL33Texture(const IGraphicsDevice& owner) {
+Renderer::OGL33Texture::OGL33Texture(const IContext& owner) {
 	mOwner = &owner;
 	mWidth = 0;
 	mHeight = 0;
@@ -162,6 +162,6 @@ void Renderer::OGL33Texture::DestroySampler(const ITextureSampler* sampler) cons
 	}
 }
 
-const Renderer::IGraphicsDevice* Renderer::OGL33Texture::GetOwner() const {
+const Renderer::IContext* Renderer::OGL33Texture::GetOwner() const {
 	return mOwner;
 }

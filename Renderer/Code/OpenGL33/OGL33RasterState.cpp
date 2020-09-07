@@ -1,10 +1,10 @@
 #include "OGL33RasterState.h"
 
-const Renderer::IGraphicsDevice* Renderer::OGL33RasterState::GetOwner() const {
+const Renderer::IContext* Renderer::OGL33RasterState::GetOwner() const {
 	return mOwner;
 }
 
-Renderer::OGL33RasterState::OGL33RasterState(const IGraphicsDevice& owner) {
+Renderer::OGL33RasterState::OGL33RasterState(const IContext& owner) {
 	mOwner = owner;
 	mFillMode = FillMode::Fill;
 	mFillFace = FillFace::Front;

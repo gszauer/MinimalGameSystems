@@ -20,7 +20,7 @@ namespace Renderer {
 		OGL33Texture(); // Disabled
 		OGL33Texture(const OGL33Texture&); // Disabled
 		OGL33Texture& operator=(const OGL33Texture&); // Disabled
-		OGL33Texture(const IGraphicsDevice&);
+		OGL33Texture(const IContext&);
 	public:
 		~OGL33Texture();
 		void Set(unsigned int width, unsigned int height, TextureType type, const void* data = 0, bool mips = false); // Data CAN be 0 to create an empty texture
@@ -38,7 +38,7 @@ namespace Renderer {
 		const ITextureSampler* CreateSampler(TextureWrapMode s = TextureWrapMode::Repeat, TextureWrapMode t = TextureWrapMode::Repeat, MinFilterType min = MinFilterType::NearestMipMapLinear, MagFilterType mag = MagFilterType::Linear) const;
 		void DestroySampler(const ITextureSampler* sampler) const;
 
-		const IGraphicsDevice* GetOwner() const;
+		const IContext* GetOwner() const;
 	};
 }
 

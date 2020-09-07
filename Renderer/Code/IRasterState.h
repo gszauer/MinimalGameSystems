@@ -57,12 +57,12 @@ namespace Renderer {
 		OneMinusSrc1Alpha = 19
 	};
 
-	class IGraphicsDevice;
+	class IContext;
 
 	class IRasterState {
 	protected:
 		IRasterState(); // Disabled
-		inline IRasterState(const IGraphicsDevice&) { }
+		inline IRasterState(const IContext&) { }
 	public:
 		inline IRasterState(const IRasterState&) { }
 		virtual inline IRasterState& operator=(const IRasterState& other) { return *this; }
@@ -96,7 +96,7 @@ namespace Renderer {
 		virtual float GetLineWidth() const = 0;
 		virtual void SetLineWidth(float width) = 0;
 
-		virtual const IGraphicsDevice* GetOwner() const = 0;
+		virtual const IContext* GetOwner() const = 0;
 	};
 }
 
