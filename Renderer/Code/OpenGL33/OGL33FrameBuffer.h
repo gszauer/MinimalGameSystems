@@ -32,6 +32,9 @@ namespace Renderer {
 		const ITexture* GetDepthStencilTarget() const;
 
 		const IContext* GetOwner() const;
+
+		bool IsComplete() const;
+		GLuint GetHandle() const;
 	};
 }
 

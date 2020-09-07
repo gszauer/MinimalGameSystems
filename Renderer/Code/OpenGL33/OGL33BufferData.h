@@ -32,6 +32,7 @@ namespace Renderer {
 		void DestroyView(const IBufferView* view) const;
 		
 		const IContext* GetOwner() const;
+		GLuint GetHandle() const;
 	};
 }
 

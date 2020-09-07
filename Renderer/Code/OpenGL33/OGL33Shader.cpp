@@ -141,7 +141,7 @@ Renderer::OGL33Shader::OGL33Shader(const IContext& device, const char* vertex, c
 
 	//////////////////////////////////////////////////////////////
 	// Done
-	glUseProgram(0);
+	glUseProgram(mOwner->GetBoundShader());
 }
 
 Renderer::OGL33Shader::~OGL33Shader() {

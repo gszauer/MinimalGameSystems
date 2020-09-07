@@ -24,6 +24,7 @@ namespace Renderer {
 		virtual const ITexture* GetDepthStencilTarget() const = 0;
 
 		virtual const IContext* GetOwner() const = 0;
+		virtual bool IsComplete() const = 0;
 	};
 }
 

@@ -21,6 +21,11 @@ namespace Renderer {
 		Triangles = 6
 	};
 
+	enum class DepthUsage {
+		Depth = 1,
+		DepthStencil = 2
+	};
+
 	class IBufferData;
 	class IBufferView;
 	class IFrameBuffer;
@@ -31,20 +36,17 @@ namespace Renderer {
 	class ITexture;
 	class ITextureSampler;
 
-	class IContext { // TODO: Rename to context, not device
+	class IContext {
 	protected:
 		IContext(const IContext&); // Disabled
 		virtual IContext& operator=(const IContext&); // Disabled
 		inline IContext() { } // Private
 	public:
 		virtual inline ~IContext() { }
-
-		// Get functions
 		virtual const char* GetName() const = 0;
-		virtual const IRasterState& GetDefaultRasterState() const = 0;
 
 		// Create / Destroy Resources
-		virtual IFrameBuffer* CreateFrameBuffer(ITexture* colorAttachment = 0, ITexture* depthAttachment = 0) const = 0;
+		virtual IFrameBuffer* CreateFrameBuffer(ITexture* colorAttachment = 0, ITexture* depthAttachment = 0, DepthUsage depth = DepthUsage::Depth) const = 0;
 		virtual void DestroyFrameBuffer(const IFrameBuffer* buffer) const = 0;
 
 		virtual IBufferData* CreateBuffer() const = 0;

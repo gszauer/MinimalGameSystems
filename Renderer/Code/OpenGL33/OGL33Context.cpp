@@ -12,67 +12,136 @@
 #include "OGL33TextureSampler.h"
 
 Renderer::OGL33Context::OGL33Context() {
-	// TODO
+	glGenVertexArrays(1, &mVAO);
+	glBindVertexArray(mVAO);
+	mRendererName = "OpenGL 3.3 Core";
+
+	mBoundFrameBuffer = 0;
+	mBoundShader = 0;
+
+	// TODO: Finish function (as new stuff gets added)
 }
 
 Renderer::OGL33Context::~OGL33Context() {
-	// TODO
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &mVAO);
+
+	// TODO: Finish function (as new stuff gets added)
 }
 
 const char* Renderer::OGL33Context::GetName() const {
-	// TODO
+	return mRendererName;
 }
 
-const Renderer::IRasterState& Renderer::OGL33Context::GetDefaultRasterState() const {
-	// TODO
-}
+Renderer::IFrameBuffer* Renderer::OGL33Context::CreateFrameBuffer(ITexture* colorAttachment, ITexture* depthAttachment, DepthUsage usage) const {
+	if (colorAttachment == 0 && depthAttachment == 0) {
+		return 0;
+	}
 
-Renderer::IFrameBuffer* Renderer::OGL33Context::CreateFrameBuffer(ITexture* colorAttachment = 0, ITexture* depthAttachment = 0) const {
-	// TODO
+	OGL33Texture* glColor = (OGL33Texture*)colorAttachment;
+	OGL33Texture* glDepth = (OGL33Texture*)depthAttachment;
+
+	Renderer::OGL33FrameBuffer* result = (Renderer::OGL33FrameBuffer*)Renderer::OGL33Internal::Alloc(sizeof(Renderer::OGL33FrameBuffer));
+	new (result) Renderer::OGL33FrameBuffer(*this);
+
+	result->SetColorTarget(glColor);
+
+	if (usage == DepthUsage::Depth) {
+		result->SetDepthTarget(glDepth);
+	}
+	else { //usage == DepthUsage::DepthStencil
+		result->SetDepthStencilTarget(glDepth);
+	}
+
+	return result;
 }
 
 void Renderer::OGL33Context::DestroyFrameBuffer(const IFrameBuffer* buffer) const {
-	// TODO
+	const Renderer::OGL33FrameBuffer* glBuffer = (const Renderer::OGL33FrameBuffer*)buffer;
+	glBuffer->~OGL33FrameBuffer();
+	Renderer::OGL33Internal::Free(buffer);
 }
 
 Renderer::IBufferData* Renderer::OGL33Context::CreateBuffer() const {
-	// TODO
+	OGL33BufferData* result = (OGL33BufferData*)Renderer::OGL33Internal::Alloc(sizeof(Renderer::OGL33BufferData));
+	new (result)OGL33BufferData(*this);
+	return result;
 }
 
 void Renderer::OGL33Context::DestroyBuffer(const IBufferData* buffer) const {
-	// TODO
+	const OGL33BufferData* glBuffer = (const OGL33BufferData*)buffer;
+	glBuffer->~OGL33BufferData();
+	Renderer::OGL33Internal::Free(buffer);
 }
 
 Renderer::ITexture* Renderer::OGL33Context::CreateTexture() const {
-	// TODO
+	OGL33Texture* result = (OGL33Texture*)Renderer::OGL33Internal::Alloc(sizeof(OGL33Texture));
+	new(result)OGL33Texture(*this);
+	return result;
 }
 
 void Renderer::OGL33Context::DestroyTexture(const Renderer::ITexture* texture) const {
-	// TODO
+	const OGL33Texture* glTex = (const OGL33Texture*)texture;
+	glTex->~OGL33Texture();
+	Renderer::OGL33Internal::Free(texture);
 }
 
 Renderer::IShader* Renderer::OGL33Context::CreateShader(const char* vertex, const char* fragment) const {
-	// TODO
+	OGL33Shader* result = (OGL33Shader*)Renderer::OGL33Internal::Alloc(sizeof(OGL33Shader));
+	new(result)OGL33Shader(*this, vertex, fragment);
+	return result;
 }
 
 void Renderer::OGL33Context::DestroyShader(const IShader* shader) const {
-	// TODO
+	const OGL33Shader* glShader = (const OGL33Shader*)shader;
+	glShader->~OGL33Shader();
+	Renderer::OGL33Internal::Free(shader);
 }
 
 Renderer::IRasterState* Renderer::OGL33Context::CreateRasterState() const {
-	// TODO
+	OGL33RasterState* result = (Renderer::OGL33RasterState*)Renderer::OGL33Internal::Alloc(sizeof(Renderer::OGL33RasterState));
+	new(result)Renderer::OGL33RasterState(*this);
+	return result;
 }
 
 void Renderer::OGL33Context::DestroyRasterState(const IRasterState* state) const {
-	// TODO
+	const OGL33RasterState* glState = (const OGL33RasterState*)state;
+	glState->~OGL33RasterState();
+	Renderer::OGL33Internal::Free(state);
 }
 
 void Renderer::OGL33Context::SetFrameBuffer(const IFrameBuffer* buffer) {
-	// TODO
+	const OGL33FrameBuffer* glBuffer = (const OGL33FrameBuffer*)buffer;
+
+	if (buffer == 0) {
+		if (mBoundFrameBuffer != 0) {
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			mBoundFrameBuffer = 0;
+		}
+	}
+	else {
+		if (mBoundFrameBuffer != glBuffer->mFrameBuffer) {
+			glBindFramebuffer(GL_FRAMEBUFFER, glBuffer->mFrameBuffer);
+			mBoundFrameBuffer = glBuffer->mFrameBuffer;
+		}
+	}
 }
 
 void Renderer::OGL33Context::SetShader(const IShader* shader) {
-	// TODO
+	const OGL33Shader* glShader = (const OGL33Shader*)shader;
+
+	if (shader == 0) {
+		if (mBoundShader != 0) {
+			glUseProgram(0);
+			mBoundShader = 0;
+		}
+	}
+	else {
+		if (mBoundShader != glShader->GetHandle()) {
+			glUseProgram(glShader->GetHandle());
+			mBoundShader = glShader->GetHandle();
+		}
+	}
 }
 
 void Renderer::OGL33Context::SetAttribute(const IShaderAttribute* attrib, const IBufferView* buffer) {

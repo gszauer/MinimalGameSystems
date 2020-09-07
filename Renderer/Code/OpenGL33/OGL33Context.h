@@ -3,9 +3,16 @@
 
 #include "../IContext.h"
 #include "OGL33Loader.h"
+#include "OGL33RasterState.h"
 
 namespace Renderer {
 	class OGL33Context : public IContext {
+	protected:
+		GLuint mVAO;
+		const char* mRendererName;
+
+		GLuint mBoundFrameBuffer;
+		GLuint mBoundShader;
 	protected:
 		OGL33Context(const OGL33Context&); // Disabled
 		OGL33Context& operator=(const OGL33Context&); // Disabled
@@ -13,10 +20,9 @@ namespace Renderer {
 	public:
 		~OGL33Context();
 		const char* GetName() const;
-		const IRasterState& GetDefaultRasterState() const;
 
 		// Create / Destroy Resources
-		IFrameBuffer* CreateFrameBuffer(ITexture* colorAttachment = 0, ITexture* depthAttachment = 0) const;
+		IFrameBuffer* CreateFrameBuffer(ITexture* colorAttachment = 0, ITexture* depthAttachment = 0, DepthUsage usage = DepthUsage::Depth) const;
 		void DestroyFrameBuffer(const IFrameBuffer* buffer) const;
 
 		IBufferData* CreateBuffer() const;
@@ -57,6 +63,10 @@ namespace Renderer {
 		// Vsynch
 		void SetVSynch(bool val);
 		bool GetVSynch() const;
+
+		// Helpers
+		GLuint GetBoundFBO() const; // TODO
+		GLuint GetBoundShader() const; // TODO
 	};
 }
 

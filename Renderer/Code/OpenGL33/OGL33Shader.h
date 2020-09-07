@@ -42,6 +42,7 @@ namespace Renderer {
 		const IShaderUniform* GetUniform(unsigned int index) const;
 
 		const IContext* GetOwner() const;
+		GLuint GetHandle() const;
 	};
 }
 

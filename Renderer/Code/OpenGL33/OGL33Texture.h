@@ -23,6 +23,7 @@ namespace Renderer {
 		OGL33Texture(const IContext& owner);
 	public:
 		~OGL33Texture();
+
 		void Set(unsigned int width, unsigned int height, TextureType type, const void* data = 0, bool mips = false); // Data CAN be 0 to create an empty texture
 		void Update(unsigned int x, unsigned int y, unsigned int width, unsigned int height, TextureType type, const void* data);
 
@@ -39,6 +40,7 @@ namespace Renderer {
 		void DestroySampler(const ITextureSampler* sampler) const;
 
 		const IContext* GetOwner() const;
+		GLuint GetHandle() const; // TODO
 	};
 }
 
