@@ -1,59 +1,63 @@
 #ifndef _H_OGL33RASTERSTATE_
 #define _H_OGL33RASTERSTATE_
 
-#include "../Renderer/IRasterState.h"
-#include "glad.h"
-
-// TODO: Fully quantify everything to the Renderer namespace
+#include "../IRasterState.h"
+#include "OGL33Loader.h"
 
 namespace Renderer {
+	class OGL33GraphicsDevice;
+
 	class OGL33RasterState : public IRasterState {
 		friend class OGL33GraphicsDevice;
 	protected:
+		OGL33GraphicsDevice* mOwner;
 		FillMode mFillMode;
 		FillFace mFillFace;
 		CullMode mCullMode;
 		Renderer::WindingOrder mWindingOrder;
 		ScissorState mScissorState;
 		GLint mScissorRect[4];
-		unsigned int mScissorCast[4];
-		GLfloat mClearColor[4];
-		float mClearCast[4];
 		BlendFactor mSrcBlend;
 		BlendFactor mDstBlend;
-		float mLineWidth;
-		float mPointSize;
+		GLfloat mLineWidth;
+		GLfloat mPointSize;
 	protected:
-		OGL33RasterState();
-		~OGL33RasterState();
-		static void Apply(const OGL33RasterState& oldState, const OGL33RasterState& newState, bool force);
-		static GLenum ConvertBlendFactor(BlendFactor factor);
+		OGL33RasterState(); // Disabled
+		OGL33RasterState(const IGraphicsDevice&);
 	public:
-		IRasterState& operator=(const IRasterState& other);
-
-		void SetFillMode(FillMode mode);
-		void SetCullMode(CullMode mode);
-		void SetFillFace(FillFace face);
-		void WindingOrder(Renderer::WindingOrder order);
-		void SetScissorState(ScissorState state);
-		void SetScissorRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
-		void SetBlendFactor(BlendFactor src, BlendFactor dst);
-		void SetLineWidth(float width);
-		void SetPointSize(float size);
+		OGL33RasterState(const OGL33RasterState&);
+		IRasterState& operator=(const OGL33RasterState& other);
+		~OGL33RasterState();
 
 		FillMode GetFillMode() const;
-		FillFace GetFillFace() const;
-		CullMode GetCullMode() const;
-		Renderer::WindingOrder GetWindingOrder() const;
-		ScissorState GetScissorState() const;
-		BlendFactor GetSrcBlendFactor() const;
-		BlendFactor GetDstBlendFactor() const;
-		float GetPointSize() const;
-		float GetLineWidth() const;
+		void SetFillMode(FillMode mode);
 
-		void SetClearColor(float r, float g, float b, float a);
-		const float* GetClearColor();
-		const unsigned int* GetScissorRect();
+		FillFace GetFillFace() const;
+		void SetFillFace(FillFace face);
+
+		CullMode GetCullMode() const;
+		void SetCullMode(CullMode mode);
+
+		Renderer::WindingOrder GetWindingOrder() const;
+		void WindingOrder(Renderer::WindingOrder order);
+
+		ScissorState GetScissorState() const;
+		void SetScissorState(ScissorState state);
+
+		void GetScissorRect(unsigned int& x, unsigned int& y, unsigned int& w, unsigned int& h) const;
+		void SetScissorRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
+
+		BlendFactor GetSrcBlend() const;
+		BlendFactor GetDstBlend() const;
+		void SetBlend(BlendFactor src, BlendFactor dst);
+
+		float GetPointSize() const;
+		void SetPointSize(float size);
+
+		float GetLineWidth() const;
+		void SetLineWidth(float width);
+
+		const IGraphicsDevice* GetOwner() const;
 	};
 }
 

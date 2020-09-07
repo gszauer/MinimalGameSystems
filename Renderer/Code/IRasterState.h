@@ -57,19 +57,19 @@ namespace Renderer {
 		OneMinusSrc1Alpha = 19
 	};
 
+	class IGraphicsDevice;
+
 	class IRasterState {
-	private:
-		IRasterState(const IRasterState&);
 	protected:
-		inline IRasterState() { }
-		inline virtual ~IRasterState() { }
+		IRasterState(); // Disabled
+		inline IRasterState(const IGraphicsDevice&) { }
 	public:
-		virtual IRasterState& operator=(const IRasterState& other) { return *this; };
+		inline IRasterState(const IRasterState&) { }
+		virtual inline IRasterState& operator=(const IRasterState& other) { return *this; }
+		virtual inline ~IRasterState() { }
+
 		virtual FillMode GetFillMode() const = 0;
 		virtual void SetFillMode(FillMode mode) = 0;
-
-		virtual void SetClearColor(float r, float g, float b, float a) = 0;
-		virtual const float* GetClearColor() = 0;
 
 		virtual FillFace GetFillFace() const = 0;
 		virtual void SetFillFace(FillFace face) = 0;
@@ -82,11 +82,13 @@ namespace Renderer {
 
 		virtual ScissorState GetScissorState() const = 0;
 		virtual void SetScissorState(ScissorState state) = 0;
+
+		virtual void GetScissorRect(unsigned int& x, unsigned int& y, unsigned int& w, unsigned int& h) const = 0;
 		virtual void SetScissorRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h) = 0;
 
-		virtual BlendFactor GetSrcBlendFactor() const = 0;
-		virtual BlendFactor GetDstBlendFactor() const = 0;
-		virtual void SetBlendFactor(BlendFactor src, BlendFactor dst) = 0;
+		virtual BlendFactor GetSrcBlend() const = 0;
+		virtual BlendFactor GetDstBlend() const = 0;
+		virtual void SetBlend(BlendFactor src, BlendFactor dst) = 0;
 
 		virtual float GetPointSize() const = 0;
 		virtual void SetPointSize(float size) = 0;
@@ -94,7 +96,7 @@ namespace Renderer {
 		virtual float GetLineWidth() const = 0;
 		virtual void SetLineWidth(float width) = 0;
 
-		virtual const unsigned int* GetScissorRect() = 0;
+		virtual const IGraphicsDevice* GetOwner() const = 0;
 	};
 }
 

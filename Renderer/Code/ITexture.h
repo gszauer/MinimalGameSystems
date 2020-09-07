@@ -27,7 +27,7 @@ namespace Renderer {
 		inline ITexture(const IGraphicsDevice&) {}
 	public:
 		virtual inline ~ITexture() { }
-		virtual void Set(unsigned int width, unsigned int height, TextureType type, const void* data, bool mips = false) = 0;
+		virtual void Set(unsigned int width, unsigned int height, TextureType type, const void* data = 0, bool mips = false) = 0; // Data CAN be 0 to make empty texture
 		virtual void Update(unsigned int x, unsigned int y, unsigned int width, unsigned int height, TextureType type, const void* data) = 0;
 		
 		virtual bool HasMips() const = 0;

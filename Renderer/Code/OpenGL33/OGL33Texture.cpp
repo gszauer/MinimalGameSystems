@@ -2,6 +2,12 @@
 #include "OGL33Internal.h"
 #include "OGL33TextureSampler.h"
 
+namespace Renderer {
+	namespace OGL33Internal {
+		unsigned int BytesPerComponent(TextureType type); // TODO: Implement this
+	}
+}
+
 Renderer::OGL33Texture::OGL33Texture(const IGraphicsDevice& owner) {
 	mOwner = &owner;
 	mWidth = 0;
@@ -58,7 +64,16 @@ void Renderer::OGL33Texture::Set(unsigned int width, unsigned int height, Textur
 		format = GL_DEPTH_STENCIL;
 	}
 
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, dataType, data);
+	char* blankData = 0;
+	if (data == 0) {
+		unsigned int bytes = width * height * Renderer::OGL33Internal::BytesPerComponent(type);
+		blankData = (char*)Renderer::OGL33Internal::Alloc(bytes);
+		Renderer::OGL33Internal::MemSet(blankData, 0, bytes);
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, dataType, blankData != 0? blankData : data);
+	if (blankData != 0) {
+		Renderer::OGL33Internal::Free(blankData);
+	}
 
 	mWidth = width;
 	mHeight = height;

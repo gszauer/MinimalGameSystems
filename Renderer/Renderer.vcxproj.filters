@@ -27,9 +27,6 @@
     <ClInclude Include="Code\IFrameBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\IGPUTimer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Code\IGraphicsDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -43,9 +40,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\OpenGL33\OGL33FrameBuffer.h">
-      <Filter>Header Files\OpenGL33</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\OpenGL33\OGL33GPUTimer.h">
       <Filter>Header Files\OpenGL33</Filter>
     </ClInclude>
     <ClInclude Include="Code\OpenGL33\OGL33GraphicsDevice.h">
@@ -72,26 +66,14 @@
     <ClInclude Include="Code\ITextureSampler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\IVertexBufferView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\IIndexBufferView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Code\OpenGL33\OGL33VertexBufferView.h">
       <Filter>Header Files\OpenGL33</Filter>
     </ClInclude>
     <ClInclude Include="Code\OpenGL33\OGL33IndexBufferView.h">
       <Filter>Header Files\OpenGL33</Filter>
     </ClInclude>
-    <ClInclude Include="Code\IVertexBufferData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Code\OpenGL33\OGL33VertexBufferData.h">
       <Filter>Header Files\OpenGL33</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\IIndexBufferData.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\OpenGL33\OGL33Internal.h">
       <Filter>Header Files\OpenGL33</Filter>
@@ -117,6 +99,12 @@
     <ClInclude Include="Code\OpenGL33\OGL33ShaderUniform.h">
       <Filter>Header Files\OpenGL33</Filter>
     </ClInclude>
+    <ClInclude Include="Code\IBufferData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\IBufferView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\glad.c">
@@ -129,9 +117,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Code\OpenGL33\OGL33FrameBuffer.cpp">
-      <Filter>Source Files\OpenGL33</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\OpenGL33\OGL33GPUTimer.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
     <ClCompile Include="Code\OpenGL33\OGL33GraphicsDevice.cpp">

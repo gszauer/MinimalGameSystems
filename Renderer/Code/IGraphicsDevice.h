@@ -1,23 +1,14 @@
 #ifndef _H_IGRAPHICSDEVICE_
 #define _H_IGRAPHICSDEVICE_
 
-#include "IBufferData.h"
-#include "ITexture.h"
 
 namespace Renderer {
-	class IFrameBuffer;
-	class IGPUTimer;
-	class ITexture;
-	class IRasterState;
-	class IBufferData;
-	class IShader;
-	class ISampler;
-
 	enum class Clear {
 		Color = (1 << 1),
 		Depth = (1 << 2),
 		Stencil = (1 << 3),
 		ColorDepth = (1 << 1) | (1 << 2),
+		DepthStencil = (1 << 2) | (1 << 3),
 		All = (1 << 1) | (1 << 2) | (1 << 3)
 	};
 
@@ -40,54 +31,143 @@ namespace Renderer {
 		Bottom = 5
 	};
 
-	class IGraphicsDevice { // TODO: Rename to context, not device
-	private:
-		IGraphicsDevice(const IGraphicsDevice&);
-		IGraphicsDevice& operator=(const IGraphicsDevice&);
-	protected:
-		inline IGraphicsDevice() { }
-		virtual inline ~IGraphicsDevice() { }
-	public:
-		// State getters and setters
-		virtual int GetMajorVersion() const = 0;
-		virtual int GetMinorVersion() const = 0;
-		virtual const char* GetDescriptionString() const = 0;
+	class IRasterState;
+	class IFrameBuffer;
+	class ITexture;
+	class IIndexBufferData;
+	class IVertexBufferData;
+	class IBufferView;
+	class IShader;
+	class IGPUTimer;
+	class ITextureSampler;
+	class IShaderUniform;
+	class IShaderAttribute;
 
-		virtual const IRasterState* GetDefaultRasterState() const = 0;
-		virtual void SetDefaultRasterState(const IRasterState* state) = 0;
+	class IGraphicsDevice { // TODO: Rename to context, not device
+	protected:
+		IGraphicsDevice(const IGraphicsDevice&); // Disabled
+		virtual IGraphicsDevice& operator=(const IGraphicsDevice&); // Disabled
+		inline IGraphicsDevice() { } // Private
+	public:
+		virtual inline ~IGraphicsDevice() { }
+
+		// Get functions
+		virtual const char* GetName() const = 0;
+		virtual const IRasterState& GetDefaultRasterState() const = 0;
 
 		// Create / Destroy Resources
-		virtual IFrameBuffer* MakeFrameBuffer(ITexture* colorAttachment = 0, ITexture* depthAttachment = 0, ITexture* stencilAttachment = 0) = 0;
-		virtual void DestroyFrameBuffer(IFrameBuffer* buffer) = 0;
+		virtual IFrameBuffer* CreateFrameBuffer(ITexture* colorAttachment = 0, ITexture* depthAttachment = 0) const = 0;
+		virtual void DestroyFrameBuffer(const IFrameBuffer* buffer) const = 0;
 
-		virtual IBufferData* MakeBuffer(BufferUsageType usageType = BufferUsageType::Static) = 0;
-		virtual void DestroyBuffer(IBufferData* buffer) = 0;
+		virtual IIndexBufferData* CreateIndexBuffer() const = 0;
+		virtual void DestroyIndexBuffer(const IIndexBufferData* buffer) const = 0;
 
-		virtual ITexture* MakeTexture() = 0;
-		virtual ITexture* MakeTexture(unsigned char* data, unsigned int width, unsigned int height, TextureType type) = 0;
-		virtual void DestroyTexture(ITexture* texture) = 0;
+		virtual IVertexBufferData* CreateVertexBuffer() const = 0;
+		virtual void DestroyVertexBuffer(const IVertexBufferData* buffer) const = 0;
 
-		virtual ISampler* MakeSampler() = 0;
-		virtual void DestroySampler(ISampler* sampler) = 0;
+		virtual ITexture* CreateTexture() const = 0;
+		virtual void DestroyTexture(const ITexture* texture) const = 0;
 
-		virtual IShader* MakeShader() = 0;
-		virtual IShader* MakeNativeShader(const char* vertex, const char* fragment) = 0;
-		virtual IShader* MakeGenericShader(const char* vertex, const char* fragment) = 0;
-		virtual void DestroyShader(IShader* shader) = 0;
+		virtual IShader* CreateShader(const char* vertex, const char* fragment) const = 0;
+		virtual void DestroyShader(const IShader* shader) const = 0;
 
-		virtual IRasterState* MakeRasterState() = 0;
-		virtual void DestroyRasterState(IRasterState* state) = 0;
+		virtual IRasterState* CreateRasterState() const = 0;
+		virtual void DestroyRasterState(const IRasterState* state) const = 0;
 
 		// Bind / unbind resources
-		virtual void BindDefaultFrameBuffer() = 0;
-		virtual void BindFrameBuffer(const IFrameBuffer* buffer) = 0;
-		virtual void UnbindFrameBuffer() = 0;
+		virtual void SetFrameBuffer(const IFrameBuffer* buffer) = 0; // Calling with 0 will bind to default FBO
+		virtual void SetShader(const IShader* shader) = 0; // Calling with 0 will unbind shader
+		virtual void SetAttribute(const IShaderAttribute* attrib, const IBufferView* buffer); // Call with 0 to unbind
+		void SetTexture(const IShaderUniform* uniform, const ITextureSampler* sampler); // No need to unbind
+		void SetUniform(const IShaderUniform* uniform, void* data, unsigned int count = 1);
 
-		virtual void BindShader(const IShader* shader) = 0;
-		virtual void UnbindShader() = 0;
+		/*
+		void Initialize() {
+			IGraphicsDevice graphicsDevice = CreateWin32OpenGL33GraphicsDevice(.....
+			
+			ITexture* colorAttachment = graphicsDevice->CreateTexture();
+			colorAttachment->Set(monitorWidth, monitorHeight, TextureType::RGB);
+			
+			ITexture* depthStencilAttachment =  graphicsDevice->CreateTexture();
+			depthStencilAttachment->Set(monitorWidth, monitorHeight, TextureType::DepthStencil);
 
-		virtual void ApplyRasterState(const IRasterState* state) = 0;
+			IFrameBuffer* frameBuffer = graphicsDevice->CreateFrameBuffer(colorAttachment, depthStencilAttachment);
+			IRasterState* rasterState = &graphicsDevice->GetDefaultRasterState();
+
+			// TODO: This right here is where I fucked up. There should be no need to have seperate IndexBufferData and VertexBufferData classes
+			// Instead, let's create a single calss, called BufferData. This can contain both vertex and index information.
+			// This will introduce a Decent amount of overhead to the per platform device code, but keep the API clean. 
+			// Below is the new API proposal, it does away with IVertexBufferData, IIndexBufferData, IVertexBufferView and IIndexBufferView
+			// Replacing them with IBufferData, IComponentView, IIndexView
+
+			IBufferData* mesh = graphicsDevice->CreateBuffer();
+			LoadMeshFromFile("suzane.txt", mesh);
+			IIndexView* indicesBuffer = mesh->CreateIndexView(36); // Defaule offset is 0, default type is uint16
+			unsigned int offset = sizeof(uint16) * 36; // Vertex and normal data is interleaved after index offset
+			IAttributeView* positionsBuffer = mesh->CreateAttributeView(3, VertexBufferDataType::Float, sizeof(float) * 8, offset);
+			IAttributeView* normalsBuffer = mesh->CreateAttributeView(3, VertexBufferDataType::Float, sizeof(float) * 8, offset + sizeof(float) * 3);
+			IAttributeView* texCoordBuffer = mesh->CreateAttributeView(2, VertexBufferDataType::Float, sizeof(float) * 8, offset + sizeof(float) * 6);
+
+			ITexture* diffuseTexture = graphicsDevice->CreateTexture();
+			LoadTextureFromFile("diffuse.png", diffuseTexture);
+			ITextureSampler* diffuseSampler = diffuseTexture->CreateSampler();
+
+			IShader* shader = graphicsDevice->CreateShader("vertex.vert", "fragment.frag");
+
+			IShaderAttribute* positionAttrib = shader->GetAttribute("positions");
+			IShaderAttribute* normalAttrib = shader->GetAttribute("normals");
+			IShaderAttribute* texCoordAttrib = shader->GetAttribute("uv");
+			IShaderUniform* diffuseUniform = shader->GetUniform("tex0");
+			IShaderUniform* mvpUniform = shader->GetUniform("mvp");
+			IShaderUniform* lightUniform = shader->GetUniform("light");
+			IShaderUniform* skinUniform = shader->GetUniform("skin");
+
+			IGPUTimer* startTimer = graphicsDevice->CreateTimer();
+			IGPUTimer* endTimer = graphicsDevice->CreateTimer();
+
+		}
+
+		void Tick() {
+			graphicsDevice->Clear(Clear::All);
+
+			mat4 mvpMatrix; // Frame data
+			vec3 lightDir; // Frame data
+			std::vector<mat4> skin; // FrameData
+
+			graphicsDevice->SetFrameBuffer(frameBuffer);
+			graphicsDevice->SetViewport(0, 0, windowWith, windowHeight);
+
+			graphicsDevice->SetShader(shader);
+			graphicsDevice->ApplyRasterState(rasterState);
+
+			graphicsDevice->SetAttribute(positionAttrib, positionsBuffer);
+			graphicsDevice->SetAttribute(normalAttrib, normalsBuffer);
+			graphicsDevice->SetAttribute(texCoordAttrib, texCoordBuffer);
+
+			graphicsDevice->SetUniform(mvpUniform, mvpMatrix.v);
+			graphicsDevice->SetUniform(lightUniform, lightDir.v);
+			graphicsDevice->SetUniform(skinUniform, skin[0].v, skin.size());
+
+			graphicsDevice->SetTexture(diffuseUniform, diffuseSampler);
+			
+			graphicsDevice->Draw(DeawMode::Triangles, indicesBuffer);
+
+			#if 1
+				graphicsDevice->Unbind(UnbindTarget::Attribs | UnbindTarget::Textures | UnbindTarget::Shader | UnbindTarget::FrameBuffer);
+			#else
+				graphicsDevice->SetAttribute(positionAttrib, 0);
+				graphicsDevice->SetAttribute(normalAttrib, 0);
+				graphicsDevice->SetAttribute(texCoordAttrib, 0);
+				graphicsDevice->SetTexture(diffuseUniform, 0);
+				graphicsDevice->SetShader(0);
+				graphicsDevice->SetFrameBuffer(0);
+			#endif
+		}
+		*/
+
+		// Modofy various states
 		virtual void Clear(Clear clear) = 0;
+		virtual void ApplyRasterState(const IRasterState* state) = 0;
 
 		// Drawing geometry
 		virtual void Draw(DrawMode mode, const IIndexBufferView* buffer) const = 0;
@@ -97,10 +177,6 @@ namespace Renderer {
 		virtual void DrawInstanced(DrawMode mode, const IIndexBufferView* buffer, unsigned int instanceCount) const = 0;
 		virtual void DrawInstanced(DrawMode mode, unsigned int first, unsigned int numVerts, unsigned int instanceCount) const = 0;
 		virtual void DrawInstanced(DrawMode mode, const IIndexBufferView* buffer, unsigned int first, unsigned int numVerts, unsigned int instanceCount) const = 0;
-
-		// Timers
-		virtual IGPUTimer* CreateTimer() = 0;
-		virtual void DestroyTimer(IGPUTimer* timer) = 0;
 
 		// Viewport
 		virtual const float* GetViewportDimensions() const = 0;
