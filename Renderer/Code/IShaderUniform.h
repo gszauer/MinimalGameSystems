@@ -43,19 +43,12 @@ namespace Renderer {
 		IShaderUniform(); // Disabled
 		IShaderUniform(const IShaderUniform&); // Disabled
 		virtual IShaderUniform& operator=(const IShaderUniform&); // Disabled
-		inline IShaderUniform(const IShader& shader, const char* name, unsigned int index, unsigned int size, ShaderUniformType type, bool isArray, unsigned int length) { }
+		inline IShaderUniform(const IShader& shader, const char* name, ShaderUniformType type) { }
 	public:
 		virtual inline ~IShaderUniform() { }
-		virtual unsigned int GetIndex() const = 0;
-
-		virtual unsigned int Size() const = 0;
-		virtual ShaderUniformType GetType() const = 0;
-
-		virtual bool IsArray() const = 0;
-		virtual unsigned int Length() const = 0;
-
 		virtual const IShader* GetOwner() const = 0;
 		virtual const char* GetName() const = 0;
+		virtual ShaderUniformType GetType() const = 0;
 	};
 }
 

@@ -17,7 +17,7 @@ namespace Renderer {
 		OGL33ShaderAttribute(); // Disabled
 		OGL33ShaderAttribute(const OGL33ShaderAttribute&); // Disabled
 		OGL33ShaderAttribute& operator=(const OGL33ShaderAttribute&); // Disabled
-		OGL33ShaderAttribute(const IShader& shader, const char* name = 0, unsigned int index = 0, unsigned int size = 0, ShaderAttributeType type = ShaderAttributeType::Float);
+		OGL33ShaderAttribute(const IShader& shader, const char* name, ShaderAttributeType type);
 	public:
 		~OGL33ShaderAttribute();
 		unsigned int GetIndex() const;
@@ -27,6 +27,7 @@ namespace Renderer {
 
 		const IShader* GetOwner() const;
 		const char* GetName() const;
+
 	};
 }
 

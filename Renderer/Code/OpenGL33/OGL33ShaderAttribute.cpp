@@ -1,10 +1,10 @@
 #include "OGL33ShaderAttribute.h"
 #include "OGL33Shader.h"
 
-Renderer::OGL33ShaderAttribute::OGL33ShaderAttribute(const IShader& shader, const char* name, unsigned int index, unsigned int size, ShaderAttributeType type) {
+Renderer::OGL33ShaderAttribute::OGL33ShaderAttribute(const IShader& shader, const char* name,  ShaderAttributeType type) {
 	mOwner = (const OGL33Shader*)&shader;
-	mIndex = index;
-	mSize = size;
+	mIndex = 0;
+	mSize = 0;
 	mType = type;
 	mName = name;
 }

@@ -21,7 +21,7 @@ namespace Renderer {
 		OGL33ShaderUniform(); // Disabled
 		OGL33ShaderUniform(const OGL33ShaderUniform&); // Disabled
 		OGL33ShaderUniform& operator=(const OGL33ShaderUniform&); // Disabled
-		OGL33ShaderUniform(const IShader& shader, const char* name, unsigned int index, unsigned int size, ShaderUniformType type, bool isArray, unsigned int length);
+		OGL33ShaderUniform(const IShader& shader, const char* name, ShaderUniformType type);
 	public:
 		~OGL33ShaderUniform();
 		unsigned int GetIndex() const;

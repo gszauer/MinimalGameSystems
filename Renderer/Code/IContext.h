@@ -26,6 +26,15 @@ namespace Renderer {
 		DepthStencil = 2
 	};
 
+	enum UnbindTarget {
+		None = 0,
+		FrameBuffer = (1 << 1),
+		Shader = (1 << 2),
+		Attribute = (1 << 3),
+		Texture = (1 << 4),
+		All = (1 << 1) | (1 << 2) << (1 << 3) << (1 << 4)
+	};
+
 	class IBufferData;
 	class IBufferView;
 	class IFrameBuffer;
@@ -62,11 +71,13 @@ namespace Renderer {
 		virtual void DestroyRasterState(const IRasterState* state) const = 0;
 
 		// Bind / unbind resources
-		virtual void SetFrameBuffer(const IFrameBuffer* buffer) = 0; // Calling with 0 will bind to default FBO
-		virtual void SetShader(const IShader* shader) = 0; // Calling with 0 will unbind shader
-		virtual void SetAttribute(const IShaderAttribute* attrib, const IBufferView* buffer) = 0; // Call with 0 to unbind
-		virtual void SetTexture(const IShaderUniform* uniform, const ITextureSampler* sampler) = 0; // No need to unbind
+		virtual void BindFrameBuffer(const IFrameBuffer* buffer) = 0; // Calling with 0 will bind to default FBO
+		virtual void BindShader(const IShader* shader) = 0; // Calling with 0 will unbind shader
+		virtual void BindAttribute(const IShaderAttribute* attrib, const IBufferView* buffer) = 0; // Call with 0 to unbind
+		virtual void BindTexture(const IShaderUniform* uniform, const ITextureSampler* sampler) = 0; // No need to unbind
 		virtual void SetUniform(const IShaderUniform* uniform, void* data, unsigned int count = 1) = 0;
+
+		virtual void Unbind(UnbindTarget target) = 0;
 
 		// Modofy various states
 		virtual void Clear(Clear clear) = 0;
@@ -88,6 +99,8 @@ namespace Renderer {
 		virtual void SetVSynch(bool val) = 0;
 		virtual bool GetVSynch() const = 0;
 	};
+
+	
 }
 
 // Usage
@@ -133,15 +146,15 @@ namespace Renderer {
 	vec3 lightDir; // Frame data
 	std::vector<mat4> skin; // FrameData
 
-	graphicsDevice->SetFrameBuffer(frameBuffer);
+	graphicsDevice->BindFrameBuffer(frameBuffer);
 	graphicsDevice->SetViewport(0, 0, windowWith, windowHeight);
 
-	graphicsDevice->SetShader(shader);
+	graphicsDevice->BindShader(shader);
 	graphicsDevice->ApplyRasterState(rasterState);
 
-	graphicsDevice->SetAttribute(positionAttrib, positionsBuffer);
-	graphicsDevice->SetAttribute(normalAttrib, normalsBuffer);
-	graphicsDevice->SetAttribute(texCoordAttrib, texCoordBuffer);
+	graphicsDevice->BindAttribute(positionAttrib, positionsBuffer);
+	graphicsDevice->BindAttribute(normalAttrib, normalsBuffer);
+	graphicsDevice->BindAttribute(texCoordAttrib, texCoordBuffer);
 
 	graphicsDevice->SetUniform(mvpUniform, mvpMatrix.v);
 	graphicsDevice->SetUniform(lightUniform, lightDir.v);
@@ -151,16 +164,7 @@ namespace Renderer {
 
 	graphicsDevice->Draw(DeawMode::Triangles, indexBuffer);
 
-	#if 1
-		graphicsDevice->Unbind(UnbindTarget::Attribs | UnbindTarget::Textures | UnbindTarget::Shader | UnbindTarget::FrameBuffer);
-	#else
-		graphicsDevice->SetAttribute(positionAttrib, 0);
-		graphicsDevice->SetAttribute(normalAttrib, 0);
-		graphicsDevice->SetAttribute(texCoordAttrib, 0);
-		graphicsDevice->SetTexture(diffuseUniform, 0);
-		graphicsDevice->SetShader(0);
-		graphicsDevice->SetFrameBuffer(0);
-	#endif
+	graphicsDevice->Unbind(UnbindTarget::Attribs | UnbindTarget::Textures | UnbindTarget::Shader | UnbindTarget::FrameBuffer);
 }
 */
 

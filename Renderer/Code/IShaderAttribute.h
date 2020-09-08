@@ -25,17 +25,12 @@ namespace Renderer {
 		IShaderAttribute(); // Disabled
 		IShaderAttribute(const IShaderAttribute&); // Disabled
 		virtual IShaderAttribute& operator=(const IShaderAttribute&); // Disabled
-		inline IShaderAttribute(const IShader& shader, const char* name = 0, unsigned int index = 0, unsigned int size = 0, ShaderAttributeType type = ShaderAttributeType::Float) { }
+		inline IShaderAttribute(const IShader& shader, const char* name = 0, ShaderAttributeType type) { }
 	public:
 		virtual inline ~IShaderAttribute() { }
-		virtual unsigned int GetIndex() const = 0;
-
-		virtual unsigned int Size() const = 0;
+		virtual const char* GetName() const = 0;
 		virtual ShaderAttributeType GetType() const = 0;
 
-		virtual const IShader* GetOwner() const = 0;
-
-		virtual const char* GetName() const = 0;
 	};
 }
 

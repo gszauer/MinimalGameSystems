@@ -5,6 +5,9 @@
 #include "OGL33Loader.h"
 #include "OGL33RasterState.h"
 
+#include <vector>
+#include <utility>
+
 namespace Renderer {
 	class OGL33Context : public IContext {
 	protected:
@@ -13,6 +16,9 @@ namespace Renderer {
 
 		GLuint mBoundFrameBuffer;
 		GLuint mBoundShader;
+
+		std::vector<std::pair<unsigned int, unsigned int>> mBoundAttribs;
+		unsigned int mCurrentTextureIndex;
 	protected:
 		OGL33Context(const OGL33Context&); // Disabled
 		OGL33Context& operator=(const OGL33Context&); // Disabled
@@ -38,11 +44,13 @@ namespace Renderer {
 		void DestroyRasterState(const IRasterState* state) const;
 
 		// Bind / unbind resources
-		void SetFrameBuffer(const IFrameBuffer* buffer); // Calling with 0 will bind to default FBO
-		void SetShader(const IShader* shader); // Calling with 0 will unbind shader
-		void SetAttribute(const IShaderAttribute* attrib, const IBufferView* buffer); // Call with 0 to unbind
-		void SetTexture(const IShaderUniform* uniform, const ITextureSampler* sampler); // No need to unbind
+		void BindFrameBuffer(const IFrameBuffer* buffer); // Calling with 0 will bind to default FBO
+		void BindShader(const IShader* shader); // Calling with 0 will unbind shader
+		void BindAttribute(const IShaderAttribute* attrib, const IBufferView* buffer); // Call with 0 to unbind
+		void BindTexture(const IShaderUniform* uniform, const ITextureSampler* sampler); // No need to unbind
 		void SetUniform(const IShaderUniform* uniform, void* data, unsigned int count = 1);
+
+		void Unbind(UnbindTarget target);
 
 		// Modofy various states
 		void Clear(Renderer::Clear clear = Renderer::Clear::All);

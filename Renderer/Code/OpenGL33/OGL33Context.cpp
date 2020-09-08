@@ -11,6 +11,15 @@
 #include "OGL33Texture.h"
 #include "OGL33TextureSampler.h"
 
+
+namespace Renderer {
+	namespace OGL33Internal {
+		GLenum BufferDataTypeToGlEnum(BufferDataType type) {
+			// TODO
+		}
+	}
+}
+
 Renderer::OGL33Context::OGL33Context() {
 	glGenVertexArrays(1, &mVAO);
 	glBindVertexArray(mVAO);
@@ -18,6 +27,7 @@ Renderer::OGL33Context::OGL33Context() {
 
 	mBoundFrameBuffer = 0;
 	mBoundShader = 0;
+	mCurrentTextureIndex = 0;
 
 	// TODO: Finish function (as new stuff gets added)
 }
@@ -25,6 +35,7 @@ Renderer::OGL33Context::OGL33Context() {
 Renderer::OGL33Context::~OGL33Context() {
 	glBindVertexArray(0);
 	glDeleteVertexArrays(1, &mVAO);
+	mBoundAttribs.clear();
 
 	// TODO: Finish function (as new stuff gets added)
 }
@@ -110,7 +121,7 @@ void Renderer::OGL33Context::DestroyRasterState(const IRasterState* state) const
 	Renderer::OGL33Internal::Free(state);
 }
 
-void Renderer::OGL33Context::SetFrameBuffer(const IFrameBuffer* buffer) {
+void Renderer::OGL33Context::BindFrameBuffer(const IFrameBuffer* buffer) {
 	const OGL33FrameBuffer* glBuffer = (const OGL33FrameBuffer*)buffer;
 
 	if (buffer == 0) {
@@ -127,7 +138,7 @@ void Renderer::OGL33Context::SetFrameBuffer(const IFrameBuffer* buffer) {
 	}
 }
 
-void Renderer::OGL33Context::SetShader(const IShader* shader) {
+void Renderer::OGL33Context::BindShader(const IShader* shader) {
 	const OGL33Shader* glShader = (const OGL33Shader*)shader;
 
 	if (shader == 0) {
@@ -144,16 +155,50 @@ void Renderer::OGL33Context::SetShader(const IShader* shader) {
 	}
 }
 
-void Renderer::OGL33Context::SetAttribute(const IShaderAttribute* attrib, const IBufferView* buffer) {
-	// TODO
+void Renderer::OGL33Context::BindAttribute(const IShaderAttribute* attrib, const IBufferView* buffer) {
+	const OGL33BufferData* glBufferData = (const OGL33BufferData*)buffer->GetOwner();
+	const OGL33ShaderAttribute* glAttrib = (const OGL33ShaderAttribute*)attrib;
+
+	GLuint index = glAttrib->GetIndex();
+	GLuint bufferHandle = glBufferData->GetHandle();
+
+	glBindBuffer(GL_ARRAY_BUFFER, bufferHandle);
+	glEnableVertexAttribArray(index);
+
+	BufferDataType bufferType = buffer->GetType();
+	if (bufferType == BufferDataType::Float) {
+		glVertexAttribPointer(index, buffer->GetNumComponents(), Renderer::OGL33Internal::BufferDataTypeToGlEnum(bufferType), GL_FALSE, buffer->GetStride(), (const void*)buffer->GetOffset());
+	}
+	else {
+		glVertexAttribIPointer(index, buffer->GetNumComponents(), Renderer::OGL33Internal::BufferDataTypeToGlEnum(bufferType), buffer->GetStride(), (const void*)buffer->GetOffset());
+	}
+
+	mBoundAttribs.push_back(std::pair<unsigned int, unsigned int>(bufferHandle, index));
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Renderer::OGL33Context::SetTexture(const IShaderUniform* uniform, const ITextureSampler* sampler) {
-	// TODO
+void Renderer::OGL33Context::BindTexture(const IShaderUniform* uniform, const ITextureSampler* sampler) {
+	const OGL33Texture* glTexture = (const OGL33Texture*)sampler->GetOwner();
+	const OGL33ShaderUniform* glUniform = (const OGL33ShaderUniform*)uniform;
+
+	glActiveTexture(GL_TEXTURE0 + mCurrentTextureIndex);
+	glBindTexture(GL_TEXTURE_2D, glTexture->GetHandle());
+	glUniform1i(glUniform->GetIndex(), mCurrentTextureIndex); // Bind uniform X to sampler Y
+	glActiveTexture(GL_TEXTURE0);
+
+	mCurrentTextureIndex += 1;
 }
 
 void Renderer::OGL33Context::SetUniform(const IShaderUniform* uniform, void* data, unsigned int count) {
-	// TODO
+	// TODO: this one is gonna be long
+}
+
+void Renderer::OGL33Context::Unbind(UnbindTarget target) {
+	// TODO: Frame Buffer
+	// TODO: Shader
+	// TODO: Attribute
+	// Texture
 }
 
 void Renderer::OGL33Context::Clear(Renderer::Clear clear) {

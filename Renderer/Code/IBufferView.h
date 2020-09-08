@@ -6,7 +6,6 @@ namespace Renderer {
 		Float = 0,
 		Int = 1,
 		UInt = 2,
-		Double = 3,
 		UShort = 4,
 		UByte = 5,
 	};
