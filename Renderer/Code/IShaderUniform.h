@@ -3,7 +3,7 @@
 
 namespace Renderer {
 	enum class ShaderUniformType {
-		Error,
+		Error = 0,
 		
 		Float,
 		Vec2F,
@@ -31,9 +31,7 @@ namespace Renderer {
 		Mat4X2F,
 		Mat4X3F,
 
-		Sampler1D,
-		Sampler2D,
-		Sampler3D
+		Sampler,
 	};
 
 	class IShader;

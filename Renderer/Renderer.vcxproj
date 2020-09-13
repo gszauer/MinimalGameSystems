@@ -170,6 +170,8 @@
     <ClCompile Include="Code\glad.c" />
     <ClCompile Include="Code\OpenGL33\OGL33FrameBuffer.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33Context.cpp" />
+    <ClCompile Include="Code\OpenGL33\OGL33Internal.cpp" />
+    <ClCompile Include="Code\OpenGL33\OGL33Loader.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33RasterState.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33Shader.cpp" />
     <ClCompile Include="Code\OpenGL33\OGL33ShaderAttribute.cpp" />

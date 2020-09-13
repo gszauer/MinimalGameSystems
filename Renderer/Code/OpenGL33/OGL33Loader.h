@@ -30,6 +30,7 @@ typedef int GLint;
 typedef char GLchar;
 typedef khronos_int64_t GLint64;
 typedef unsigned char GLboolean;
+typedef unsigned int GLbitfield;
 
 // TODO: namespace ALL of thse to avoid collisions with actual types
 
@@ -174,6 +175,103 @@ extern PFNGLUNIFORM1IPROC glUniform1i;
 typedef void (* PFNGLVERTEXATTRIBIPOINTERPROC)(GLuint index, GLint size, GLenum type, GLsizei stride, const void* pointer);
 extern PFNGLVERTEXATTRIBIPOINTERPROC glVertexAttribIPointer;
 
+typedef void (* PFNGLUNIFORM1FPROC)(GLint location, GLfloat v0);
+extern PFNGLUNIFORM1FPROC glUniform1f;
+
+typedef void (* PFNGLUNIFORM2FVPROC)(GLint location, GLsizei count, const GLfloat* value);
+extern PFNGLUNIFORM2FVPROC glUniform2fv;
+
+typedef void (* PFNGLUNIFORM3FVPROC)(GLint location, GLsizei count, const GLfloat* value);
+extern PFNGLUNIFORM3FVPROC glUniform3fv;
+
+typedef void (* PFNGLUNIFORM4FVPROC)(GLint location, GLsizei count, const GLfloat* value);
+extern PFNGLUNIFORM4FVPROC glUniform4fv;
+
+typedef void (* PFNGLUNIFORM2IVPROC)(GLint location, GLsizei count, const GLint* value);
+extern PFNGLUNIFORM2IVPROC glUniform2iv;
+
+typedef void (* PFNGLUNIFORM3IVPROC)(GLint location, GLsizei count, const GLint* value);
+extern PFNGLUNIFORM3IVPROC glUniform3iv;
+
+typedef void (* PFNGLUNIFORM4IVPROC)(GLint location, GLsizei count, const GLint* value);
+extern PFNGLUNIFORM4IVPROC glUniform4iv;
+
+typedef void (* PFNGLUNIFORM2UIPROC)(GLint location, GLuint v0, GLuint v1);
+extern PFNGLUNIFORM2UIPROC glUniform2ui;
+
+typedef void (* PFNGLUNIFORM2UIVPROC)(GLint location, GLsizei count, const GLuint* value);
+extern PFNGLUNIFORM2UIVPROC glUniform2uiv;
+
+typedef void (* PFNGLUNIFORM3UIVPROC)(GLint location, GLsizei count, const GLuint* value);
+extern PFNGLUNIFORM3UIVPROC glUniform3uiv;
+
+typedef void (* PFNGLUNIFORM4UIVPROC)(GLint location, GLsizei count, const GLuint* value);
+extern PFNGLUNIFORM4UIVPROC glUniform4uiv;
+
+typedef void (* PFNGLUNIFORMMATRIX2FVPROC)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+extern PFNGLUNIFORMMATRIX2FVPROC glUniformMatrix2fv;
+
+typedef void (* PFNGLUNIFORMMATRIX3FVPROC)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+extern PFNGLUNIFORMMATRIX3FVPROC glUniformMatrix3fv;
+
+typedef void (* PFNGLUNIFORMMATRIX4FVPROC)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+extern PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv;
+
+typedef void (* PFNGLUNIFORMMATRIX2X3FVPROC)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+extern PFNGLUNIFORMMATRIX2X3FVPROC glUniformMatrix2x3fv;
+
+typedef void (* PFNGLUNIFORMMATRIX3X2FVPROC)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+extern PFNGLUNIFORMMATRIX3X2FVPROC glUniformMatrix3x2fv;
+
+typedef void (* PFNGLUNIFORMMATRIX2X4FVPROC)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+extern PFNGLUNIFORMMATRIX2X4FVPROC glUniformMatrix2x4fv;
+
+typedef void (* PFNGLUNIFORMMATRIX4X2FVPROC)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+extern PFNGLUNIFORMMATRIX4X2FVPROC glUniformMatrix4x2fv;
+
+typedef void (* PFNGLUNIFORMMATRIX3X4FVPROC)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+extern PFNGLUNIFORMMATRIX3X4FVPROC glUniformMatrix3x4fv;
+
+typedef void (* PFNGLUNIFORMMATRIX4X3FVPROC)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+extern PFNGLUNIFORMMATRIX4X3FVPROC glUniformMatrix4x3fv;
+
+typedef void (* PFNGLDISABLEVERTEXATTRIBARRAYPROC)(GLuint index);
+extern PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray;
+
+typedef void (*PFNGLCLEARPROC)(GLbitfield mask);
+extern PFNGLCLEARPROC glClear;
+
+typedef void (* PFNGLPOLYGONMODEPROC)(GLenum face, GLenum mode);
+extern PFNGLPOLYGONMODEPROC glPolygonMode;
+
+typedef void (* PFNGLCULLFACEPROC)(GLenum mode);
+extern PFNGLCULLFACEPROC glCullFace;
+
+typedef void (* PFNGLDISABLEPROC)(GLenum cap);
+extern PFNGLDISABLEPROC glDisable;
+
+typedef void (* PFNGLENABLEPROC)(GLenum cap);
+extern PFNGLENABLEPROC glEnable;
+
+typedef void (* PFNGLFRONTFACEPROC)(GLenum mode);
+extern PFNGLFRONTFACEPROC glFrontFace;
+
+typedef void (* PFNGLSCISSORPROC)(GLint x, GLint y, GLsizei width, GLsizei height);
+extern PFNGLSCISSORPROC glScissor;
+
+typedef void (* PFNGLBLENDFUNCPROC)(GLenum sfactor, GLenum dfactor);
+extern PFNGLBLENDFUNCPROC glBlendFunc;
+
+typedef void (* PFNGLLINEWIDTHPROC)(GLfloat width);
+extern PFNGLLINEWIDTHPROC glLineWidth;
+
+typedef void (* PFNGLPOINTSIZEPROC)(GLfloat size);
+extern PFNGLPOINTSIZEPROC glPointSize;
+
+typedef void (* PFNGLVIEWPORTPROC)(GLint x, GLint y, GLsizei width, GLsizei height);
+extern PFNGLVIEWPORTPROC glViewport;
+
+
 #define GL_STREAM_DRAW 0x88E0
 #define GL_STREAM_READ 0x88E1
 #define GL_STREAM_COPY 0x88E2
@@ -278,5 +376,11 @@ extern PFNGLVERTEXATTRIBIPOINTERPROC glVertexAttribIPointer;
 #define GL_TEXTURE29 0x84DD
 #define GL_TEXTURE30 0x84DE
 #define GL_TEXTURE31 0x84DF
+#define GL_DEPTH_BUFFER_BIT 0x00000100
+#define GL_STENCIL_BUFFER_BIT 0x00000400
+#define GL_COLOR_BUFFER_BIT 0x00004000
+#define GL_CULL_FACE 0x0B44
+#define GL_SCISSOR_TEST 0x0C11
+#define GL_BLEND 0x0BE2
 
 #endif // !_H_OGL33LOADER_

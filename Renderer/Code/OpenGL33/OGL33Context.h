@@ -18,7 +18,16 @@ namespace Renderer {
 		GLuint mBoundShader;
 
 		std::vector<std::pair<unsigned int, unsigned int>> mBoundAttribs;
-		unsigned int mCurrentTextureIndex;
+		unsigned int mNumBoundAttribs;
+		unsigned int mNumBoundTextures;
+
+		OGL33RasterState mCurrentState;
+		OGL33RasterState mDefaultState;
+
+		bool mCullingEnabled;
+		bool mBlendingEnabled;
+
+		unsigned int mViewPort[4];
 	protected:
 		OGL33Context(const OGL33Context&); // Disabled
 		OGL33Context& operator=(const OGL33Context&); // Disabled
@@ -48,12 +57,12 @@ namespace Renderer {
 		void BindShader(const IShader* shader); // Calling with 0 will unbind shader
 		void BindAttribute(const IShaderAttribute* attrib, const IBufferView* buffer); // Call with 0 to unbind
 		void BindTexture(const IShaderUniform* uniform, const ITextureSampler* sampler); // No need to unbind
-		void SetUniform(const IShaderUniform* uniform, void* data, unsigned int count = 1);
+		void SetUniform(const IShaderUniform* uniform, const void* data, unsigned int count = 1);
 
 		void Unbind(UnbindTarget target);
 
 		// Modofy various states
-		void Clear(Renderer::Clear clear = Renderer::Clear::All);
+		void Clear(Renderer::ClearTarget clear = Renderer::ClearTarget::All);
 		void ApplyRasterState(const IRasterState* state);
 
 		// Viewport

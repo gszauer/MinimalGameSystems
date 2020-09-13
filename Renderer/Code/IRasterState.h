@@ -24,7 +24,6 @@ namespace Renderer {
 	};
 
 	enum class WindingOrder {
-		Disabled = 0,
 		Clockwise = 1,
 		CounterClockwise = 2
 	};

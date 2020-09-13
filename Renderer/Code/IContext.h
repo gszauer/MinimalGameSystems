@@ -2,7 +2,7 @@
 #define _H_ICONTEXT_
 
 namespace Renderer {
-	enum class Clear {
+	enum class ClearTarget {
 		Color = (1 << 1),
 		Depth = (1 << 2),
 		Stencil = (1 << 3),
@@ -75,12 +75,12 @@ namespace Renderer {
 		virtual void BindShader(const IShader* shader) = 0; // Calling with 0 will unbind shader
 		virtual void BindAttribute(const IShaderAttribute* attrib, const IBufferView* buffer) = 0; // Call with 0 to unbind
 		virtual void BindTexture(const IShaderUniform* uniform, const ITextureSampler* sampler) = 0; // No need to unbind
-		virtual void SetUniform(const IShaderUniform* uniform, void* data, unsigned int count = 1) = 0;
+		virtual void SetUniform(const IShaderUniform* uniform, const void* data, unsigned int count = 1) = 0;
 
 		virtual void Unbind(UnbindTarget target) = 0;
 
 		// Modofy various states
-		virtual void Clear(Clear clear) = 0;
+		virtual void Clear(ClearTarget clear) = 0;
 		virtual void ApplyRasterState(const IRasterState* state) = 0;
 
 		// Viewport
@@ -140,7 +140,7 @@ namespace Renderer {
 }*/
 
 /*void Tick() {
-	graphicsDevice->Clear(Clear::All);
+	graphicsDevice->Clear(ClearTarget::All);
 
 	mat4 mvpMatrix; // Frame data
 	vec3 lightDir; // Frame data

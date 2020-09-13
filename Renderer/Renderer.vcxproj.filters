@@ -143,5 +143,11 @@
     <ClCompile Include="Code\OpenGL33\OGL33Context.cpp">
       <Filter>Source Files\OpenGL33</Filter>
     </ClCompile>
+    <ClCompile Include="Code\OpenGL33\OGL33Internal.cpp">
+      <Filter>Source Files\OpenGL33</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\OpenGL33\OGL33Loader.cpp">
+      <Filter>Source Files\OpenGL33</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
