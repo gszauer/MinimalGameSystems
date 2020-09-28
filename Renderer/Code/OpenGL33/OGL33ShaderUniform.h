@@ -11,12 +11,11 @@ namespace Renderer {
 		friend class OGL33Shader;
 	protected:
 		const OGL33Shader* mOwner;
-		const char* mName;
+		const char* mName; // //This string lives in OGL33Shader. It's the key to a dictionary. The Shader uniform does not own it.
 		unsigned int mIndex;
 		unsigned int mSize;
 		ShaderUniformType mType;
 		bool mIsArray;
-		unsigned int mLength;
 	protected:
 		OGL33ShaderUniform(); // Disabled
 		OGL33ShaderUniform(const OGL33ShaderUniform&); // Disabled
@@ -30,7 +29,6 @@ namespace Renderer {
 		ShaderUniformType GetType() const;
 
 		bool IsArray() const;
-		unsigned int Length() const;
 
 		const IShader* GetOwner() const;
 		const char* GetName() const;

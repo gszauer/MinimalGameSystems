@@ -25,14 +25,14 @@ namespace Renderer {
 		MirroredClampToEdge = 11
 	};
 
-	class ITexutre;
+	class ITexture;
 	
 	class ITextureSampler {
 	protected:
 		ITextureSampler(); // Disabled
 		ITextureSampler(const ITextureSampler&); // Disabled
 		virtual ITextureSampler& operator=(const ITextureSampler&); // Disabled
-		inline ITextureSampler(const ITexutre& owner) { }
+		inline ITextureSampler(const ITexture& owner) { }
 	public:
 		virtual inline ~ITextureSampler() { };
 		
@@ -47,7 +47,7 @@ namespace Renderer {
 		virtual void SetMinFilter(MinFilterType filter) = 0;
 		virtual void SetMagFilter(MagFilterType filter) = 0;
 
-		virtual const ITexutre* GetOwner() const = 0;
+		virtual const ITexture* GetOwner() const = 0;
 	};
 }
 

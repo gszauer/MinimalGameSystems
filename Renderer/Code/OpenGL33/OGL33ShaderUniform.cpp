@@ -1,14 +1,10 @@
 #include "OGL33ShaderUniform.h"
 #include "OGL33Shader.h"
 
-Renderer::OGL33ShaderUniform::OGL33ShaderUniform(const IShader& shader, const char* name, unsigned int index, unsigned int size, ShaderUniformType type, bool isArray, unsigned int length) {
+Renderer::OGL33ShaderUniform::OGL33ShaderUniform(const IShader& shader, const char* name, ShaderUniformType type) {
 	mOwner = (const OGL33Shader *)&shader;
-	mIndex = index;
-	mSize = size;
 	mType = type;
-	mIsArray = isArray;
-	mName = name;
-	mLength = length;
+	mName = name; //This string lives in OGL33Shader. It's the key to a dictionary. The Shader uniform does not own it.
 }
 
 Renderer::OGL33ShaderUniform::~OGL33ShaderUniform() {
@@ -31,9 +27,6 @@ bool Renderer::OGL33ShaderUniform::IsArray() const {
 	return mIsArray;
 }
 
-unsigned int Renderer::OGL33ShaderUniform::Length() const {
-	return mLength;
-}
 
 const char* Renderer::OGL33ShaderUniform::GetName() const {
 	return mName;

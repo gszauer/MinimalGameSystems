@@ -6,7 +6,7 @@ Renderer::OGL33ShaderAttribute::OGL33ShaderAttribute(const IShader& shader, cons
 	mIndex = 0;
 	mSize = 0;
 	mType = type;
-	mName = name;
+	mName = name; // This string lives in OGL33Shader. It's the key to a dictionary. The Shader attribute does not own it.
 }
 
 Renderer::OGL33ShaderAttribute::~OGL33ShaderAttribute() {

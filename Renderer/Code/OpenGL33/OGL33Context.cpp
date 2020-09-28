@@ -21,7 +21,15 @@ namespace Renderer {
 			// TODO
 		}
 
+		inline FillMode EnumToFillMode(GLenum glenum) {
+			// TODO
+		}
+
 		inline GLenum FillFaceToEnum(FillFace fillFace) {
+			// TODO
+		}
+
+		inline FillFace EnumToFillFace(GLenum glenum) {
 			// TODO
 		}
 
@@ -29,7 +37,15 @@ namespace Renderer {
 			// TODO
 		}
 
+		inline CullMode EnumToCullMode(GLenum glenum) {
+			// TODO
+		}
+
 		inline GLenum WindingOrderToEnum(WindingOrder windingOrder) {
+			// TODO
+		}
+
+		inline WindingOrder EnumToWindingOrder(GLenum glenum) {
 			// TODO
 		}
 
@@ -40,6 +56,14 @@ namespace Renderer {
 		inline GLenum BlendFactorToEnum(BlendFactor blend) {
 			// TODO
 		}
+
+		inline BlendFactor EnumToBlendFactor(GLenum rgb, GLenum a) {
+			// TODO
+		}
+
+		inline GLenum DrawModeToEnum(DrawMode mode) {
+			// TODO
+		}
 	}
 }
 
@@ -47,16 +71,20 @@ Renderer::OGL33Context::OGL33Context() : mCurrentState(*this), mDefaultState(*th
 	glGenVertexArrays(1, &mVAO);
 	glBindVertexArray(mVAO);
 	mRendererName = "OpenGL 3.3 Core";
-
 	mBoundFrameBuffer = 0;
 	mBoundShader = 0;
 	mNumBoundTextures = 0;
 	mNumBoundAttribs = 0;
-
-	mCullingEnabled = false; // TODO: I don't know what hte default state is!
-	mBlendingEnabled = false; // TODO: I don't know what the efault is
-
+	mCullingEnabled = false; 
+	mBlendingEnabled = false; 
 	mViewPort[0] = mViewPort[1] = mViewPort[2] = mViewPort[3] = 0;
+
+	mVSynchOn = false; 
+	mVSynchSupported = false; 
+
+	PullNativeState();
+
+	mDefaultState = mCurrentState;
 }
 
 Renderer::OGL33Context::~OGL33Context() {
@@ -299,7 +327,7 @@ void Renderer::OGL33Context::SetUniform(const IShaderUniform* uniform, const voi
 	else if (uniformType == ShaderUniformType::Mat4X3F) {
 		glUniformMatrix4x3fv(location, count, GL_FALSE, dataAsGlFloat);
 	}
-	// Else, samplers are handled elsewhere
+	// Samplers are handled elsewhere
 }
 
 void Renderer::OGL33Context::Unbind(UnbindTarget target) {
@@ -376,7 +404,7 @@ void Renderer::OGL33Context::ApplyRasterState(const IRasterState* state) {
 	Renderer::BlendFactor srcBlend = glState->mSrcBlend;
 	Renderer::BlendFactor dstBlend = glState->mDstBlend;
 	GLfloat lineWidth = glState->mLineWidth;
-	GLfloat pointSize = glState->GetPointSize;
+	GLfloat pointSize = glState->mPointSize;
 
 	if (mCurrentState.mFillMode != fillMode || mCurrentState.mFillFace != fillFace) {
 		glPolygonMode(OGL33Internal::FillFaceToEnum(fillFace), OGL33Internal::FillModeToEnum(fillMode));
@@ -384,22 +412,8 @@ void Renderer::OGL33Context::ApplyRasterState(const IRasterState* state) {
 		mCurrentState.mFillFace = fillFace;
 	}
 	
-	if (mCurrentState.mCullMode != cullMode) {
-		if (cullMode == Renderer::CullMode::Disabled) {
-			if (mCullingEnabled) {
-				glDisable(GL_CULL_FACE);
-				mCullingEnabled = false;
-			}
-		}
-		else {
-			if (!mCullingEnabled) {
-				glEnable(GL_CULL_FACE);
-				mCullingEnabled = true;
-			}
-			glCullFace(OGL33Internal::CullModeToEnum(cullMode));
-		}
-		mCurrentState.mCullMode = cullMode;
-	}
+	
+
 	if (mCurrentState.mWindingOrder != windingOrder) {
 		glFrontFace(Renderer::OGL33Internal::WindingOrderToEnum(windingOrder));
 		mCurrentState.mWindingOrder = windingOrder;
@@ -425,10 +439,37 @@ void Renderer::OGL33Context::ApplyRasterState(const IRasterState* state) {
 		mCurrentState.mScissorRect[2] = scissorRect[2];
 		mCurrentState.mScissorRect[3] = scissorRect[3];
 	}
-	if (mCurrentState.mSrcBlend != srcBlend || mCurrentState.mDstBlend != dstBlend) {
-		GLenum src = Renderer::OGL33Internal::BlendFactorToEnum(srcBlend);
-		GLenum dst = Renderer::OGL33Internal::BlendFactorToEnum(dstBlend);
+	if (mCurrentState.mLineWidth != lineWidth) {
+		glLineWidth(lineWidth);
+		mCurrentState.mLineWidth = lineWidth;
+	}
+	if (mCurrentState.mPointSize != pointSize) {
+		glPointSize(pointSize);
+		mCurrentState.mPointSize = pointSize;
+	}
 
+	bool shouldEnableCulling = cullMode != Renderer::CullMode::Disabled;
+	if (mCurrentState.mCullMode != cullMode || (mCullingEnabled != shouldEnableCulling)) {
+		if (cullMode == Renderer::CullMode::Disabled) {
+			if (mCullingEnabled) {
+				glDisable(GL_CULL_FACE);
+				mCullingEnabled = false;
+			}
+		}
+		else {
+			if (!mCullingEnabled) {
+				glEnable(GL_CULL_FACE);
+				mCullingEnabled = true;
+			}
+			glCullFace(OGL33Internal::CullModeToEnum(cullMode));
+		}
+		mCurrentState.mCullMode = cullMode;
+	}
+	
+	GLenum src = Renderer::OGL33Internal::BlendFactorToEnum(srcBlend);
+	GLenum dst = Renderer::OGL33Internal::BlendFactorToEnum(dstBlend);
+	bool shouldEnableBlend = srcBlend != BlendFactor::Disabled && dstBlend != BlendFactor::Disabled;
+	if ((mCurrentState.mSrcBlend != srcBlend || mCurrentState.mDstBlend != dstBlend) || mBlendingEnabled != shouldEnableBlend) {
 		bool disabled = srcBlend == BlendFactor::Disabled || dstBlend == BlendFactor::Disabled;
 
 		if (!disabled) {
@@ -447,14 +488,6 @@ void Renderer::OGL33Context::ApplyRasterState(const IRasterState* state) {
 
 		mCurrentState.mSrcBlend = srcBlend;
 		mCurrentState.mDstBlend = dstBlend;
-	}
-	if (mCurrentState.mLineWidth != lineWidth) {
-		glLineWidth(lineWidth);
-		mCurrentState.mLineWidth = lineWidth;
-	}
-	if (mCurrentState.mPointSize != pointSize) {
-		glPointSize(pointSize);
-		mCurrentState.mPointSize = pointSize;
 	}
 }
 
@@ -478,25 +511,115 @@ void Renderer::OGL33Context::SetViewport(unsigned int x, unsigned int y, unsigne
 }
 
 void Renderer::OGL33Context::Draw(DrawMode mode, const IBufferView* buffer, unsigned int instanceCount) const {
-	// TODO
-}
+	const OGL33BufferView* glBufferView = (const OGL33BufferView*)buffer;
+	const OGL33BufferData* glBufferData = (const OGL33BufferData*)glBufferView->GetOwner();
 
-void Renderer::OGL33Context::Draw(DrawMode mode, const IBufferView* buffer, unsigned int first, unsigned int numVerts, unsigned int instanceCount) const {
-	// TODO
+	GLenum glMode = Renderer::OGL33Internal::DrawModeToEnum(mode);
+	GLenum glType = Renderer::OGL33Internal::BufferDataTypeToGlEnum(glBufferView->GetType());
+	GLuint handle = glBufferData->GetHandle();
+	GLsizei count = (GLsizei)glBufferView->GetCount();
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, handle);
+	glDrawElementsInstanced(glMode, count, glType, (const void*)glBufferView->GetOffset(), instanceCount);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Renderer::OGL33Context::Draw(DrawMode mode, unsigned int first, unsigned int numVerts, unsigned int instanceCount) const {
-	// TODO
+	GLenum glMode = Renderer::OGL33Internal::DrawModeToEnum(mode);
+	glDrawArraysInstanced(glMode, first, numVerts, instanceCount);
+}
+
+GLuint Renderer::OGL33Context::GetBoundFBO() const {
+	return mBoundFrameBuffer;
+}
+
+GLuint Renderer::OGL33Context::GetBoundShader() const {
+	return mBoundShader;
 }
 
 void Renderer::OGL33Context::GetNDC(float& left, float& right, float& top, float& bottom, float& near, float& far) const {
-	// TODO
+	left = -1.0f;
+	right = 1.0f;
+	bottom = -1.0f;
+	top = 1.0f;
+	near = -1.0f;
+	far = 1.0f;
 }
 
 void Renderer::OGL33Context::SetVSynch(bool val) {
-	// TODO
+	if (mVSynchSupported) {
+		if (val) {
+			if (!mVSynchOn) {
+				if (wglSwapIntervalEXT(1)) {
+					mVSynchOn = true;
+				}
+			}
+		}
+		else {
+			if (mVSynchOn) {
+				wglSwapIntervalEXT(0);
+				mVSynchOn = false;
+			}
+		}
+	}
 }
 
 bool Renderer::OGL33Context::GetVSynch() const {
-	// TODO
+	return mVSynchSupported && mVSynchOn;
+}
+
+void Renderer::OGL33Context::PullNativeState() {
+	mVSynchSupported = strstr(wglGetExtensionsStringEXT(), "WGL_EXT_swap_control") != 0;
+	if (mVSynchSupported) {
+		mVSynchOn = wglGetSwapIntervalEXT() > 0;
+		if (!mVSynchOn) {
+			SetVSynch(true);
+		}
+	}
+
+	mCullingEnabled = glIsEnabled(GL_CULL_FACE);
+	mBlendingEnabled = glIsEnabled(GL_BLEND);
+
+	GLint viewport[4] = { 0 };
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	mViewPort[0] = (unsigned int)viewport[0];
+	mViewPort[1] = (unsigned int)viewport[1];
+	mViewPort[2] = (unsigned int)viewport[2];
+	mViewPort[3] = (unsigned int)viewport[3];
+
+	GLint polyMode[2] = { 0 };
+	glGetIntegerv(GL_POLYGON_MODE, polyMode);
+
+	GLint cullFace = 0;
+	glGetIntegerv(GL_CULL_FACE_MODE, &cullFace);
+
+	GLint frontFace = 0;
+	glGetIntegerv(GL_FRONT_FACE, &frontFace);
+
+	GLint scissor[4] = { 0 };
+	glGetIntegerv(GL_SCISSOR_BOX, scissor);
+	mCurrentState.mScissorRect[0] = (unsigned int)scissor[0];
+	mCurrentState.mScissorRect[1] = (unsigned int)scissor[1];
+	mCurrentState.mScissorRect[2] = (unsigned int)scissor[2];
+	mCurrentState.mScissorRect[3] = (unsigned int)scissor[3];
+
+	mCurrentState.mFillMode = Renderer::OGL33Internal::EnumToFillMode(polyMode[0]);
+	mCurrentState.mFillFace = Renderer::OGL33Internal::EnumToFillFace(polyMode[1]);
+	mCurrentState.mCullMode = Renderer::OGL33Internal::EnumToCullMode(cullFace);
+	mCurrentState.mWindingOrder = Renderer::OGL33Internal::EnumToWindingOrder(frontFace);
+	mCurrentState.mScissorState = glIsEnabled(GL_SCISSOR_TEST) ? Renderer::ScissorState::Enabled : Renderer::ScissorState::Disabled;
+
+	GLint srcBlend[2] = { 0 };
+	glGetIntegerv(GL_BLEND_SRC_RGB, &srcBlend[0]);
+	glGetIntegerv(GL_BLEND_SRC_ALPHA, &srcBlend[1]);
+
+	GLint dstBlend[2] = { 0 };
+	glGetIntegerv(GL_BLEND_DST_RGB, &dstBlend[0]);
+	glGetIntegerv(GL_BLEND_DST_ALPHA, &dstBlend[1]);
+
+	mCurrentState.mSrcBlend = Renderer::OGL33Internal::EnumToBlendFactor(srcBlend[0], srcBlend[1]);
+	mCurrentState.mDstBlend = Renderer::OGL33Internal::EnumToBlendFactor(dstBlend[0], dstBlend[1]);
+	
+	glGetFloatv(GL_LINE_WIDTH, &mCurrentState.mLineWidth);
+	glGetFloatv(GL_POINT_SIZE, &mCurrentState.mPointSize);
 }

@@ -11,9 +11,9 @@ namespace Renderer {
 	};
 
 	enum class FillFace {
-		Front = 1,
-		Back = 2,
-		Both = 3
+		Front = 0,
+		Back = 1,
+		Both = 2
 	};
 
 	enum class CullMode {
@@ -24,8 +24,8 @@ namespace Renderer {
 	};
 
 	enum class WindingOrder {
-		Clockwise = 1,
-		CounterClockwise = 2
+		Clockwise = 0,
+		CounterClockwise = 1
 	};
 
 	enum class ScissorState {

@@ -271,6 +271,29 @@ extern PFNGLPOINTSIZEPROC glPointSize;
 typedef void (* PFNGLVIEWPORTPROC)(GLint x, GLint y, GLsizei width, GLsizei height);
 extern PFNGLVIEWPORTPROC glViewport;
 
+typedef void (* PFNGLDRAWELEMENTSINSTANCEDPROC)(GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei instancecount);
+extern PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced;
+
+typedef void (* PFNGLDRAWARRAYSINSTANCEDPROC)(GLenum mode, GLint first, GLsizei count, GLsizei instancecount);
+extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
+
+typedef GLboolean(* PFNGLISENABLEDPROC)(GLenum cap);
+extern PFNGLISENABLEDPROC glIsEnabled;
+
+typedef void (* PFNGLGETINTEGERVPROC)(GLenum pname, GLint* data);
+extern PFNGLGETINTEGERVPROC glGetIntegerv;
+
+typedef void (* PFNGLGETFLOATVPROC)(GLenum pname, GLfloat* data);
+extern PFNGLGETFLOATVPROC glGetFloatv;
+
+typedef const char* (__stdcall* PFNWGLGETEXTENSIONSSTRINGEXTPROC) (void);
+extern PFNWGLGETEXTENSIONSSTRINGEXTPROC wglGetExtensionsStringEXT;
+
+typedef int (__stdcall* PFNWGLSWAPINTERVALEXTPROC) (int interval);
+extern PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
+
+typedef int (__stdcall* PFNWGLGETSWAPINTERVALEXTPROC) (void);
+extern PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT;
 
 #define GL_STREAM_DRAW 0x88E0
 #define GL_STREAM_READ 0x88E1
@@ -382,5 +405,16 @@ extern PFNGLVIEWPORTPROC glViewport;
 #define GL_CULL_FACE 0x0B44
 #define GL_SCISSOR_TEST 0x0C11
 #define GL_BLEND 0x0BE2
+#define GL_VIEWPORT 0x0BA2
+#define GL_POLYGON_MODE 0x0B40
+#define GL_CULL_FACE_MODE 0x0B45
+#define GL_FRONT_FACE 0x0B46
+#define GL_SCISSOR_BOX 0x0C10
+#define GL_BLEND_DST_RGB 0x80C8
+#define GL_BLEND_SRC_RGB 0x80C9
+#define GL_BLEND_DST_ALPHA 0x80CA
+#define GL_BLEND_SRC_ALPHA 0x80CB
+#define GL_LINE_WIDTH 0x0B21
+#define GL_POINT_SIZE 0x0B11
 
 #endif // !_H_OGL33LOADER_

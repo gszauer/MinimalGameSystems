@@ -25,7 +25,7 @@ namespace Renderer {
 		IShaderAttribute(); // Disabled
 		IShaderAttribute(const IShaderAttribute&); // Disabled
 		virtual IShaderAttribute& operator=(const IShaderAttribute&); // Disabled
-		inline IShaderAttribute(const IShader& shader, const char* name = 0, ShaderAttributeType type) { }
+		inline IShaderAttribute(const IShader& shader, const char* name, ShaderAttributeType type) { }
 	public:
 		virtual inline ~IShaderAttribute() { }
 		virtual const char* GetName() const = 0;

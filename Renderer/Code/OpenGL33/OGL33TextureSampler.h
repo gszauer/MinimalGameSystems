@@ -18,7 +18,7 @@ namespace Renderer {
 		OGL33TextureSampler(); // Disabled
 		OGL33TextureSampler(const OGL33TextureSampler&); // Disabled
 		OGL33TextureSampler& operator=(const OGL33TextureSampler&); // Disabled
-		OGL33TextureSampler(const ITexutre& owner);
+		OGL33TextureSampler(const ITexture& owner);
 	public:
 		~OGL33TextureSampler();
 
@@ -33,7 +33,7 @@ namespace Renderer {
 		void SetMinFilter(MinFilterType filter);
 		void SetMagFilter(MagFilterType filter);
 
-		const ITexutre* GetOwner() const;
+		const ITexture* GetOwner() const;
 	};
 }
 

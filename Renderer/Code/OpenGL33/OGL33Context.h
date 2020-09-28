@@ -28,6 +28,9 @@ namespace Renderer {
 		bool mBlendingEnabled;
 
 		unsigned int mViewPort[4];
+
+		bool mVSynchSupported;
+		bool mVSynchOn;
 	protected:
 		OGL33Context(const OGL33Context&); // Disabled
 		OGL33Context& operator=(const OGL33Context&); // Disabled
@@ -71,7 +74,6 @@ namespace Renderer {
 
 		// Drawing geometry
 		void Draw(DrawMode mode, const IBufferView* buffer, unsigned int instanceCount = 1) const;
-		void Draw(DrawMode mode, const IBufferView* buffer, unsigned int first, unsigned int numVerts, unsigned int instanceCount) const;
 		void Draw(DrawMode mode, unsigned int first, unsigned int numVerts, unsigned int instanceCount) const;
 
 		// NDC Info
@@ -82,8 +84,10 @@ namespace Renderer {
 		bool GetVSynch() const;
 
 		// Helpers
-		GLuint GetBoundFBO() const; // TODO
-		GLuint GetBoundShader() const; // TODO
+		GLuint GetBoundFBO() const;
+		GLuint GetBoundShader() const;
+		
+		void PullNativeState();
 	};
 }
 

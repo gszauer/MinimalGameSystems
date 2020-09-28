@@ -106,8 +106,18 @@ Renderer::OGL33Shader::OGL33Shader(const IContext& device, const char* vertex, c
 		Renderer::OGL33Internal::StrCpy(mUniformNames[uniform], nameString);
 
 		// Placement new to init the new array
-		new (&mUniforms[uniform])OGL33ShaderUniform(*this, nameString, uniform, (unsigned int)size,
-			Renderer::OGL33Internal::EnumToUniform(type), isArray);
+		new (&mUniforms[uniform])OGL33ShaderUniform(*this, nameString, Renderer::OGL33Internal::EnumToUniform(type));
+		mUniforms[uniform].mIndex = uniform;
+		mUniforms[uniform].mSize = (unsigned int)size;
+		mUniforms[uniform].mIsArray = isArray;
+
+		const OGL33Shader* mOwner;
+		const char* mName;
+		unsigned int mIndex;
+		unsigned int mSize;
+		ShaderUniformType mType;
+		bool mIsArray;
+		unsigned int mLength;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -132,10 +142,9 @@ Renderer::OGL33Shader::OGL33Shader(const IContext& device, const char* vertex, c
 		Renderer::OGL33Internal::StrCpy(mAttribNames[attrib], nameString);
 
 		// Placement new to init the new array
-		new(&mAttribs[attrib])OGL33ShaderAttribute(*this, nameString,
-			(unsigned int)attrib, (unsigned int)size,
-			Renderer::OGL33Internal::EnumToAttrib(type)
-		);
+		new(&mAttribs[attrib])OGL33ShaderAttribute(*this, nameString, Renderer::OGL33Internal::EnumToAttrib(type));
+		mAttribs[attrib].mIndex = (unsigned int)attrib;
+		mAttribs[attrib].mSize = (unsigned int)size;
 	}
 
 
@@ -337,13 +346,13 @@ Renderer::ShaderUniformType Renderer::OGL33Internal::EnumToUniform(GLenum enumer
 		result = ShaderUniformType::Mat4X3F;
 	}
 	else if (enumeration == GL_SAMPLER_1D) {
-		result = ShaderUniformType::Sampler1D;
+		result = ShaderUniformType::Sampler;
 	}
 	else if (enumeration == GL_SAMPLER_2D) {
-		result = ShaderUniformType::Sampler2D;
+		result = ShaderUniformType::Sampler;
 	}
 	else if (enumeration == GL_SAMPLER_3D) {
-		result = ShaderUniformType::Sampler3D;
+		result = ShaderUniformType::Sampler;
 	}
 
 	return result;

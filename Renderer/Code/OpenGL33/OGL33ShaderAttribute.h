@@ -9,7 +9,7 @@ namespace Renderer {
 		friend class OGL33Shader;
 	protected:
 		const OGL33Shader* mOwner;
-		const char* mName;
+		const char* mName; // This string lives in OGL33Shader. It's the key to a dictionary. The Shader attribute does not own it.
 		unsigned int mIndex;
 		unsigned int mSize;
 		ShaderAttributeType mType;

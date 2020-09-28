@@ -89,7 +89,6 @@ namespace Renderer {
 		
 		// Drawing geometry
 		virtual void Draw(DrawMode mode, const IBufferView* buffer, unsigned int instanceCount = 1) const = 0;
-		virtual void Draw(DrawMode mode, const IBufferView* buffer, unsigned int first, unsigned int numVerts, unsigned int instanceCount) const = 0;
 		virtual void Draw(DrawMode mode, unsigned int first, unsigned int numVerts, unsigned int instanceCount) const = 0;
 
 		// NDC Info
@@ -98,6 +97,9 @@ namespace Renderer {
 		// Vsynch
 		virtual void SetVSynch(bool val) = 0;
 		virtual bool GetVSynch() const = 0;
+
+		// Native state
+		virtual void PullNativeState() = 0;
 	};
 
 	

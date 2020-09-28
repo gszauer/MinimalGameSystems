@@ -1,12 +1,13 @@
 #include "OGL33TextureSampler.h"
 #include "OGL33Texture.h"
+#include "../ITexture.h"
 
-const Renderer::ITexutre* Renderer::OGL33TextureSampler::GetOwner() const {
-	return mOwner;
+const Renderer::ITexture* Renderer::OGL33TextureSampler::GetOwner() const {
+	return (const Renderer::ITexture*)mOwner;
 }
 
-Renderer::OGL33TextureSampler::OGL33TextureSampler(const ITexutre& owner) {
-	mOwner = &owner;
+Renderer::OGL33TextureSampler::OGL33TextureSampler(const ITexture& owner) {
+	mOwner = (const Renderer::OGL33Texture*)&owner;
 	mWrapS = TextureWrapMode::Repeat;
 	mWrapT = TextureWrapMode::Repeat;
 	mMinFilter = MinFilterType::NearestMipMapLinear;
