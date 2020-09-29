@@ -25,9 +25,10 @@ namespace Renderer {
 		~OGL33Texture();
 
 		void Set(unsigned int width, unsigned int height, TextureType type, const void* data = 0, bool mips = false); // Data CAN be 0 to create an empty texture
-		void Update(unsigned int x, unsigned int y, unsigned int width, unsigned int height, TextureType type, const void* data);
+		void Update(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const void* data);
 
-		// TODO: Maybe add a "Pull Data" option to like save screenshots or whatever?
+		unsigned int GetSizeInBytes() const;
+		void GetData(void* target, unsigned int level = 0) const;
 
 		bool HasMips() const;
 		void GenerateMips();
@@ -40,7 +41,7 @@ namespace Renderer {
 		void DestroySampler(const ITextureSampler* sampler) const;
 
 		const IContext* GetOwner() const;
-		GLuint GetHandle() const; // TODO
+		GLuint GetHandle() const;
 	};
 }
 

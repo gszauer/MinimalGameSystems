@@ -14,55 +14,245 @@
 namespace Renderer {
 	namespace OGL33Internal {
 		inline GLenum BufferDataTypeToGlEnum(BufferDataType type) {
-			// TODO
+			if (type == BufferDataType::Int) {
+				return GL_INT;
+			}
+			else if (type == BufferDataType::UInt) {
+				return GL_UNSIGNED_INT;
+			}
+			else if (type == BufferDataType::UShort) {
+				return GL_UNSIGNED_SHORT;
+			}
+			else if (type == BufferDataType::UByte) {
+				return GL_UNSIGNED_BYTE;
+			}
+			return GL_FLOAT;
 		}
 
 		inline GLenum FillModeToEnum(FillMode fillMode) {
-			// TODO
+			if (fillMode == FillMode::Point) {
+				return GL_POINT;
+			}
+			else if (fillMode == FillMode::Line) {
+				return GL_LINE;
+			}
+			return GL_FILL;
 		}
 
 		inline FillMode EnumToFillMode(GLenum glenum) {
-			// TODO
+			if (glenum == GL_POINT) {
+				return FillMode::Point;
+			}
+			else if (glenum == GL_LINE) {
+				return FillMode::Line;
+			}
+			return FillMode::Fill;
 		}
 
 		inline GLenum FillFaceToEnum(FillFace fillFace) {
-			// TODO
+			if (fillFace == FillFace::Front) {
+				return GL_FRONT;
+			}
+			else if (fillFace == FillFace::Back) {
+				return GL_BACK;
+			}
+			return GL_FRONT_AND_BACK;
 		}
 
 		inline FillFace EnumToFillFace(GLenum glenum) {
-			// TODO
+			if (glenum == GL_FRONT) {
+				return FillFace::Front;
+			}
+			else if (glenum == GL_BACK) {
+				return FillFace::Back;
+			}
+			return FillFace::Both;
 		}
 
 		inline GLenum CullModeToEnum(CullMode cullMode) {
-			// TODO
+			if (cullMode == CullMode::Front) {
+				return GL_FRONT;
+			}
+			else if (cullMode == CullMode::Back) {
+				return GL_BACK;
+			}
+			else if (cullMode == CullMode::Both) {
+				return GL_FRONT_AND_BACK;
+			}
+			return GL_INVALID_ENUM;
 		}
 
 		inline CullMode EnumToCullMode(GLenum glenum) {
-			// TODO
+			if (glenum == GL_FRONT) {
+				return CullMode::Front;
+			}
+			else if (glenum == GL_BACK) {
+				return CullMode::Back;
+			}
+			else if (glenum == GL_FRONT_AND_BACK) {
+				return CullMode::Both;
+			}
+			return CullMode::Disabled;
 		}
 
 		inline GLenum WindingOrderToEnum(WindingOrder windingOrder) {
-			// TODO
+			if (windingOrder == WindingOrder::Clockwise) {
+				return GL_CW;
+			}
+			return GL_CCW;
 		}
 
 		inline WindingOrder EnumToWindingOrder(GLenum glenum) {
-			// TODO
-		}
-
-		inline GLenum ScissorStateToEnum(ScissorState state) {
-			// TODO
+			if (glenum == GL_CW) {
+				return WindingOrder::Clockwise;
+			}
+			return WindingOrder::CounterClockwise;
 		}
 
 		inline GLenum BlendFactorToEnum(BlendFactor blend) {
-			// TODO
+			if (blend == BlendFactor::Zero) {
+				return GL_ZERO;
+			}
+			else if (blend == BlendFactor::One) {
+				return GL_ONE;
+			}
+			else if (blend == BlendFactor::SrcColor) {
+				return GL_SRC_COLOR;
+			}
+			else if (blend == BlendFactor::OneMinusSrcColor) {
+				return GL_ONE_MINUS_SRC_COLOR;
+			}
+			else if (blend == BlendFactor::DstColor) {
+				return GL_DST_COLOR;
+			}
+			else if (blend == BlendFactor::OneMinusDestColor) {
+				return GL_ONE_MINUS_DST_COLOR;
+			}
+			else if (blend == BlendFactor::SrcAlpha) {
+				return GL_SRC_ALPHA;
+			}
+			else if (blend == BlendFactor::OneMinusSrcAlpha) {
+				return GL_ONE_MINUS_SRC_ALPHA;
+			}
+			else if (blend == BlendFactor::DstAlpha) {
+				return GL_DST_ALPHA;
+			}
+			else if (blend == BlendFactor::OneMinusdstAlpha) {
+				return GL_ONE_MINUS_DST_ALPHA;
+			}
+			else if (blend == BlendFactor::ConstantColor) {
+				return GL_CONSTANT_COLOR;
+			}
+			else if (blend == BlendFactor::OneMinusConstantColor) {
+				return GL_ONE_MINUS_CONSTANT_COLOR;
+			}
+			else if (blend == BlendFactor::ConstantAlpha) {
+				return GL_CONSTANT_ALPHA;
+			}
+			else if (blend == BlendFactor::OneMinusConstantAlpha) {
+				return GL_ONE_MINUS_CONSTANT_ALPHA;
+			}
+			else if (blend == BlendFactor::SrcAlphaSaturate) {
+				return GL_SRC_ALPHA_SATURATE;
+			}
+			else if (blend == BlendFactor::Src1Color) {
+				return GL_SRC1_COLOR;
+			}
+			else if (blend == BlendFactor::OneMinusSrc1Color) {
+				return GL_ONE_MINUS_SRC1_COLOR;
+			}
+			else if (blend == BlendFactor::Src1Alpha) {
+				return GL_SRC1_ALPHA;
+			}
+			else if (blend == BlendFactor::OneMinusSrc1Alpha) {
+				return GL_ONE_MINUS_SRC1_ALPHA;
+			}
+
+			return GL_INVALID_ENUM;
 		}
 
-		inline BlendFactor EnumToBlendFactor(GLenum rgb, GLenum a) {
-			// TODO
+		inline BlendFactor EnumToBlendFactor(GLenum rgb, GLenum blend) {
+			if (blend == GL_ZERO) {
+				return BlendFactor::Zero;
+			}
+			else if (blend == GL_ONE) {
+				return BlendFactor::One;
+			}
+			else if (blend == GL_SRC_COLOR) {
+				return BlendFactor::SrcColor;
+			}
+			else if (blend == GL_ONE_MINUS_SRC_COLOR) {
+				return BlendFactor::OneMinusSrcColor;
+			}
+			else if (blend == GL_DST_COLOR) {
+				return BlendFactor::DstColor;
+			}
+			else if (blend == GL_ONE_MINUS_DST_COLOR) {
+				return BlendFactor::OneMinusDestColor;
+			}
+			else if (blend == GL_SRC_ALPHA) {
+				return BlendFactor::SrcAlpha;
+			}
+			else if (blend == GL_ONE_MINUS_SRC_ALPHA) {
+				return BlendFactor::OneMinusSrcAlpha;
+			}
+			else if (blend == GL_DST_ALPHA) {
+				return BlendFactor::DstAlpha;
+			}
+			else if (blend == GL_ONE_MINUS_DST_ALPHA) {
+				return BlendFactor::OneMinusdstAlpha;
+			}
+			else if (blend == GL_CONSTANT_COLOR) {
+				return BlendFactor::ConstantColor;
+			}
+			else if (blend == GL_ONE_MINUS_CONSTANT_COLOR) {
+				return BlendFactor::OneMinusConstantColor;
+			}
+			else if (blend == GL_CONSTANT_ALPHA) {
+				return BlendFactor::ConstantAlpha;
+			}
+			else if (blend == GL_ONE_MINUS_CONSTANT_ALPHA) {
+				return BlendFactor::OneMinusConstantAlpha;
+			}
+			else if (blend == GL_SRC_ALPHA_SATURATE) {
+				return BlendFactor::SrcAlphaSaturate;
+			}
+			else if (blend == GL_SRC1_COLOR) {
+				return BlendFactor::Src1Color;
+			}
+			else if (blend == GL_ONE_MINUS_SRC1_COLOR) {
+				return  BlendFactor::OneMinusSrc1Color;
+			}
+			else if (blend == GL_SRC1_ALPHA) {
+				return BlendFactor::Src1Alpha;
+			}
+			else if (blend == GL_ONE_MINUS_SRC1_ALPHA) {
+				return BlendFactor::OneMinusSrc1Alpha;
+			}
+
+			return BlendFactor::Disabled;
 		}
 
 		inline GLenum DrawModeToEnum(DrawMode mode) {
-			// TODO
+			if (mode == DrawMode::Points) {
+				return GL_POINTS;
+			}
+			else if (mode == DrawMode::LineStrip) {
+				return GL_LINE_STRIP;
+			}
+			else if (mode == DrawMode::LineLoop) {
+				return GL_LINE_LOOP;
+			}
+			else if (mode == DrawMode::Lines) {
+				return GL_LINES;
+			}
+			else if (mode == DrawMode::TriangleStrip) {
+				return GL_TRIANGLE_STRIP;
+			}
+			else if (mode == DrawMode::TriangleFan) {
+				return GL_TRIANGLE_FAN;
+			}
+			return GL_TRIANGLES;
 		}
 	}
 }
@@ -477,7 +667,8 @@ void Renderer::OGL33Context::ApplyRasterState(const IRasterState* state) {
 				glEnable(GL_BLEND);
 				mBlendingEnabled = true;
 			}
-			glBlendFunc(src, dst);
+			//glBlendFunc(src, dst);
+			glBlendFuncSeparate(src, src, dst, dst);
 		}
 		else {
 			if (mBlendingEnabled) {

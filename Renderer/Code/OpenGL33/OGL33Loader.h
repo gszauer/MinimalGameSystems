@@ -1,7 +1,7 @@
 #ifndef _H_OGL33LOADER_
 #define _H_OGL33LOADER_
 
-// TODO: Make sure these are not double defed in other loaders
+// TODO: Condense this entire header into a namespace. Renderer::OGL33::
 
 #ifdef _WIN64
 typedef signed   long long int khronos_intptr_t;
@@ -31,8 +31,6 @@ typedef char GLchar;
 typedef khronos_int64_t GLint64;
 typedef unsigned char GLboolean;
 typedef unsigned int GLbitfield;
-
-// TODO: namespace ALL of thse to avoid collisions with actual types
 
 typedef void (*PFNGLGENBUFFERSPROC)(GLsizei n, GLuint* buffers);
 extern PFNGLGENBUFFERSPROC glGenBuffers;
@@ -286,6 +284,12 @@ extern PFNGLGETINTEGERVPROC glGetIntegerv;
 typedef void (* PFNGLGETFLOATVPROC)(GLenum pname, GLfloat* data);
 extern PFNGLGETFLOATVPROC glGetFloatv;
 
+typedef void (* PFNGLBLENDFUNCSEPARATEPROC)(GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha);
+extern PFNGLBLENDFUNCSEPARATEPROC glBlendFuncSeparate;
+
+typedef void (* PFNGLGETTEXIMAGEPROC)(GLenum target, GLint level, GLenum format, GLenum type, void* pixels);
+extern PFNGLGETTEXIMAGEPROC glGetTexImage;
+
 typedef const char* (__stdcall* PFNWGLGETEXTENSIONSSTRINGEXTPROC) (void);
 extern PFNWGLGETEXTENSIONSSTRINGEXTPROC wglGetExtensionsStringEXT;
 
@@ -416,5 +420,44 @@ extern PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT;
 #define GL_BLEND_SRC_ALPHA 0x80CB
 #define GL_LINE_WIDTH 0x0B21
 #define GL_POINT_SIZE 0x0B11
+#define GL_POINTS 0x0000
+#define GL_LINES 0x0001
+#define GL_LINE_LOOP 0x0002
+#define GL_LINE_STRIP 0x0003
+#define GL_TRIANGLES 0x0004
+#define GL_TRIANGLE_STRIP 0x0005
+#define GL_TRIANGLE_FAN 0x0006
+#define GL_UNSIGNED_SHORT 0x1403
+#define GL_POINT 0x1B00
+#define GL_LINE 0x1B01
+#define GL_FILL 0x1B02
+#define GL_FRONT 0x0404
+#define GL_BACK 0x0405
+#define GL_LEFT 0x0406
+#define GL_RIGHT 0x0407
+#define GL_FRONT_AND_BACK 0x0408
+#define GL_INVALID_ENUM 0x0500
+#define GL_CW 0x0900
+#define GL_CCW 0x0901
+#define GL_ZERO 0
+#define GL_ONE 1
+#define GL_SRC_COLOR 0x0300
+#define GL_ONE_MINUS_SRC_COLOR 0x0301
+#define GL_SRC_ALPHA 0x0302
+#define GL_ONE_MINUS_SRC_ALPHA 0x0303
+#define GL_DST_ALPHA 0x0304
+#define GL_ONE_MINUS_DST_ALPHA 0x0305
+#define GL_DST_COLOR 0x0306
+#define GL_ONE_MINUS_DST_COLOR 0x0307
+#define GL_SRC_ALPHA_SATURATE 0x0308
+#define GL_CONSTANT_COLOR 0x8001
+#define GL_ONE_MINUS_CONSTANT_COLOR 0x8002
+#define GL_CONSTANT_ALPHA 0x8003
+#define GL_ONE_MINUS_CONSTANT_ALPHA 0x8004
+#define GL_SRC1_COLOR 0x88F9
+#define GL_ONE_MINUS_SRC1_COLOR 0x88FA
+#define GL_ONE_MINUS_SRC1_ALPHA 0x88FB
+#define GL_SRC1_ALPHA 0x8589
+
 
 #endif // !_H_OGL33LOADER_

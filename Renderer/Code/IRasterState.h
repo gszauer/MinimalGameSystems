@@ -1,8 +1,6 @@
 #ifndef _H_IRASTERSTATE_
 #define _H_IRASTERSTATE_
 
-// TODO: Redo all enums to be power of twos!
-
 namespace Renderer {
 	enum class FillMode {
 		Point = 0,
@@ -34,7 +32,7 @@ namespace Renderer {
 	};
 
 	enum class BlendFactor {
-		Disabled = 0,
+		Disabled = 0, // TODO: Disabled effects Get/Set. When getting current raw state, set it AFTER getting the enum value! Other similar structs exist@
 		Zero = 1,
 		One = 2,
 		SrcColor = 3,

@@ -28,7 +28,7 @@ namespace Renderer {
 	public:
 		virtual inline ~ITexture() { }
 		virtual void Set(unsigned int width, unsigned int height, TextureType type, const void* data = 0, bool mips = false) = 0; // Data CAN be 0 to make empty texture
-		virtual void Update(unsigned int x, unsigned int y, unsigned int width, unsigned int height, TextureType type, const void* data) = 0;
+		virtual void Update(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const void* data) = 0;
 		
 		virtual bool HasMips() const = 0;
 		virtual void GenerateMips() = 0;
@@ -36,6 +36,9 @@ namespace Renderer {
 		virtual unsigned int GetWidth() const = 0;
 		virtual unsigned int GetHeight() const = 0;
 		virtual TextureType GetType() const = 0;
+
+		virtual unsigned int GetSizeInBytes() const = 0;
+		virtual void GetData(void* target, unsigned int level = 0) const = 0;
 
 		virtual const ITextureSampler* CreateSampler(TextureWrapMode s = TextureWrapMode::Repeat, TextureWrapMode t = TextureWrapMode::Repeat, MinFilterType min = MinFilterType::NearestMipMapLinear, MagFilterType mag = MagFilterType::Linear) const = 0;
 		virtual void DestroySampler(const ITextureSampler* sampler) const = 0;

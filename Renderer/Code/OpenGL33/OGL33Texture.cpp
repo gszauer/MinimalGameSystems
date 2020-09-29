@@ -4,12 +4,6 @@
 #include "OGL33Context.h"
 #include "../ITexture.h"
 
-namespace Renderer {
-	namespace OGL33Internal {
-		unsigned int BytesPerComponent(TextureType type); // TODO: Implement this
-	}
-}
-
 Renderer::OGL33Texture::OGL33Texture(const IContext& owner) {
 	mOwner = (const OGL33Context*)&owner;
 	mWidth = 0;
@@ -79,26 +73,26 @@ void Renderer::OGL33Texture::Set(unsigned int width, unsigned int height, Textur
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Renderer::OGL33Texture::Update(unsigned int x, unsigned int y, unsigned int width, unsigned int height, TextureType type, const void* data) {
+void Renderer::OGL33Texture::Update(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const void* data) {
 	GLenum format = 0;
 	GLenum dataType = GL_UNSIGNED_BYTE;
 	
-	if (type == TextureType::RGB) {
+	if (mType == TextureType::RGB) {
 		format = GL_RGB;
 	}
-	else if (type == TextureType::RGB32) {
+	else if (mType == TextureType::RGB32) {
 		format = GL_RGB32F;
 	}
-	else if (type == TextureType::RGBA) {
+	else if (mType == TextureType::RGBA) {
 		format = GL_RGBA;
 	}
-	else if (type == TextureType::RGBA32) {
+	else if (mType == TextureType::RGBA32) {
 		format = GL_RGBA32F;
 	}
-	else if (type == TextureType::R) {
+	else if (mType == TextureType::R) {
 		format = GL_RED;
 	}
-	else if (type == TextureType::R32) {
+	else if (mType == TextureType::R32) {
 		format = GL_R32F;
 	}
 	else if (mType == TextureType::Depth) {
@@ -158,4 +152,73 @@ void Renderer::OGL33Texture::DestroySampler(const ITextureSampler* sampler) cons
 
 const Renderer::IContext* Renderer::OGL33Texture::GetOwner() const {
 	return mOwner;
+}
+
+GLuint Renderer::OGL33Texture::GetHandle() const {
+	return mTexture;
+}
+
+unsigned int Renderer::OGL33Texture::GetSizeInBytes() const {
+	unsigned int bytesPerPixel = 0;
+	if (mType == TextureType::RGB) {
+		bytesPerPixel = 3;
+	}
+	else if (mType == TextureType::RGB32) {
+		bytesPerPixel = 3 * 4;
+	}
+	else if (mType == TextureType::RGBA) {
+		bytesPerPixel = 4;
+	}
+	else if (mType == TextureType::RGBA32) {
+		bytesPerPixel = 4 * 4;
+	}
+	else if (mType == TextureType::R) {
+		bytesPerPixel = 1;
+	}
+	else if (mType == TextureType::R32) {
+		bytesPerPixel = 1 * 4;
+	}
+	else if (mType == TextureType::Depth) {
+		bytesPerPixel = 1 * 4;
+	}
+	else { // type == TextureType::DepthStencil
+		bytesPerPixel = 1 * 4;
+	}
+
+	return mWidth * mHeight * bytesPerPixel;
+}
+
+void Renderer::OGL33Texture::GetData(void* target, unsigned int level) const {
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mTexture);
+
+	GLenum format = 0;
+	GLenum dataType = GL_UNSIGNED_BYTE;
+
+	if (mType == TextureType::RGB) {
+		format = GL_RGB;
+	}
+	else if (mType == TextureType::RGB32) {
+		format = GL_RGB32F;
+	}
+	else if (mType == TextureType::RGBA) {
+		format = GL_RGBA;
+	}
+	else if (mType == TextureType::RGBA32) {
+		format = GL_RGBA32F;
+	}
+	else if (mType == TextureType::R) {
+		format = GL_RED;
+	}
+	else if (mType == TextureType::R32) {
+		format = GL_R32F;
+	}
+	else if (mType == TextureType::Depth) {
+		format = GL_DEPTH_COMPONENT;
+	}
+	else { // type == TextureType::DepthStencil
+		format = GL_DEPTH_STENCIL;
+	}
+
+	glGetTexImage(GL_TEXTURE_2D, level, format, dataType, target);
 }

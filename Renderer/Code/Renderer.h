@@ -15,11 +15,13 @@
 namespace Renderer {
 	class OGL33Context;
 
-	OGL33Context* Win32CreateOpenGL33Context(); // TODO: Figure out args
+	// TODO: Get to a compileable state, then figute out this interface!
+
+	OGL33Context* Win32CreateOpenGL33Context(); 
 	void Win32DestroyOpenGL33Context(const OGL33Context*);
 
-	void Win32InitOpenGL33(); // TODO: Figure out args
-	void Win32ShutdownOpenGL33(); // TODO: Figure out args
+	void Win32InitOpenGL33();
+	void Win32ShutdownOpenGL33();
 }
 
 #endif

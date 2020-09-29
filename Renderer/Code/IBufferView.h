@@ -7,7 +7,7 @@ namespace Renderer {
 		Int = 1,
 		UInt = 2,
 		UShort = 4,
-		UByte = 5,
+		UByte = 5
 	};
 
 	class IBufferData;
