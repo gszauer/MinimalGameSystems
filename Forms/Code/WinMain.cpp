@@ -122,6 +122,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 			gRenderer->Draw(Forms::Rect(3, 123, 300, 25), Forms::Color(0, 0, 255));
 			gRenderer->Draw(Forms::Rect(310, 78, 50, 149), Forms::Color(255, 0, 255));
 
+			Forms::Box b1(Forms::Rect(400 - 150, 300 - 75, 300, 150));
+			Forms::Box b2(Forms::Rect(800-100 - 20, 600 - 100 - 20, 100, 100));
+
+			b1.mMargin = Forms::Offset(13, 13, 23, 23);
+			b1.mBorder = Forms::Offset(1, 1, 1, 5);
+			b1.mPadding = Forms::Offset(40, 40, 10, 10);
+
+			b2.mMargin = Forms::Offset(15, 15, 15, 15);
+			b2.mBorder = Forms::Offset(3, 3, 3, 3);
+			b2.mPadding = Forms::Offset(10, 10, 10, 10);
+
+			gRenderer->Draw(b1);
+			gRenderer->Draw(b2);
+
 			gRenderer->Flush(); // To avoid Present calling Flush and doing work
 
 			gRenderer->Present();

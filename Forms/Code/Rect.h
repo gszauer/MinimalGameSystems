@@ -1,14 +1,33 @@
 #ifndef _H_RECT_
 #define _H_RECT_
 
+#include "Position.h"
+#include "Size.h"
+
 namespace Forms {
 	struct Rect {
-		int x;
-		int y;
-		int width;
-		int height;
+		union  {
+			struct {
+				int x;
+				int y;
+			};
+			Position position;
+		};
+		
+		union {
+			struct {
+				unsigned int width;
+				unsigned int height;
+			};
+			Size size;
+		};
+		
+		inline Rect(int _x = 0, int _y = 0, unsigned int _w = 0, unsigned int _h = 0) : x(_x), y(_y), width(_w), height(_h) { }
+		inline Rect(const Position& pos, const Size& siz = Size(0, 0)) : position(pos), size(siz) { }
 
-		inline Rect(int _x = 0, int _y = 0, int _w = 0, int _h = 0) : x(_x), y(_y), width(_w), height(_h) { }
+		inline unsigned int Area() const {
+			return size.width * size.height;
+		}
 	};
 
 #if 0

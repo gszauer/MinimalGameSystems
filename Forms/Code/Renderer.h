@@ -3,6 +3,7 @@
 
 #include "Rect.h"
 #include "Color.h"
+#include "Box.h"
 #include <vector>
 #include <unordered_map>
 
@@ -110,6 +111,52 @@ namespace Forms {
 			mRectangles[mCacheLength].bottom = rect.y + rect.height;
 			mColors[mCacheLength] = RGB(color.r, color.g, color.b);
 			mCacheLength += 1;
+		}
+
+		inline void Draw(const Box& box, const Color& marginColor = Color(185, 155, 25), const Color& borderolor = Color(95, 95, 95), const Color& paddingColor = Color(125, 65, 185), const Color& contentColor = Color(35, 115, 145)) { // TODO: Default values for colors
+			Rect layout = box.GetLayoutRect();
+
+			Color colors[3] = {
+				marginColor,
+				borderolor,
+				paddingColor
+			};
+
+			for (int i = 0; i < 3; ++i) {
+				Offset style = box.mStyle[i];
+				if (style.Total() > 0) {
+					Rect top = layout;
+					top.height = style.top;
+					Draw(top, colors[i]);
+
+					Rect bottom = layout;
+					bottom.y = (bottom.y + bottom.height) - style.bottom;
+					bottom.height = style.bottom;
+					Draw(bottom, colors[i]);
+
+					Rect left = layout;
+					left.width = style.left;
+					left.y += style.top;
+					left.height -= style.top + style.bottom;
+					Draw(left, colors[i]);
+
+					Rect right = layout;
+					right.x = (right.x + right.width) - style.right;
+					right.width = style.right;
+					right.y += style.top;
+					right.height -= style.top + style.bottom;
+					Draw(right, colors[i]);
+
+					layout.x += style.left;
+					layout.y += style.top;
+					layout.width -= style.left + style.right;
+					layout.height -= style.top + style.bottom;
+				}
+			}
+
+			if (layout.Area() > 0) {
+				Draw(layout, contentColor);
+			}
 		}
 	};
 }

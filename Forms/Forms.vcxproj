@@ -138,10 +138,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Code\Box.h" />
     <ClInclude Include="Code\Color.h" />
     <ClInclude Include="Code\Form.h" />
+    <ClInclude Include="Code\Offset.h" />
+    <ClInclude Include="Code\Position.h" />
     <ClInclude Include="Code\Rect.h" />
     <ClInclude Include="Code\Renderer.h" />
+    <ClInclude Include="Code\Size.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\WinMain.cpp" />
