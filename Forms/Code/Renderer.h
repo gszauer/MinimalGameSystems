@@ -130,7 +130,7 @@ namespace Forms {
 			};
 
 			for (int i = 0; i < 3; ++i) {
-				Offset style = box.mStyle[i];
+				Offset style = box.mOffsets[i];
 				if (style.Total() != 0) {
 					Rect top = layout;
 					top.height = style.top;

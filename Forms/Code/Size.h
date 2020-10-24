@@ -11,7 +11,7 @@ namespace Forms {
 			unsigned int size[2];
 		};
 
-		inline Size(unsigned int w, unsigned int h) : width(w), height(h) { }
+		inline Size(unsigned int w = 0, unsigned int h = 0) : width(w), height(h) { }
 	};
 }
 

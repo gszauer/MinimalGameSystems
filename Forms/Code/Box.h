@@ -11,9 +11,9 @@
 #define Box_ApplyDeltaToStyle(_side, _delta) \
 for (int _style_i = 0; _style_i < 3; ++_style_i) { \
 	if (_delta <= 0) { break; } \
-	int min = std::min<int>(CONCAT(result.mStyle[_style_i]., _side), _delta); \
+	int min = std::min<int>(CONCAT(result.mOffsets[_style_i]., _side), _delta); \
 	_delta -= min; \
-	CONCAT(result.mStyle[_style_i]., _side) -= min; \
+	CONCAT(result.mOffsets[_style_i]., _side) -= min; \
 }
 
 namespace Forms {
@@ -26,7 +26,7 @@ namespace Forms {
 				Offset mBorder;
 				Offset mPadding;
 			};
-			Offset mStyle[3];
+			Offset mOffsets[3];
 		};
 
 		inline Box(const Rect& content = Rect(0, 0, 0, 0), const Offset& margin = Offset(0, 0, 0, 0),
@@ -116,6 +116,18 @@ namespace Forms {
 			}
 
 			return result;
+		}
+
+		inline void AdjustToLayoutRect(const Rect& layout) {
+			int left = layout.x + mMargin.left + mBorder.left + mPadding.left;
+			int top = layout.y + mMargin.top + mBorder.top + mPadding.top;
+			int right = (layout.x + layout.width) - (mMargin.right + mBorder.right + mPadding.right);
+			int bottom = (layout.y + layout.height) - (mMargin.bottom + mBorder.bottom + mPadding.bottom);
+
+			mContentRect.x = left;
+			mContentRect.y = top;
+			mContentRect.width = right - left;
+			mContentRect.height = bottom - top;
 		}
 	};
 }

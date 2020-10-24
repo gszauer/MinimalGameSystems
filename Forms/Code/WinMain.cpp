@@ -121,6 +121,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 			gRenderer->Draw(Forms::Rect(3, 123, 300, 25), Forms::Color(0, 0, 255));
 			gRenderer->Draw(Forms::Rect(310, 78, 50, 149), Forms::Color(255, 0, 255));
 
+			gRenderer->Clear(Forms::Color(125, 175, 225));
+
 			Forms::Box b1(Forms::Rect(400 - 150, 300 - 75, 300, 150));
 			Forms::Box b2(Forms::Rect(800-100 - 20, 600 - 100 - 20, 100, 100));
 
@@ -152,7 +154,37 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 
 			root.SetOverflow(Forms::Control::Overflow::Hidden);
 			a.SetOverflow(Forms::Control::Overflow::Hidden);
-			// TODO: Draw order is probably wrong. IE try to interweave
+
+			gRenderer->Draw(root);
+
+			gRenderer->Clear(Forms::Color(125, 175, 225));
+
+			// Docking tests
+			root = Forms::Control(0, Forms::Box(Forms::Rect(50, 50, 400, 300), Forms::Offset(10, 10, 10, 10), Forms::Offset(2, 2, 2, 2), Forms::Offset(5, 5, 5, 5)));
+			a = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(0, 0, 0, 0), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+			b = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(0, 0, 0, 0), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+			c = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(0, 0, 0, 0), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+			d = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 50, 50), Forms::Offset(0, 0, 0, 0), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+			e = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 50, 50), Forms::Offset(0, 0, 0, 0), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+			f = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(0, 0, 0, 0), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+			g = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(0, 0, 0, 0), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+			a.SetParent(&root);
+			a.SetDocking(Forms::Control::Docking::Left);
+			b.SetParent(&root);
+			b.SetDocking(Forms::Control::Docking::Bottom);
+			c.SetParent(&root);
+			f.SetDocking(Forms::Control::Docking::Top);
+			f.SetParent(&root);
+			c.SetDocking(Forms::Control::Docking::Top);
+			d.SetParent(&root);
+			d.SetDocking(Forms::Control::Docking::Right);
+			g.SetParent(&root);
+			g.SetDocking(Forms::Control::Docking::Bottom);
+			e.SetParent(&root);
+			e.SetDocking(Forms::Control::Docking::Fill);
+			b.SetMaxLayoutSize(Forms::Size(22, 22));
+			c.SetMaxLayoutSize(Forms::Size(22, 22));
+			g.SetMaxLayoutSize(Forms::Size(22, 22));
 
 			gRenderer->Draw(root);
 
