@@ -3,8 +3,13 @@
 
 namespace Forms {
 	struct Size {
-		unsigned int width;
-		unsigned int height;
+		union {
+			struct {
+				unsigned int width;
+				unsigned int height;
+			};
+			unsigned int size[2];
+		};
 
 		inline Size(unsigned int w, unsigned int h) : width(w), height(h) { }
 	};

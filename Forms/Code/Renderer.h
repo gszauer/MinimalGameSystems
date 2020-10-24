@@ -4,7 +4,9 @@
 #include "Rect.h"
 #include "Color.h"
 #include "Box.h"
+#include "Control.h"
 #include <vector>
+#include <list>
 #include <unordered_map>
 
 #undef APIENTRY
@@ -71,6 +73,9 @@ namespace Forms {
 		inline void Present() {
 			Flush();
 
+			PAINTSTRUCT ps;
+			BeginPaint(mHwnd, &ps);
+
 			RECT clientRect;
 			GetClientRect(mHwnd, &clientRect);
 			unsigned int clientWidth = clientRect.right - clientRect.left;
@@ -79,6 +84,8 @@ namespace Forms {
 			HBITMAP defaultBackBuffer = (HBITMAP)SelectObject(mMemoryDc, mBackBuffer);
 			BitBlt(mHdc, 0, 0, clientWidth, clientHeight, mMemoryDc, 0, 0, SRCCOPY);
 			SelectObject(mMemoryDc, defaultBackBuffer);
+
+			EndPaint(mHwnd, &ps);
 		}
 
 		inline void Flush() {
@@ -113,7 +120,7 @@ namespace Forms {
 			mCacheLength += 1;
 		}
 
-		inline void Draw(const Box& box, const Color& marginColor = Color(185, 155, 25), const Color& borderolor = Color(95, 95, 95), const Color& paddingColor = Color(125, 65, 185), const Color& contentColor = Color(35, 115, 145)) { // TODO: Default values for colors
+		inline void Draw(const Box& box, const Color& marginColor = Color(185, 155, 25), const Color& borderolor = Color(55, 55, 55), const Color& paddingColor = Color(125, 65, 185), const Color& contentColor = Color(35, 115, 145)) { // TODO: Default values for colors
 			Rect layout = box.GetLayoutRect();
 
 			Color colors[3] = {
@@ -124,7 +131,7 @@ namespace Forms {
 
 			for (int i = 0; i < 3; ++i) {
 				Offset style = box.mStyle[i];
-				if (style.Total() > 0) {
+				if (style.Total() != 0) {
 					Rect top = layout;
 					top.height = style.top;
 					Draw(top, colors[i]);
@@ -156,6 +163,22 @@ namespace Forms {
 
 			if (layout.Area() > 0) {
 				Draw(layout, contentColor);
+			}
+		}
+
+		inline void Draw(const Control& control, const Color& marginColor = Color(185, 155, 25), const Color& borderolor = Color(55, 55, 55), const Color& paddingColor = Color(125, 65, 185), const Color& contentColor = Color(35, 115, 145)) { // TODO: Default values for colors
+			Box absoluteBox = control.GetAbsoluteBox();
+			if (absoluteBox.GetLayoutRect().Area() > 0) {
+				Draw(absoluteBox, marginColor, borderolor, paddingColor, contentColor);
+
+				// Push kids
+				unsigned int numKids = (unsigned int)control.GetNumChildren();
+				for (unsigned int kid = 0; kid < numKids; ++kid) {
+					Control* child = control.GetChild(kid);
+					if (child != 0) {
+						Draw(*child, marginColor, borderolor, paddingColor, contentColor);
+					}
+				}
 			}
 		}
 	};

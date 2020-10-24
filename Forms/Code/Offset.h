@@ -3,15 +3,20 @@
 
 namespace Forms {
 	struct Offset {
-		unsigned int left;
-		unsigned int top;
-		unsigned int right;
-		unsigned int bottom;
+		union {
+			struct {
+				int left;
+				int top;
+				int right;
+				int bottom;
+			};
+			int offsets[4];
+		};
 
-		inline Offset(unsigned int l = 0, unsigned int t = 0, unsigned int r = 0, unsigned int b = 0) :
+		inline Offset(int l = 0, int t = 0, int r = 0, int b = 0) :
 			left(l), top(t), right(r), bottom(b) { }
 
-		inline unsigned int Total() const {
+		inline int Total() const {
 			return left + top + right + bottom;
 		}
 	};

@@ -28,6 +28,22 @@ namespace Forms {
 		inline unsigned int Area() const {
 			return size.width * size.height;
 		}
+
+		inline int GetLeft() const {
+			return x;
+		}
+
+		inline int GetTop() const {
+			return y;
+		}
+
+		inline int GetRight() const {
+			return x + (int)width;
+		}
+
+		inline int GetBottom() const {
+			return y + (int)height;
+		}
 	};
 
 #if 0

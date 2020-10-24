@@ -32,6 +32,7 @@ int main(int argc, const char** argv) {
 #pragma comment(lib, "opengl32.lib")
 
 #include "Renderer.h"
+#include "Control.h"
 Forms::Renderer* gRenderer;
 
 
@@ -112,9 +113,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_MOUSEWHEEL:
 		return 1;
 	case WM_PAINT:
-		PAINTSTRUCT ps;
 		if (gRenderer != 0) {
-			BeginPaint(hwnd, &ps);
 			gRenderer->Clear(Forms::Color(125, 175, 225));
 
 			gRenderer->Draw(Forms::Rect(10, 10, 150, 50), Forms::Color(255, 0, 0));
@@ -136,10 +135,28 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 			gRenderer->Draw(b1);
 			gRenderer->Draw(b2);
 
-			gRenderer->Flush(); // To avoid Present calling Flush and doing work
+			gRenderer->Clear(Forms::Color(125, 175, 225));
+
+			// Clipping test
+			Forms::Control root(0,	Forms::Box(Forms::Rect(50, 50, 500, 200),		Forms::Offset(5, 5, 5, 5),		Forms::Offset(1, 1, 1, 1),	Forms::Offset(5, 5, 5, 5)));
+			Forms::Control a(&root, Forms::Box(Forms::Rect(100, 10, 300, 300),	Forms::Offset(0, 0, 0, 5),		Forms::Offset(1, 1, 1, 1),	Forms::Offset(3, 3, 3, 3)));
+			Forms::Control b(&a,	Forms::Box(Forms::Rect(-150, 150, 500, 50),	Forms::Offset(5, 5, 5, 5),		Forms::Offset(1, 1, 1, 1),	Forms::Offset(4, 3, 2, 1)));
+			Forms::Control c(&root, Forms::Box(Forms::Rect(300, 10, 400, 10),	Forms::Offset(10, 10, 10, 10),	Forms::Offset(1, 1, 1, 1),	Forms::Offset(3, 3, 3, 3)));
+			Forms::Control d(&c,	Forms::Box(Forms::Rect(-150, 10, 50, 50),	Forms::Offset(5, 5, 5, 5),		Forms::Offset(1, 1, 1, 1),	Forms::Offset(10, 10, 10, 10)));
+			Forms::Control e(&c, Forms::Box(Forms::Rect(0, 50, 5, 5), Forms::Offset(10, 10, 10, 10), Forms::Offset(1, 1, 1, 1), Forms::Offset(1, 2, 3, 4)));
+			Forms::Control f(&root, Forms::Box(Forms::Rect(0, 30, 5, 5), Forms::Offset(5, 5, 5, 5), Forms::Offset(5, 5, 5, 5), Forms::Offset(5, 5, 5, 5)));
+			Forms::Control g(&root, Forms::Box(Forms::Rect(5, 50, 5, 5), Forms::Offset(5, 5, 5, 5), Forms::Offset(5, 5, 5, 5), Forms::Offset(5, 5, 5, 5)));
+			Forms::Control h(&root, Forms::Box(Forms::Rect(10, 70, 5, 5), Forms::Offset(5, 5, 5, 5), Forms::Offset(5, 5, 5, 5), Forms::Offset(5, 5, 5, 5)));
+			Forms::Control i(&root, Forms::Box(Forms::Rect(15, 90, 5, 5), Forms::Offset(5, 5, 5, 5), Forms::Offset(5, 5, 5, 5), Forms::Offset(5, 5, 5, 5)));
+			Forms::Control j(&a, Forms::Box(Forms::Rect(150, -150, 50, 500), Forms::Offset(5, 5, 5, 5), Forms::Offset(1, 1, 1, 1), Forms::Offset(4, 3, 2, 1)));
+
+			root.SetOverflow(Forms::Control::Overflow::Hidden);
+			a.SetOverflow(Forms::Control::Overflow::Hidden);
+			// TODO: Draw order is probably wrong. IE try to interweave
+
+			gRenderer->Draw(root);
 
 			gRenderer->Present();
-			EndPaint(hwnd, &ps);
 		}
 		return 1;
 	case WM_ERASEBKGND:
