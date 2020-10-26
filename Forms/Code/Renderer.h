@@ -120,7 +120,7 @@ namespace Forms {
 			mCacheLength += 1;
 		}
 
-		inline void Draw(const Box& box, const Color& marginColor = Color(185, 155, 25), const Color& borderolor = Color(55, 55, 55), const Color& paddingColor = Color(125, 65, 185), const Color& contentColor = Color(35, 115, 145)) { // TODO: Default values for colors
+		inline void Draw(const Box& box, const Color& marginColor = Color(185, 155, 25), const Color& borderolor = Color(55, 55, 55), const Color& paddingColor = Color(125, 65, 185), const Color& contentColor = Color(35, 115, 145)) {
 			Rect layout = box.GetLayoutRect();
 
 			Color colors[3] = {
@@ -130,7 +130,7 @@ namespace Forms {
 			};
 
 			for (int i = 0; i < 3; ++i) {
-				Offset style = box.mOffsets[i];
+				Offset style = box.offsets[i];
 				if (style.Total() != 0) {
 					Rect top = layout;
 					top.height = style.top;
@@ -166,8 +166,8 @@ namespace Forms {
 			}
 		}
 
-		inline void Draw(const Control& control, const Color& marginColor = Color(185, 155, 25), const Color& borderolor = Color(55, 55, 55), const Color& paddingColor = Color(125, 65, 185), const Color& contentColor = Color(35, 115, 145)) { // TODO: Default values for colors
-			Box absoluteBox = control.GetAbsoluteBox();
+		inline void Draw(const Control& control, const Color& marginColor = Color(185, 155, 25), const Color& borderolor = Color(55, 55, 55), const Color& paddingColor = Color(125, 65, 185), const Color& contentColor = Color(35, 115, 145)) {
+			Box absoluteBox = control.GetAbsoluteLayoutClipped();
 			if (absoluteBox.GetLayoutRect().Area() > 0) {
 				Draw(absoluteBox, marginColor, borderolor, paddingColor, contentColor);
 
