@@ -2,6 +2,8 @@
 #define _H_CONTROL_
 
 #include "Box.h"
+#include "Style.h"
+
 #include <vector>
 
 namespace Forms {
@@ -21,12 +23,11 @@ namespace Forms {
 			Right,
 			Fill
 		};
-	protected:
+	private:
 		Box mRelativeLayout;
 
-		Box mAbsoluteLayoutUnClipped; // Absolute (Rename to CachedAbsoluteLayout)
-		Box mAbsoluteLayoutClipped; // Absolute (Rename to CachedAbsoluteLayoutClipped)
-		// TODO: If layout is dirty, need to re-layout? (mAbsoluteLayoutDirty)
+		Box mAbsoluteLayoutUnClipped;
+		Box mAbsoluteLayoutClipped; 
 
 		Control* mParent;
 		std::vector<Control*> mChildren;
@@ -36,15 +37,26 @@ namespace Forms {
 		Docking mDocking;
 		Size mMinSize;
 		Size mMaxSize;
+
+		const Style* mStyle;
 	public:
-		inline Control(Control* parent = 0, const Box& box = Box()) : 
-			mRelativeLayout(box), mOverflow(Overflow::Visible), mDocking(Docking::None) {
+		inline Control(Control* parent = 0, const Box& box = Box(), Style* style = 0) :
+			mRelativeLayout(box), mOverflow(Overflow::Visible), mDocking(Docking::None)  {
 			mParent = 0;
+			mStyle = style;
 
 			if (parent != 0) {
 				SetParent(parent);
 			}
 
+		}
+
+		inline const Style* GetStyle() const {
+			return mStyle;
+		}
+
+		inline void SetStyle(const Style* style) {
+			mStyle = style;
 		}
 
 		inline void SetDocking(Docking dock) {
@@ -64,7 +76,6 @@ namespace Forms {
 		}
 
 		inline void SetRelativeLayout(const Box& box) {
-			// TODO: Mark dirty
 			mRelativeLayout = box;
 		}
 
@@ -88,32 +99,24 @@ namespace Forms {
 		}
 
 		inline void UpdateLayout(const Rect& layoutRect) {
-			mAbsoluteLayoutUnClipped = mRelativeLayout; // Copies margin and padding info
-			if (mDocking == Docking::Fill) {
+			if (layoutRect.Area() == 0) {
+				mAbsoluteLayoutUnClipped = Box();
+				return;
+			}
+
+			// Copies margin and padding info
+			mAbsoluteLayoutUnClipped = mRelativeLayout; 
+			
+			// No margin if docked
+			if (mDocking != Docking::None) {
 				mAbsoluteLayoutUnClipped.margin = Offset(0, 0, 0, 0);
 			}
-			else if (mDocking == Docking::Left) {
-				mAbsoluteLayoutUnClipped.margin.left = 0;
-				mAbsoluteLayoutUnClipped.margin.top = 0;
-				mAbsoluteLayoutUnClipped.margin.bottom = 0;
-			}
-			else if (mDocking == Docking::Top) {
-				mAbsoluteLayoutUnClipped.margin.left = 0;
-				mAbsoluteLayoutUnClipped.margin.top = 0;
-				mAbsoluteLayoutUnClipped.margin.right = 0;
-			}
-			else if (mDocking == Docking::Right) {
-				mAbsoluteLayoutUnClipped.margin.right = 0;
-				mAbsoluteLayoutUnClipped.margin.top = 0;
-				mAbsoluteLayoutUnClipped.margin.bottom = 0;
-			}
-			else if (mDocking == Docking::Bottom) {
-				mAbsoluteLayoutUnClipped.margin.left = 0;
-				mAbsoluteLayoutUnClipped.margin.bottom = 0;
-				mAbsoluteLayoutUnClipped.margin.right = 0;
-			}
+			
+			// Adjust content rect to fit into layout
 			mAbsoluteLayoutUnClipped.AdjustToLayoutRect(layoutRect);
-
+			
+			// Next, we will need to lay out all children. These are running numbers
+			// for the content rect that are used to lay out any children that dock.
 			Rect contentRect = mAbsoluteLayoutUnClipped.GetContentRect();
 			int dockLeft = contentRect.x;
 			int dockTop = contentRect.y;
@@ -132,12 +135,22 @@ namespace Forms {
 
 				if (childDock != Docking::None) {
 					if (childDock == Docking::Left) {
+						// Handle case where we might not have enough space
+						int width = childSize.width;
+						if (dockLeft + width > dockRight) {
+							int delta = std::max<int>(dockRight - (dockLeft + width), 0);
+							width -= std::min<int>(delta, width);;
+						}
+
 						childLayout.x = dockLeft;
 						childLayout.y = dockTop;
-						childLayout.width = childSize.width;
+						childLayout.width = width;
 						childLayout.height = (dockBottom > dockTop)? dockBottom - dockTop : 0;
 
-						dockLeft += childSize.width;
+						dockLeft += width;
+						if (dockLeft > dockRight) {
+							dockLeft = dockRight;
+						}
 					}
 					else if (childDock == Docking::Top) {
 						childLayout.x = dockLeft;
@@ -146,14 +159,27 @@ namespace Forms {
 						childLayout.height = childSize.height;
 
 						dockTop += childSize.height;
+						if (dockTop > dockBottom) {
+							dockTop = dockBottom;
+						}
 					}
 					else if (childDock == Docking::Right) {
-						childLayout.x = dockRight - childSize.width;
-						childLayout.y = dockTop;
-						childLayout.height = (dockBottom > dockTop)? dockBottom - dockTop : 0;
-						childLayout.width = childSize.width;
+						// Handle case where we might not have enough space
+						int width = childSize.width;
+						if (dockRight - width < dockLeft) {
+							int delta = std::max<int>(dockLeft - (dockRight - width), 0);
+							width -= std::min<int>(delta, width);;
+						}
 
-						dockRight -= childSize.width;
+						childLayout.x = dockRight - width;
+						childLayout.y = dockTop;
+						childLayout.height = (dockBottom > dockTop)? dockBottom - dockTop : 0; // Avoid underflow
+						childLayout.width = width;
+
+						dockRight -= width;
+						if (dockRight < dockLeft) {
+							dockRight = dockLeft;
+						}
 					}
 					else if (childDock == Docking::Bottom) {
 						childLayout.x = dockLeft;
@@ -162,6 +188,9 @@ namespace Forms {
 						childLayout.height = childSize.height;
 
 						dockBottom -= childSize.height;
+						if (dockBottom < dockTop) {
+							dockBottom = dockTop;
+						}
 					}
 					else if (childDock == Docking::Fill) {
 						childLayout.x = dockLeft;
@@ -176,8 +205,6 @@ namespace Forms {
 		}
 
 		inline void Clip(const Rect& clipRect, bool shouldClip = false) {
-			// TODO: Update layout only if dirty
-
 			mAbsoluteLayoutClipped = mAbsoluteLayoutUnClipped;
 			if (shouldClip) {
 				mAbsoluteLayoutClipped = mAbsoluteLayoutClipped.ClipTo(clipRect);
@@ -194,20 +221,15 @@ namespace Forms {
 			}
 		}
 
-		// TODO: The mark dirty functions, call them invalidate!
-
 		inline Box GetRelativeLayout() const {
 			return mRelativeLayout;
 		}
 
 		inline Box GetAbsoluteLayout() const {
-			// TODO: Layout if dirty
 			return mAbsoluteLayoutUnClipped;
 		}
 
 		inline Box GetAbsoluteLayoutClipped() const {
-			// TODO: Layout if dirty
-			// TODO: Clip if dirty
 			return mAbsoluteLayoutClipped;
 		}
 

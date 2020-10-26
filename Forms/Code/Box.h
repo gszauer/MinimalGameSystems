@@ -51,11 +51,87 @@ namespace Forms {
 			int top = margin.top + border.top + padding.top;
 			int bottom = margin.bottom + border.bottom + padding.bottom;
 
+			int width = (int)layout.width;
+			int height = (int)layout.height;
+			int target_width = width - std::min<int>(width, left + right);
+			int target_height = height - std::min<int>(height, top + bottom);
+
+			// Sweep left to right
+			int smaller = std::min<int>(width, margin.left);
+			margin.left = smaller;
+			width -= smaller;
+
+			smaller = std::min<int>(width, border.left);
+			border.left = smaller;
+			width -= smaller;
+
+			smaller = std::min<int>(width, padding.left);
+			padding.left = smaller;
+			width -= smaller;
+
+			smaller = std::min<int>(width, target_width);
+			content.width = smaller;
+			content.x = layout.x + margin.left + border.left + padding.left;
+			width -= smaller;
+
+			smaller = std::min<int>(width, padding.right);
+			padding.right = smaller;
+			width -= smaller;
+
+			smaller = std::min<int>(width, border.right);
+			border.right = smaller;
+			width -= smaller;
+
+			smaller = std::min<int>(width, margin.right);
+			margin.right = smaller;
+			width -= smaller;
+
+			// Sweep top to bottom
+			smaller = std::min<int>(height, margin.top);
+			margin.top = smaller;
+			height -= smaller;
+
+			smaller = std::min<int>(height, border.top);
+			border.top = smaller;
+			height -= smaller;
+
+			smaller = std::min<int>(height, padding.top);
+			padding.top = smaller;
+			height -= smaller;
+
+			smaller = std::min<int>(height, target_height);
+			content.height = smaller;
+			content.y = layout.y + margin.top + border.top + padding.top;
+			height -= smaller;
+
+			smaller = std::min<int>(height, padding.bottom);
+			padding.bottom = smaller;
+			height -= smaller;
+
+			smaller = std::min<int>(height, border.bottom);
+			border.bottom = smaller;
+			height -= smaller;
+
+			smaller = std::min<int>(height, margin.bottom);
+			margin.bottom = smaller;
+			height -= smaller;
+
+#if 0
+			// This didn't work because it would set content to be 0 for example, but that would
+			// not touch the margin or padding. Which would cause the margin / padding
+			// to show up when a form was being laid out.
+
+			int left = margin.left + border.left + padding.left;
+			int right = margin.right + border.right + padding.right;
+			int top = margin.top + border.top + padding.top;
+			int bottom = margin.bottom + border.bottom + padding.bottom;
+
 			content = layout;
 			content.x += left;
 			content.y += top;
 			content.width -= std::min<unsigned int>(content.width, left + right);
 			content.height -= std::min<unsigned int>(content.height, top + bottom);
+#endif
 		}
 
 		inline Box ClipTo(const Rect& rect) const {

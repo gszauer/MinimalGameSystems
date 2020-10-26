@@ -146,6 +146,7 @@
     <ClInclude Include="Code\Rect.h" />
     <ClInclude Include="Code\Renderer.h" />
     <ClInclude Include="Code\Size.h" />
+    <ClInclude Include="Code\Style.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\WinMain.cpp" />

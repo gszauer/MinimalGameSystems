@@ -120,13 +120,31 @@ namespace Forms {
 			mCacheLength += 1;
 		}
 
-		inline void Draw(const Box& box, const Color& marginColor = Color(185, 155, 25), const Color& borderolor = Color(55, 55, 55), const Color& paddingColor = Color(125, 65, 185), const Color& contentColor = Color(35, 115, 145)) {
+		inline void Draw(const Box& box, const Style& style) {
 			Rect layout = box.GetLayoutRect();
 
-			Color colors[3] = {
-				marginColor,
-				borderolor,
-				paddingColor
+			const Color* left_colors[3] = {
+				&style.marginLeftColor,
+				&style.borderLeftColor,
+				&style.paddingLeftColor
+			};
+
+			const Color* top_colors[3] = {
+				&style.marginTopColor,
+				&style.borderTopColor,
+				&style.paddingTopColor
+			};
+
+			const Color* right_colors[3] = {
+				&style.marginRightColor,
+				&style.borderRightColor,
+				&style.paddingRightColor
+			};
+
+			const Color* bottom_colors[3] = {
+				&style.marginBottomColor,
+				&style.borderBottomColor,
+				&style.paddingBottomColor
 			};
 
 			for (int i = 0; i < 3; ++i) {
@@ -134,25 +152,25 @@ namespace Forms {
 				if (style.Total() != 0) {
 					Rect top = layout;
 					top.height = style.top;
-					Draw(top, colors[i]);
+					Draw(top, *top_colors[i]);
 
 					Rect bottom = layout;
 					bottom.y = (bottom.y + bottom.height) - style.bottom;
 					bottom.height = style.bottom;
-					Draw(bottom, colors[i]);
+					Draw(bottom, *bottom_colors[i]);
 
 					Rect left = layout;
 					left.width = style.left;
 					left.y += style.top;
 					left.height -= std::min<unsigned int>(left.height, style.top + style.bottom);
-					Draw(left, colors[i]);
+					Draw(left, *left_colors[i]);
 
 					Rect right = layout;
 					right.x = (right.x + right.width) - style.right;
 					right.width = style.right;
 					right.y += style.top;
 					right.height -= std::min<unsigned int>(right.height, style.top + style.bottom);
-					Draw(right, colors[i]);
+					Draw(right, *right_colors[i]);
 
 					layout.x += style.left;
 					layout.y += style.top;
@@ -162,21 +180,26 @@ namespace Forms {
 			}
 
 			if (layout.Area() > 0) {
-				Draw(layout, contentColor);
+				Draw(layout, style.contentColor);
 			}
 		}
 
-		inline void Draw(const Control& control, const Color& marginColor = Color(185, 155, 25), const Color& borderolor = Color(55, 55, 55), const Color& paddingColor = Color(125, 65, 185), const Color& contentColor = Color(35, 115, 145)) {
+		inline void Draw(const Control& control, const Style& style = Style()) {
 			Box absoluteBox = control.GetAbsoluteLayoutClipped();
 			if (absoluteBox.GetLayoutRect().Area() > 0) {
-				Draw(absoluteBox, marginColor, borderolor, paddingColor, contentColor);
+				if (control.GetStyle() != 0) {
+					Draw(absoluteBox, *control.GetStyle());
+				}
+				else {
+					Draw(absoluteBox, style);
+				}
 
 				// Push kids
 				unsigned int numKids = (unsigned int)control.GetNumChildren();
 				for (unsigned int kid = 0; kid < numKids; ++kid) {
 					Control* child = control.GetChild(kid);
 					if (child != 0) {
-						Draw(*child, marginColor, borderolor, paddingColor, contentColor);
+						Draw(*child, style);
 					}
 				}
 			}

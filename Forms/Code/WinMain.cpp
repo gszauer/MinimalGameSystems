@@ -85,6 +85,171 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 #define LEFT_MOUSE_POS (short)((float)LOWORD(lParam))
 #define RIGHT_MOUSE_POS (short)((float)HIWORD(lParam))
 
+void GraphicsTest0(HWND hwnd) {
+	if (gRenderer != 0) {
+		RECT clientRect;
+		GetClientRect(hwnd, &clientRect);
+
+		gRenderer->Clear(Forms::Color(125, 175, 225));
+
+		// Docking tests
+		Forms::Control  root = Forms::Control(0, Forms::Box(Forms::Rect(50, 50, 400, 300), Forms::Offset(10, 10, 10, 10), Forms::Offset(2, 2, 2, 2), Forms::Offset(5, 5, 5, 5)));
+		Forms::Control  a = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  b = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  c = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  d = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 50, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  e = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 50, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  f = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  g = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		
+		a.SetParent(&root);
+		a.SetDocking(Forms::Control::Docking::Left);
+		b.SetParent(&root);
+		b.SetDocking(Forms::Control::Docking::Bottom);
+		c.SetParent(&root);
+		f.SetDocking(Forms::Control::Docking::Top);
+		f.SetParent(&root);
+		c.SetDocking(Forms::Control::Docking::Top);
+		d.SetParent(&root);
+		d.SetDocking(Forms::Control::Docking::Right);
+		g.SetParent(&root);
+		g.SetDocking(Forms::Control::Docking::Bottom);
+		e.SetParent(&root);
+		e.SetDocking(Forms::Control::Docking::Fill);
+		b.SetMaxLayoutSize(Forms::Size(22, 22));
+		c.SetMaxLayoutSize(Forms::Size(22, 22));
+		g.SetMaxLayoutSize(Forms::Size(22, 22));
+
+		root.SetDocking(Forms::Control::Docking::Fill);
+		root.SetOverflow(Forms::Control::Overflow::Hidden);
+
+		Forms::Rect formRect(0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
+		root.UpdateLayout(formRect);
+		root.Clip(formRect);
+
+		gRenderer->Draw(root);
+
+		gRenderer->Present();
+	}
+}
+
+void GraphicsTest1(HWND hwnd, bool horizontal) {
+	if (gRenderer != 0) {
+		RECT clientRect;
+		GetClientRect(hwnd, &clientRect);
+
+		gRenderer->Clear(Forms::Color(125, 175, 225));
+
+		// Docking tests
+		Forms::Control  root = Forms::Control(0, Forms::Box(Forms::Rect(50, 50, 400, 300), Forms::Offset(10, 10, 10, 10), Forms::Offset(2, 2, 2, 2), Forms::Offset(5, 5, 5, 5)));
+		Forms::Control  a = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  b = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  c = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		a.SetMinLayoutSize(Forms::Size(22, 22));
+		b.SetMinLayoutSize(Forms::Size(22, 22));
+		a.SetMaxLayoutSize(Forms::Size(200, 200));
+		b.SetMaxLayoutSize(Forms::Size(200, 200));
+
+		a.SetParent(&root);
+		a.SetDocking(horizontal? Forms::Control::Docking::Left : Forms::Control::Docking::Top);
+		b.SetParent(&root);
+		b.SetDocking(horizontal? Forms::Control::Docking::Right : Forms::Control::Docking::Bottom);
+		c.SetParent(&root);
+		c.SetDocking(Forms::Control::Docking::Fill);
+
+		root.SetDocking(Forms::Control::Docking::Fill);
+		root.SetOverflow(Forms::Control::Overflow::Hidden);
+
+		Forms::Color red[4] = { Forms::Color(255, 0, 0), Forms::Color(205, 0, 0), Forms::Color(155, 0, 0), Forms::Color(105, 0, 0) };
+		Forms::Color green[4] = { Forms::Color(0, 255, 0), Forms::Color(0, 205, 0), Forms::Color(0, 155, 0), Forms::Color(0, 105, 0) };
+		Forms::Color blue[4] = { Forms::Color(0, 0, 255), Forms::Color(0, 0, 205), Forms::Color(0, 0, 155), Forms::Color(0, 0, 105) };
+
+		Forms::Style a_style(red[0], red[1], red[2], red[3]);
+		Forms::Style b_style(green[0], green[1], green[2], green[3]);
+		Forms::Style c_style(blue[0], blue[1], blue[2], blue[3]);
+
+		a.SetStyle(&a_style);
+		b.SetStyle(&b_style);
+		c.SetStyle(&c_style);
+
+		int width = (clientRect.right - clientRect.left);
+		int height = (clientRect.bottom - clientRect.top);
+
+		Forms::Rect formRect(0, 0, width, height);
+		root.UpdateLayout(formRect);
+		root.Clip(formRect);
+
+		gRenderer->Draw(root);
+
+		gRenderer->Present();
+	}
+}
+
+void GraphicsTest2(HWND hwnd) {
+	if (gRenderer != 0) {
+		RECT clientRect;
+		GetClientRect(hwnd, &clientRect);
+
+		gRenderer->Clear(Forms::Color(125, 175, 225));
+
+		// Docking tests
+		Forms::Control  root = Forms::Control(0, Forms::Box(Forms::Rect(50, 50, 400, 300), Forms::Offset(10, 10, 10, 10), Forms::Offset(2, 2, 2, 2), Forms::Offset(5, 5, 5, 5)));
+		Forms::Control  a = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  b = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  c = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  d = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 50, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  e = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 50, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  f = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  g = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
+		Forms::Control  j = Forms::Control(0, Forms::Box(Forms::Rect(50, 50, 200, 150), Forms::Offset(10, 10, 10, 10), Forms::Offset(0, 0, 0, 0), Forms::Offset(0, 0, 0, 0)));
+		a.SetParent(&root);
+		a.SetDocking(Forms::Control::Docking::Left);
+		b.SetParent(&root);
+		b.SetDocking(Forms::Control::Docking::Bottom);
+		c.SetParent(&root);
+		f.SetDocking(Forms::Control::Docking::Top);
+		f.SetParent(&root);
+		c.SetDocking(Forms::Control::Docking::Top);
+		d.SetParent(&root);
+		d.SetDocking(Forms::Control::Docking::Right);
+		g.SetParent(&root);
+		g.SetDocking(Forms::Control::Docking::Bottom);
+		e.SetParent(&root);
+		e.SetDocking(Forms::Control::Docking::Fill);
+		b.SetMaxLayoutSize(Forms::Size(22, 22));
+		c.SetMaxLayoutSize(Forms::Size(22, 22));
+		g.SetMaxLayoutSize(Forms::Size(22, 22));
+
+		//root.SetDocking(Forms::Control::Docking::Fill);
+		root.SetParent(&j);
+		j.SetOverflow(Forms::Control::Overflow::Hidden);
+
+		int width = (clientRect.right - clientRect.left);
+		int height = (clientRect.bottom - clientRect.top);
+		int x = width / 2 - width / 2 / 2;
+		int y = height / 2 - height / 2 / 2;
+
+		int root_x = width / 2 - root.GetPreferedLayoutSize().width / 2;
+		int root_y = height / 2 - root.GetPreferedLayoutSize().height / 2;
+		root_x -= x;
+		root_y -= y;
+		Forms::Box rootLayout = root.GetRelativeLayout();
+		rootLayout.content.x = root_x;
+		rootLayout.content.y = root_y;
+		root.SetRelativeLayout(rootLayout);
+
+		Forms::Rect formRect(x, y, width / 2, height / 2);
+		j.UpdateLayout(formRect);
+		j.Clip(formRect);
+
+		gRenderer->Draw(j);
+
+		gRenderer->Present();
+	}
+}
+
+unsigned int currentTest = 0;
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	switch (iMsg) {
 	case WM_CLOSE:
@@ -112,43 +277,36 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 		return 1;
 	case WM_MOUSEWHEEL:
 		return 1;
+	case WM_CHAR:
+		if (wParam == '1') {
+			currentTest = 0;
+			InvalidateRect(hwnd, NULL, FALSE);
+		}
+		if (wParam == '2') {
+			currentTest = 1;
+			InvalidateRect(hwnd, NULL, FALSE);
+		}
+		else if (wParam == '3') {
+			currentTest = 2;
+			InvalidateRect(hwnd, NULL, FALSE);
+		}
+		else if (wParam == '4') {
+			currentTest = 3;
+			InvalidateRect(hwnd, NULL, FALSE);
+		}
+		return 1;
 	case WM_PAINT:
-		if (gRenderer != 0) {
-			RECT clientRect;
-			GetClientRect(hwnd, &clientRect);
-
-			gRenderer->Clear(Forms::Color(125, 175, 225));
-
-			// Docking tests
-			Forms::Control  root = Forms::Control(0,Forms::Box(Forms::Rect(50, 50  , 400, 300), Forms::Offset(10, 10, 10, 10), Forms::Offset(2, 2, 2, 2), Forms::Offset(5, 5, 5, 5)));
-			Forms::Control  a = Forms::Control(0,	Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-			Forms::Control  b = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-			Forms::Control  c = Forms::Control(0,	Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-			a.SetMinLayoutSize(Forms::Size(22, 22));
-			b.SetMinLayoutSize(Forms::Size(22, 22));
-			a.SetMaxLayoutSize(Forms::Size(200, 200));
-			b.SetMaxLayoutSize(Forms::Size(200, 200));
-			
-			a.SetParent(&root);
-			a.SetDocking(Forms::Control::Docking::Left);
-			b.SetParent(&root);
-			b.SetDocking(Forms::Control::Docking::Right);
-			c.SetParent(&root);
-			c.SetDocking(Forms::Control::Docking::Fill);
-			
-			root.SetDocking(Forms::Control::Docking::Fill);
-			root.SetOverflow(Forms::Control::Overflow::Hidden);
-
-			int width = (clientRect.right - clientRect.left);
-			int height = (clientRect.bottom - clientRect.top);
-			
-			Forms::Rect formRect(0, 0, width, height);
-			root.UpdateLayout(formRect);
-			root.Clip(formRect);
-
-			gRenderer->Draw(root);
-
-			gRenderer->Present();
+		if (currentTest == 0) {
+			GraphicsTest0(hwnd);
+		}
+		else if (currentTest == 1) {
+			GraphicsTest1(hwnd, true);
+		}
+		else if (currentTest == 2) {
+			GraphicsTest1(hwnd, false);
+		}
+		else if (currentTest == 3) {
+			GraphicsTest2(hwnd);
 		}
 		return 1;
 	case WM_ERASEBKGND:
