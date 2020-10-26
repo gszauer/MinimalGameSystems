@@ -24,8 +24,8 @@ namespace Forms {
 	protected:
 		Box mRelativeLayout;
 
-		Box mLayoutUnClipped; // Absolute (Rename to CachedAbsoluteLayout)
-		Box mLayoutClipped; // Absolute (Rename to CachedAbsoluteLayoutClipped)
+		Box mAbsoluteLayoutUnClipped; // Absolute (Rename to CachedAbsoluteLayout)
+		Box mAbsoluteLayoutClipped; // Absolute (Rename to CachedAbsoluteLayoutClipped)
 		// TODO: If layout is dirty, need to re-layout? (mAbsoluteLayoutDirty)
 
 		Control* mParent;
@@ -86,33 +86,33 @@ namespace Forms {
 		}
 
 		inline void UpdateLayout(const Rect& layoutRect) {
-			mLayoutUnClipped = mRelativeLayout; // Copies margin and padding info
+			mAbsoluteLayoutUnClipped = mRelativeLayout; // Copies margin and padding info
 			if (mDocking == Docking::Fill) {
-				mLayoutUnClipped.margin = Offset(0, 0, 0, 0);
+				mAbsoluteLayoutUnClipped.margin = Offset(0, 0, 0, 0);
 			}
 			else if (mDocking == Docking::Left) {
-				mLayoutUnClipped.margin.left = 0;
-				mLayoutUnClipped.margin.top = 0;
-				mLayoutUnClipped.margin.bottom = 0;
+				mAbsoluteLayoutUnClipped.margin.left = 0;
+				mAbsoluteLayoutUnClipped.margin.top = 0;
+				mAbsoluteLayoutUnClipped.margin.bottom = 0;
 			}
 			else if (mDocking == Docking::Top) {
-				mLayoutUnClipped.margin.left = 0;
-				mLayoutUnClipped.margin.top = 0;
-				mLayoutUnClipped.margin.right = 0;
+				mAbsoluteLayoutUnClipped.margin.left = 0;
+				mAbsoluteLayoutUnClipped.margin.top = 0;
+				mAbsoluteLayoutUnClipped.margin.right = 0;
 			}
 			else if (mDocking == Docking::Right) {
-				mLayoutUnClipped.margin.right = 0;
-				mLayoutUnClipped.margin.top = 0;
-				mLayoutUnClipped.margin.bottom = 0;
+				mAbsoluteLayoutUnClipped.margin.right = 0;
+				mAbsoluteLayoutUnClipped.margin.top = 0;
+				mAbsoluteLayoutUnClipped.margin.bottom = 0;
 			}
 			else if (mDocking == Docking::Bottom) {
-				mLayoutUnClipped.margin.left = 0;
-				mLayoutUnClipped.margin.bottom = 0;
-				mLayoutUnClipped.margin.right = 0;
+				mAbsoluteLayoutUnClipped.margin.left = 0;
+				mAbsoluteLayoutUnClipped.margin.bottom = 0;
+				mAbsoluteLayoutUnClipped.margin.right = 0;
 			}
-			mLayoutUnClipped.AdjustToLayoutRect(layoutRect);
+			mAbsoluteLayoutUnClipped.AdjustToLayoutRect(layoutRect);
 
-			Rect contentRect = mLayoutUnClipped.GetContentRect();
+			Rect contentRect = mAbsoluteLayoutUnClipped.GetContentRect();
 			int dockLeft = contentRect.x;
 			int dockTop = contentRect.y;
 			int dockRight = contentRect.GetRight();
@@ -176,15 +176,15 @@ namespace Forms {
 		inline void Clip(const Rect& clipRect, bool shouldClip = false) {
 			// TODO: Update layout only if dirty
 
-			mLayoutClipped = mLayoutUnClipped;
+			mAbsoluteLayoutClipped = mAbsoluteLayoutUnClipped;
 			if (shouldClip) {
-				mLayoutClipped = mLayoutClipped.ClipTo(clipRect);
+				mAbsoluteLayoutClipped = mAbsoluteLayoutClipped.ClipTo(clipRect);
 			}
 			if (mOverflow == Overflow::Hidden) {
 				shouldClip = true;
 			}
 
-			Rect clipTo = mLayoutClipped.GetContentRect();
+			Rect clipTo = mAbsoluteLayoutClipped.GetContentRect();
 
 			unsigned int numChildren = mChildren.size();
 			for (unsigned int c = 0; c < numChildren; ++c) {
@@ -200,13 +200,13 @@ namespace Forms {
 
 		inline Box GetAbsoluteLayout() const {
 			// TODO: Layout if dirty
-			return mLayoutUnClipped;
+			return mAbsoluteLayoutUnClipped;
 		}
 
 		inline Box GetAbsoluteLayoutClipped() const {
 			// TODO: Layout if dirty
 			// TODO: Clip if dirty
-			return mLayoutClipped;
+			return mAbsoluteLayoutClipped;
 		}
 
 		inline void SetParent(Control* parent) {

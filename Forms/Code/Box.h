@@ -54,8 +54,8 @@ namespace Forms {
 			content = layout;
 			content.x += left;
 			content.y += top;
-			content.width -= left + right;
-			content.height -= top + bottom;
+			content.width -= std::min<unsigned int>(content.width, left + right);
+			content.height -= std::min<unsigned int>(content.height, top + bottom);
 		}
 
 		inline Box ClipTo(const Rect& rect) const {

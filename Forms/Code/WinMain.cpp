@@ -147,7 +147,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 			c.SetMaxLayoutSize(Forms::Size(22, 22));
 			g.SetMaxLayoutSize(Forms::Size(22, 22));
 
-			//root.SetDocking(Forms::Control::Docking::Fill);
+			root.SetDocking(Forms::Control::Docking::Fill);
 			root.SetParent(&j);
 			j.SetOverflow(Forms::Control::Overflow::Hidden);
 
@@ -163,13 +163,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 			Forms::Box rootLayout = root.GetRelativeLayout();
 			rootLayout.content.x = root_x;
 			rootLayout.content.y = root_y;
-			root.SetRelativeLayout(rootLayout);
+			//root.SetRelativeLayout(rootLayout);
 
-			Forms::Rect formRect(x, y, width / 2, height / 2);
+			Forms::Rect formRect(0, 0, width, height);
 			j.UpdateLayout(formRect);
 			j.Clip(formRect);
-
-
 
 			gRenderer->Draw(j);
 
