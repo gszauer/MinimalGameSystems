@@ -69,7 +69,9 @@ namespace Forms {
 		}
 
 		inline Size GetPreferedLayoutSize() const {
-			Size prefered = mRelativeLayout.GetLayoutRect().size;
+			Rect layoutRect = mRelativeLayout.GetLayoutRect();
+			Size prefered(layoutRect.width, layoutRect.height);
+
 			if (prefered.width < mMinSize.width) {
 				prefered.width = mMinSize.width;
 			}
@@ -125,47 +127,47 @@ namespace Forms {
 
 				// Apply layout
 				Rect childLayout = mChildren[c]->mRelativeLayout.GetLayoutRect();
-				childLayout.position.x += contentRect.x;
-				childLayout.position.y += contentRect.y;
+				childLayout.x += contentRect.x;
+				childLayout.y += contentRect.y;
 
 				if (childDock != Docking::None) {
 					if (childDock == Docking::Left) {
-						childLayout.position.x = dockLeft;
-						childLayout.position.y = dockTop;
-						childLayout.size.width = childSize.width;
-						childLayout.size.height = dockBottom - dockTop;
+						childLayout.x = dockLeft;
+						childLayout.y = dockTop;
+						childLayout.width = childSize.width;
+						childLayout.height = (dockBottom > dockTop)? dockBottom - dockTop : 0;
 
 						dockLeft += childSize.width;
 					}
 					else if (childDock == Docking::Top) {
-						childLayout.position.x = dockLeft;
-						childLayout.position.y = dockTop;
-						childLayout.size.width = dockRight - dockLeft;
-						childLayout.size.height = childSize.height;
+						childLayout.x = dockLeft;
+						childLayout.y = dockTop;
+						childLayout.width = (dockRight > dockLeft)? dockRight - dockLeft : 0;
+						childLayout.height = childSize.height;
 
 						dockTop += childSize.height;
 					}
 					else if (childDock == Docking::Right) {
-						childLayout.position.x = dockRight - childSize.width;
-						childLayout.position.y = dockTop;
-						childLayout.size.height = dockBottom - dockTop;
-						childLayout.size.width = childSize.width;
+						childLayout.x = dockRight - childSize.width;
+						childLayout.y = dockTop;
+						childLayout.height = (dockBottom > dockTop)? dockBottom - dockTop : 0;
+						childLayout.width = childSize.width;
 
 						dockRight -= childSize.width;
 					}
 					else if (childDock == Docking::Bottom) {
-						childLayout.position.x = dockLeft;
-						childLayout.position.y = dockBottom - childSize.height;
-						childLayout.size.width = dockRight - dockLeft;
-						childLayout.size.height = childSize.height;
+						childLayout.x = dockLeft;
+						childLayout.y = dockBottom - childSize.height;
+						childLayout.width = (dockRight > dockLeft)? dockRight - dockLeft : 0;
+						childLayout.height = childSize.height;
 
 						dockBottom -= childSize.height;
 					}
 					else if (childDock == Docking::Fill) {
-						childLayout.position.x = dockLeft;
-						childLayout.position.y = dockTop;
-						childLayout.size.width = dockRight - dockLeft;
-						childLayout.size.height = dockBottom - dockTop;
+						childLayout.x = dockLeft;
+						childLayout.y = dockTop;
+						childLayout.width = (dockRight > dockLeft)? dockRight - dockLeft : 0;
+						childLayout.height = (dockBottom > dockTop)? dockBottom - dockTop : 0;
 					}
 				}
 

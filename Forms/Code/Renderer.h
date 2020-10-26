@@ -144,20 +144,20 @@ namespace Forms {
 					Rect left = layout;
 					left.width = style.left;
 					left.y += style.top;
-					left.height -= style.top + style.bottom;
+					left.height -= std::min<unsigned int>(left.height, style.top + style.bottom);
 					Draw(left, colors[i]);
 
 					Rect right = layout;
 					right.x = (right.x + right.width) - style.right;
 					right.width = style.right;
 					right.y += style.top;
-					right.height -= style.top + style.bottom;
+					right.height -= std::min<unsigned int>(right.height, style.top + style.bottom);
 					Draw(right, colors[i]);
 
 					layout.x += style.left;
 					layout.y += style.top;
-					layout.width -= style.left + style.right;
-					layout.height -= style.top + style.bottom;
+					layout.width -= std::min<unsigned int>(layout.width, style.left + style.right);
+					layout.height -= std::min<unsigned int>(layout.height, style.top + style.bottom);
 				}
 			}
 

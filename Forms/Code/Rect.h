@@ -11,7 +11,7 @@ namespace Forms {
 				int x;
 				int y;
 			};
-			Position position;
+			//Position position;
 		};
 		
 		union {
@@ -19,14 +19,14 @@ namespace Forms {
 				unsigned int width;
 				unsigned int height;
 			};
-			Size size;
+			//Size size;
 		};
 		
 		inline Rect(int _x = 0, int _y = 0, unsigned int _w = 0, unsigned int _h = 0) : x(_x), y(_y), width(_w), height(_h) { }
-		inline Rect(const Position& pos, const Size& siz = Size(0, 0)) : position(pos), size(siz) { }
+		inline Rect(const Position& pos, const Size& siz = Size(0, 0)) : x(pos.x), y(pos.y), width(siz.width), height(siz.height) { }
 
 		inline unsigned int Area() const {
-			return size.width * size.height;
+			return width * height;
 		}
 
 		inline int GetLeft() const {
