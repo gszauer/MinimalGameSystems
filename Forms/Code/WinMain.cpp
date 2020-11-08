@@ -33,8 +33,10 @@ int main(int argc, const char** argv) {
 
 #include "Renderer.h"
 #include "Control.h"
-Forms::Renderer* gRenderer;
+#include "Skin.h"
 
+Forms::Skin* gClassicSkin;
+Forms::Renderer* gRenderer;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
 	WNDCLASSEX wndclass;
@@ -68,6 +70,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	// Initialize Here
 	///////////////////////////////////////////////////////////////////////////////////////
 	gRenderer = new Forms::Renderer(hwnd);
+	gClassicSkin = new Forms::Skin(*gRenderer);
 
 	ShowWindow(hwnd, SW_SHOW);
 	UpdateWindow(hwnd);
@@ -85,176 +88,76 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 #define LEFT_MOUSE_POS (short)((float)LOWORD(lParam))
 #define RIGHT_MOUSE_POS (short)((float)HIWORD(lParam))
 
-void GraphicsTest0(HWND hwnd) {
-	if (gRenderer != 0) {
-		RECT clientRect;
-		GetClientRect(hwnd, &clientRect);
-
-		gRenderer->Clear(Forms::Color(125, 175, 225));
-
-		// Docking tests
-		Forms::Control  root = Forms::Control(0, Forms::Box(Forms::Rect(50, 50, 400, 300), Forms::Offset(10, 10, 10, 10), Forms::Offset(2, 2, 2, 2), Forms::Offset(5, 5, 5, 5)));
-		Forms::Control  a = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  b = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  c = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  d = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 50, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  e = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 50, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  f = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  g = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		
-		a.SetParent(&root);
-		a.SetDocking(Forms::Control::Docking::Left);
-		b.SetParent(&root);
-		b.SetDocking(Forms::Control::Docking::Bottom);
-		c.SetParent(&root);
-		f.SetDocking(Forms::Control::Docking::Top);
-		f.SetParent(&root);
-		c.SetDocking(Forms::Control::Docking::Top);
-		d.SetParent(&root);
-		d.SetDocking(Forms::Control::Docking::Right);
-		g.SetParent(&root);
-		g.SetDocking(Forms::Control::Docking::Bottom);
-		e.SetParent(&root);
-		e.SetDocking(Forms::Control::Docking::Fill);
-		b.SetMaxLayoutSize(Forms::Size(22, 22));
-		c.SetMaxLayoutSize(Forms::Size(22, 22));
-		g.SetMaxLayoutSize(Forms::Size(22, 22));
-
-		root.SetDocking(Forms::Control::Docking::Fill);
-		root.SetOverflow(Forms::Control::Overflow::Hidden);
-
-		Forms::Rect formRect(0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
-		root.UpdateLayout(formRect);
-		root.Clip(formRect);
-
-		gRenderer->Draw(root);
-
-		gRenderer->Present();
+void ClippingTest(HWND hwnd) {
+	if (gRenderer == 0) {
+		return;
 	}
+
+	RECT clientRect;
+	GetClientRect(hwnd, &clientRect);
+
+	gRenderer->Clear(Forms::Color(128, 158, 178)); // I call RGB(.5, .6, .7) as "Gabor Blue"
+
+	int root_pad = 5; // Should root touch the edges, or respect some padding?
+	Forms::Control  root = Forms::Control(0, Forms::Rect(root_pad, root_pad, clientRect.right - clientRect.left - root_pad * 2, clientRect.bottom - clientRect.top - root_pad * 2));
+	
+	// Testing vertical clipping
+	Forms::Control vertical_clipping = Forms::Control(&root, Forms::Rect(15, 15, 660, 300)); // Free floating inside root (not clipped by default)
+	Forms::Control v_a = Forms::Control(&vertical_clipping, Forms::Rect(40, 20, 80, 260)); // Top and bottom are in frame
+	Forms::Control v_b = Forms::Control(&vertical_clipping, Forms::Rect(140, 0, 80, 300 - 4)); // Top and bottom are at layout border
+	Forms::Control v_c = Forms::Control(&vertical_clipping, Forms::Rect(240, -1, 80, 300 - 2)); // Top and bottom are clipped by 1px
+	Forms::Control v_d = Forms::Control(&vertical_clipping, Forms::Rect(340, 20, 80, 350)); // Bottom is clipped only
+	Forms::Control v_e = Forms::Control(&vertical_clipping, Forms::Rect(440, -20, 80, 300)); // Top is clipped only
+	Forms::Control v_f = Forms::Control(&vertical_clipping, Forms::Rect(540, -20, 80, 360)); // Top and bottom are clipped
+
+	// Testing horizontal clipping
+	Forms::Control horizontal_clipping = Forms::Control(&root, Forms::Rect(15, 330, 300, 240), 0, false); // Free floating inside root (not clipped by default)
+	Forms::Control h_a = Forms::Control(&horizontal_clipping, Forms::Rect(40, 5, 300 - 80, 25)); // Left and right are both in frame
+	Forms::Control h_b = Forms::Control(&horizontal_clipping, Forms::Rect(0, 45, 300 - 4, 25)); // Left and right are at layout border
+	Forms::Control h_c = Forms::Control(&horizontal_clipping, Forms::Rect(-1, 85, 300 - 2, 25)); // Top and bottom are clipped by 1px
+	Forms::Control h_d = Forms::Control(&horizontal_clipping, Forms::Rect(40, 125, 300, 25)); // Right is clipped only
+	Forms::Control h_e = Forms::Control(&horizontal_clipping, Forms::Rect(-40, 165, 300, 25)); // Left is clipped only
+	Forms::Control h_f = Forms::Control(&horizontal_clipping, Forms::Rect(-40, 205, 500, 25)); // Right and left are clipped
+
+	// Test multi clipping
+	Forms::Control multi_clipping = Forms::Control(&root, Forms::Rect(340, 330, 120, 100)); // Free floating inside root (not clipped by default)
+	Forms::Control m_a = Forms::Control(&multi_clipping, Forms::Rect(-2, -2, 124, 104)); // No borders should show at all
+	Forms::Control m_b = Forms::Control(&multi_clipping, Forms::Rect(-1, -1, 118, 98)); // 1 pixel on the inset
+	Forms::Control m_c = Forms::Control(&m_b, Forms::Rect(-10, -10, 30, 30)); // clip top left
+	Forms::Control m_d = Forms::Control(&m_b, Forms::Rect(100, 80, 300, 300)); // clip bottom right
+	Forms::Control m_e = Forms::Control(&m_b, Forms::Rect(100, -10, 30, 30)); // clip top right
+	Forms::Control m_f = Forms::Control(&m_b, Forms::Rect(-10, 80, 50, 300)); // clip bottom left
+
+	// Test complex clipping
+	Forms::Control complex_clipping = Forms::Control(&root, Forms::Rect(340, 460, 120, 100)); // Free floating inside root (not clipped by default)
+	Forms::Control c_a = Forms::Control(&complex_clipping, Forms::Rect(10 + 100, 10, 50, 50)); // Partially clipped on right
+	Forms::Control c_b = Forms::Control(&complex_clipping, Forms::Rect(-50, 10, 10, 10)); // Far back enough to not be clipped (should be clipped tough)
+
+	// Test flush inside, deep nesting
+	Forms::Control no_clipping = Forms::Control(&root, Forms::Rect(490, 460, 120, 100)); // Free floating inside root (not clipped by default)
+	Forms::Control n_a = Forms::Control(&no_clipping, Forms::Rect(0, 0, 120 - 4, 100 - 4)); // Should not clip
+	Forms::Control n_b = Forms::Control(&n_a, Forms::Rect(0, 0, 120 - 8, 100 - 8)); // Should not clip
+	Forms::Control n_c = Forms::Control(&n_b, Forms::Rect(2, 2, 120 - 12 - 4, 100 - 12 - 4)); // Should not clip
+	Forms::Control n_d = Forms::Control(&n_c, Forms::Rect(0, 0, 120 - 16 - 4, 100 - 16 - 4), 0, false); // Should not clip
+	Forms::Control n_e = Forms::Control(&n_d, Forms::Rect(n_d.GetRelativeLayout().AdjustPosition(30, -20).AdjustSize(-64, 20))); // Should clip top and bottom
+	Forms::Control n_f = Forms::Control(&n_d, Forms::Rect(n_d.GetRelativeLayout().AdjustPosition(-20, 30).AdjustSize(20, -64))); // Should clip left and right
+	Forms::Control n_g = Forms::Control(&n_d, Forms::Rect(n_d.GetRelativeLayout().AdjustPosition(30, 30).AdjustSize(-64, -64))); // Should not clip
+
+	root.Draw(*gClassicSkin);
+
+	gRenderer->Present();
 }
-
-void GraphicsTest1(HWND hwnd, bool horizontal) {
-	if (gRenderer != 0) {
-		RECT clientRect;
-		GetClientRect(hwnd, &clientRect);
-
-		gRenderer->Clear(Forms::Color(125, 175, 225));
-
-		// Docking tests
-		Forms::Control  root = Forms::Control(0, Forms::Box(Forms::Rect(50, 50, 400, 300), Forms::Offset(10, 10, 10, 10), Forms::Offset(2, 2, 2, 2), Forms::Offset(5, 5, 5, 5)));
-		Forms::Control  a = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  b = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  c = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		a.SetMinLayoutSize(Forms::Size(22, 22));
-		b.SetMinLayoutSize(Forms::Size(22, 22));
-		a.SetMaxLayoutSize(Forms::Size(200, 200));
-		b.SetMaxLayoutSize(Forms::Size(200, 200));
-
-		a.SetParent(&root);
-		a.SetDocking(horizontal? Forms::Control::Docking::Left : Forms::Control::Docking::Top);
-		b.SetParent(&root);
-		b.SetDocking(horizontal? Forms::Control::Docking::Right : Forms::Control::Docking::Bottom);
-		c.SetParent(&root);
-		c.SetDocking(Forms::Control::Docking::Fill);
-
-		root.SetDocking(Forms::Control::Docking::Fill);
-		root.SetOverflow(Forms::Control::Overflow::Hidden);
-
-		Forms::Color red[4] = { Forms::Color(255, 0, 0), Forms::Color(205, 0, 0), Forms::Color(155, 0, 0), Forms::Color(105, 0, 0) };
-		Forms::Color green[4] = { Forms::Color(0, 255, 0), Forms::Color(0, 205, 0), Forms::Color(0, 155, 0), Forms::Color(0, 105, 0) };
-		Forms::Color blue[4] = { Forms::Color(0, 0, 255), Forms::Color(0, 0, 205), Forms::Color(0, 0, 155), Forms::Color(0, 0, 105) };
-
-		Forms::Style a_style(red[0], red[1], red[2], red[3]);
-		Forms::Style b_style(green[0], green[1], green[2], green[3]);
-		Forms::Style c_style(blue[0], blue[1], blue[2], blue[3]);
-
-		a.SetStyle(&a_style);
-		b.SetStyle(&b_style);
-		c.SetStyle(&c_style);
-
-		int width = (clientRect.right - clientRect.left);
-		int height = (clientRect.bottom - clientRect.top);
-
-		Forms::Rect formRect(0, 0, width, height);
-		root.UpdateLayout(formRect);
-		root.Clip(formRect);
-
-		gRenderer->Draw(root);
-
-		gRenderer->Present();
-	}
-}
-
-void GraphicsTest2(HWND hwnd) {
-	if (gRenderer != 0) {
-		RECT clientRect;
-		GetClientRect(hwnd, &clientRect);
-
-		gRenderer->Clear(Forms::Color(125, 175, 225));
-
-		// Docking tests
-		Forms::Control  root = Forms::Control(0, Forms::Box(Forms::Rect(50, 50, 400, 300), Forms::Offset(10, 10, 10, 10), Forms::Offset(2, 2, 2, 2), Forms::Offset(5, 5, 5, 5)));
-		Forms::Control  a = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  b = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  c = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  d = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 50, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  e = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 50, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  f = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  g = Forms::Control(0, Forms::Box(Forms::Rect(150, 150, 100, 50), Forms::Offset(3, 3, 3, 3), Forms::Offset(1, 1, 1, 1), Forms::Offset(3, 3, 3, 3)));
-		Forms::Control  j = Forms::Control(0, Forms::Box(Forms::Rect(50, 50, 200, 150), Forms::Offset(10, 10, 10, 10), Forms::Offset(0, 0, 0, 0), Forms::Offset(0, 0, 0, 0)));
-		a.SetParent(&root);
-		a.SetDocking(Forms::Control::Docking::Left);
-		b.SetParent(&root);
-		b.SetDocking(Forms::Control::Docking::Bottom);
-		c.SetParent(&root);
-		f.SetDocking(Forms::Control::Docking::Top);
-		f.SetParent(&root);
-		c.SetDocking(Forms::Control::Docking::Top);
-		d.SetParent(&root);
-		d.SetDocking(Forms::Control::Docking::Right);
-		g.SetParent(&root);
-		g.SetDocking(Forms::Control::Docking::Bottom);
-		e.SetParent(&root);
-		e.SetDocking(Forms::Control::Docking::Fill);
-		b.SetMaxLayoutSize(Forms::Size(22, 22));
-		c.SetMaxLayoutSize(Forms::Size(22, 22));
-		g.SetMaxLayoutSize(Forms::Size(22, 22));
-
-		//root.SetDocking(Forms::Control::Docking::Fill);
-		root.SetParent(&j);
-		j.SetOverflow(Forms::Control::Overflow::Hidden);
-
-		int width = (clientRect.right - clientRect.left);
-		int height = (clientRect.bottom - clientRect.top);
-		int x = width / 2 - width / 2 / 2;
-		int y = height / 2 - height / 2 / 2;
-
-		int root_x = width / 2 - root.GetPreferedLayoutSize().width / 2;
-		int root_y = height / 2 - root.GetPreferedLayoutSize().height / 2;
-		root_x -= x;
-		root_y -= y;
-		Forms::Box rootLayout = root.GetRelativeLayout();
-		rootLayout.content.x = root_x;
-		rootLayout.content.y = root_y;
-		root.SetRelativeLayout(rootLayout);
-
-		Forms::Rect formRect(x, y, width / 2, height / 2);
-		j.UpdateLayout(formRect);
-		j.Clip(formRect);
-
-		gRenderer->Draw(j);
-
-		gRenderer->Present();
-	}
-}
-
-unsigned int currentTest = 0;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	switch (iMsg) {
 	case WM_CLOSE:
 		if (gRenderer != 0) {
 			delete gRenderer;
+			gRenderer = 0;
+		}
+		if (gClassicSkin != 0) {
+			delete gClassicSkin;
+			gClassicSkin = 0;
 		}
 		DestroyWindow(hwnd);
 		return 1;
@@ -279,34 +182,39 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 		return 1;
 	case WM_CHAR:
 		if (wParam == '1') {
-			currentTest = 0;
+			//currentTest = 0;
 			InvalidateRect(hwnd, NULL, FALSE);
 		}
 		if (wParam == '2') {
-			currentTest = 1;
+			//currentTest = 1;
 			InvalidateRect(hwnd, NULL, FALSE);
 		}
 		else if (wParam == '3') {
-			currentTest = 2;
+			//currentTest = 2;
 			InvalidateRect(hwnd, NULL, FALSE);
 		}
 		else if (wParam == '4') {
-			currentTest = 3;
+			//currentTest = 3;
 			InvalidateRect(hwnd, NULL, FALSE);
 		}
 		return 1;
 	case WM_PAINT:
-		if (currentTest == 0) {
-			GraphicsTest0(hwnd);
-		}
-		else if (currentTest == 1) {
-			GraphicsTest1(hwnd, true);
-		}
-		else if (currentTest == 2) {
-			GraphicsTest1(hwnd, false);
-		}
-		else if (currentTest == 3) {
-			GraphicsTest2(hwnd);
+		if (gRenderer != 0) {
+			ClippingTest(hwnd);
+#if 0
+			if (currentTest == 0) {
+				GraphicsTest0(hwnd);
+			}
+			else if (currentTest == 1) {
+				GraphicsTest1(hwnd, true);
+			}
+			else if (currentTest == 2) {
+				GraphicsTest1(hwnd, false);
+			}
+			else if (currentTest == 3) {
+				GraphicsTest2(hwnd);
+			}
+#endif
 		}
 		return 1;
 	case WM_ERASEBKGND:

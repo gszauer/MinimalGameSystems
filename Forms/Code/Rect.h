@@ -1,58 +1,35 @@
 #ifndef _H_RECT_
 #define _H_RECT_
 
-#include "Position.h"
-#include "Size.h"
-
 namespace Forms {
-	struct Rect {
-		union  {
-			struct {
-				int x;
-				int y;
-			};
-			//Position position;
-		};
+	class Rect {
+	protected:
+		int x;
+		int y;
+		unsigned int width;
+		unsigned int height;
+	public:
+		Rect(int _x = 0, int _y = 0, unsigned int _w = 0, unsigned int _h = 0);
+		bool IsDegenerate() const;
+
+		int GetLeft() const;
+		int GetTop() const;
 		
-		union {
-			struct {
-				unsigned int width;
-				unsigned int height;
-			};
-			//Size size;
-		};
-		
-		inline Rect(int _x = 0, int _y = 0, unsigned int _w = 0, unsigned int _h = 0) : x(_x), y(_y), width(_w), height(_h) { }
-		inline Rect(const Position& pos, const Size& siz = Size(0, 0)) : x(pos.x), y(pos.y), width(siz.width), height(siz.height) { }
+		int GetRight() const;
+		int GetBottom() const;
 
-		inline unsigned int Area() const {
-			return width * height;
-		}
+		unsigned int GetWidth() const;
+		unsigned int GetHeight() const;
 
-		inline int GetLeft() const {
-			return x;
-		}
+		void SetPosition(int _x = 0, int _y = 0);
+		void SetSize(unsigned int _w = 0, unsigned int _h = 0);
+		void SetSides(int left, int top, int right, int bottom);
 
-		inline int GetTop() const {
-			return y;
-		}
+		Rect AdjustPosition(int deltaX = 0, int deltaY = 0) const;
+		Rect AdjustSize(int deltaW = 0, int deltaH = 0) const;
+		Rect GetOverlap(const Rect& other) const;
 
-		inline int GetRight() const {
-			return x + (int)width;
-		}
-
-		inline int GetBottom() const {
-			return y + (int)height;
-		}
 	};
-
-#if 0
-	struct CachedRect {
-		Rect rect;
-		bool dirty;
-	};
-#endif
-
 }
 
 #endif
