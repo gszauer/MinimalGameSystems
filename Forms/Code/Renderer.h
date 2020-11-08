@@ -38,9 +38,11 @@ namespace Forms {
 	public:
 		Renderer(HWND hWnd);
 		~Renderer();
+		
 		void Clear(const Color& color);
 		void Present();
 		void Flush();
+
 		void DrawRect(const Rect& rect, const Rect& clip, const Color& color);
 	};
 }

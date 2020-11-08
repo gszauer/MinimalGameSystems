@@ -11,6 +11,9 @@
 #include <windows.h>
 #include <iostream>
 
+#include <ShellScalingAPI.h>
+#pragma comment(lib, "Shcore.lib")
+
 int WINAPI WinMain(HINSTANCE, HINSTANCE, PSTR, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -39,6 +42,8 @@ Forms::ClassicSkin* gClassicSkin;
 Forms::Renderer* gRenderer;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
+	//HRESULT hr = SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+
 	WNDCLASSEX wndclass;
 	wndclass.cbSize = sizeof(WNDCLASSEX);
 	wndclass.style = CS_HREDRAW | CS_VREDRAW;
@@ -147,6 +152,10 @@ void ClippingTest(HWND hwnd) {
 	root.Draw(*gClassicSkin);
 
 	gRenderer->Present();
+}
+
+void AnchoringTest(HWND hwnd) {
+	// TODO: Create anchor tests
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {

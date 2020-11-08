@@ -7,11 +7,20 @@
 namespace Forms {
 	class Skin;
 
+	enum class Anchor {
+		None = 0,
+		Left = 1 >> 1,
+		Top = 1 >> 2,
+		Right = 1 >> 3,
+		Bottom = 1 >> 4
+	};
+
 	class Control {
 	protected:
 		Rect mRelativeLayout;
 
-		// TODO: Anchoring
+		Anchor mAnchoring;
+		unsigned int mAnchor[4];
 
 		Control* mParent;
 		std::vector<Control*> mChildren;
@@ -23,7 +32,13 @@ namespace Forms {
 		
 		const Skin* GetSkin() const;
 		void SetSkin(const Skin* skin);
+
+		Anchor GetAnchoring() const;
+		void SetAnchoring(Anchor anchor);
 		
+		unsigned int GetAnchor(Anchor anchor) const;
+		void SetAnchor(Anchor anchor, unsigned int value);
+
 		virtual Rect GetRelativeLayout() const;
 		virtual void SetRelativeLayout(const Rect& layout);
 		

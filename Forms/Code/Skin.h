@@ -17,7 +17,14 @@ namespace Forms {
 		virtual ~Skin();
 
 		virtual unsigned int GetPadding() const = 0;
+
 		virtual void DrawPanel(const Rect& layout, const Rect& clip) const = 0;
+		// virtual void DrawLabel(const Rect& layout, const Rect& clip, const String& string); // Font, size, etc are a part of skin
+
+		//virtual void DrawButton(const Rect& layout, const Rect& clip, State);
+		//virtual void DrawLabelButton(const Rect& layout, const Rect& clip, State, const string& string);
+		//virtual void DrawImageButton(const Rect& layout, const Rect& clip, State, const Image& image);
+
 	};
 }
 

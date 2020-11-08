@@ -2,8 +2,19 @@
 #include "Skin.h"
 #include <algorithm>
 
+#define ANCHOR_LEFT mAnchor[0]
+#define ANCHOR_TOP mAnchor[1]
+#define ANCHOR_RIGHT mAnchor[2]
+#define ANCHOR_BOTTOM mAnchor[3]
+
 Forms::Control::Control(Control* parent, const Rect& rect, const Skin* skin) :
-	mRelativeLayout(rect), mCustomSkin(skin) {
+	mRelativeLayout(rect), mCustomSkin(skin), mAnchoring(Anchor::None) {
+
+	ANCHOR_LEFT = 0;
+	ANCHOR_TOP = 0;
+	ANCHOR_RIGHT = 0;
+	ANCHOR_BOTTOM = 0;
+
 	mParent = 0;
 	if (parent != 0) {
 		SetParent(parent);
@@ -11,6 +22,48 @@ Forms::Control::Control(Control* parent, const Rect& rect, const Skin* skin) :
 }
 
 Forms::Control::~Control() { }
+
+Forms::Anchor Forms::Control::GetAnchoring() const {
+	return mAnchoring;
+}
+
+void Forms::Control::SetAnchoring(Anchor anchor) {
+	mAnchoring = anchor;
+}
+
+unsigned int Forms::Control::GetAnchor(Anchor anchor) const {
+	if (anchor == Anchor::Left) {
+		return ANCHOR_LEFT;
+	}
+	else if (anchor == Anchor::Top) {
+		return ANCHOR_TOP;
+	}
+	else if (anchor == Anchor::Right) {
+		return ANCHOR_RIGHT;
+	}
+	else if (anchor == Anchor::Bottom) {
+		return ANCHOR_BOTTOM;
+	}
+	return 0;
+}
+
+void Forms::Control::SetAnchor(Anchor anchor, unsigned int value) {
+	if (((unsigned int)anchor & (unsigned int)Anchor::Left) == (unsigned int)Anchor::Left) {
+		ANCHOR_LEFT = value;
+	}
+
+	if (((unsigned int)anchor & (unsigned int)Anchor::Top) == (unsigned int)Anchor::Top) {
+		ANCHOR_TOP = value;
+	}
+
+	if (((unsigned int)anchor & (unsigned int)Anchor::Right) == (unsigned int)Anchor::Right) {
+		ANCHOR_RIGHT = value;
+	}
+
+	if (((unsigned int)anchor & (unsigned int)Anchor::Bottom) == (unsigned int)Anchor::Bottom) {
+		ANCHOR_BOTTOM = value;
+	}
+}
 
 Forms::Rect Forms::Control::GetAbsoluteLayout(const Skin& defaultSkin) const {
 	Rect absoluteLayout = mRelativeLayout;
@@ -118,8 +171,44 @@ Forms::Rect Forms::Control::GetChildLayout(const Skin& defaultSkin, const Rect& 
 	int padding = (int)skin->GetPadding();
 	Rect padded = childRelative.AdjustPosition(padding, padding);
 
-	// Apply padding, this will push all content so that 0, 0 is in an appropriate position
-	// We have to apply the padding here because some controls might choose not to pad
+	if (mAnchoring == Anchor::None) {
+		// Apply padding, this will push all content so that 0, 0 is in an appropriate position
+		// We have to apply the padding here because some controls might choose not to pad
+		return padded;
+	}
+
+	// Now for anchoring 
+	// TODO: Actually find the valuees of this
+	bool leftSet = false;
+	bool topSet = false;
+	bool rightSet = false;
+	bool bottomSet = false;
+
+	Rect result = padded;
+
+	if (leftSet && rightSet) {
+		// TODO: Change position and size
+	}
+	else if (leftSet) {
+		int xPos = selfLayout.GetLeft();
+		result.SetPosition(xPos, 0);
+		result = result.AdjustPosition(padding, 0);
+		result = result.AdjustPosition((int)ANCHOR_LEFT, 0);
+	}
+	else if (rightSet) {
+		// TODO: Change position only
+	}
+
+	if (topSet && bottomSet) {
+		// TODO: Change position and size
+	}
+	else if (topSet) {
+		// TODO: Change position only
+	}
+	else if (bottomSet) {
+		// TODO: Change position only
+	}
+
 	return padded;
 }
 
@@ -140,3 +229,4 @@ Forms::Rect Forms::Control::GetAbsoluteContentClip(const Skin& defaultSkin) cons
 
 	return absoluteClipping;
 }
+
