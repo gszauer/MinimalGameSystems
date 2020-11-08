@@ -7,6 +7,12 @@
 #define ANCHOR_RIGHT mAnchor[2]
 #define ANCHOR_BOTTOM mAnchor[3]
 
+Forms::Anchor Forms::operator|(Anchor a, Anchor b) {
+	unsigned int uA = (unsigned int)a;
+	unsigned int uB = (unsigned int)b;
+	return (Anchor)(uA | uB);
+}
+
 Forms::Control::Control(Control* parent, const Rect& rect, const Skin* skin) :
 	mRelativeLayout(rect), mCustomSkin(skin), mAnchoring(Anchor::None) {
 
@@ -160,54 +166,58 @@ Forms::Rect Forms::Control::GetChildLayout(const Skin& defaultSkin, const Rect& 
 	if (mCustomSkin != 0) {
 		skin = mCustomSkin;
 	}
+	int padding = (int)skin->GetPadding();
+	Anchor anchor = child.GetAnchoring();
+
+	// Consider checking that the child is actually a child of control
 
 	// Child layout in local space
 	Rect childLocal = child.mRelativeLayout;
+
+	{ // Apply anchoring
+		bool leftSet = ((unsigned int)anchor & (unsigned int)Anchor::Left) == (unsigned int)Anchor::Left;
+		bool topSet = ((unsigned int)anchor & (unsigned int)Anchor::Top) == (unsigned int)Anchor::Top;
+		bool rightSet = ((unsigned int)anchor & (unsigned int)Anchor::Right) == (unsigned int)Anchor::Right;
+		bool bottomSet = ((unsigned int)anchor & (unsigned int)Anchor::Bottom) == (unsigned int)Anchor::Bottom;
+		
+		if (leftSet && rightSet) {
+			childLocal.SetPosition(child.GetAnchor(Anchor::Left), childLocal.GetTop());
+			int selfLayoutPaddedWidth = (int)selfLayout.GetWidth() - (padding * 2);
+			int childWidth = selfLayoutPaddedWidth - child.GetAnchor(Anchor::Right) - child.GetAnchor(Anchor::Left);
+			childLocal.SetSize(childWidth, childLocal.GetHeight());
+		}
+		else if (leftSet) {
+			childLocal.SetPosition(child.GetAnchor(Anchor::Left), childLocal.GetTop());
+		}
+		else if (rightSet) {
+			int selfLayoutPaddedWidth = (int)selfLayout.GetWidth() - (padding * 2);
+			int childRelativeLeft = selfLayoutPaddedWidth - (int)childLocal.GetWidth();
+			childLocal.SetPosition(childRelativeLeft - (int)child.GetAnchor(Anchor::Right), childLocal.GetTop());
+		}
+
+		if (topSet && bottomSet) {
+			childLocal.SetPosition(childLocal.GetLeft(), child.GetAnchor(Anchor::Top));
+			int selfLayoutPaddedHeight = (int)selfLayout.GetHeight() - (padding * 2);
+			int childHeight = selfLayoutPaddedHeight - child.GetAnchor(Anchor::Top) - child.GetAnchor(Anchor::Bottom);
+			childLocal.SetSize(childLocal.GetWidth(), childHeight);
+		}
+		else if (topSet) {
+			childLocal.SetPosition(childLocal.GetLeft(), child.GetAnchor(Anchor::Top));
+		}
+		else if (bottomSet) {
+			int selfLayoutPaddedHeight = (int)selfLayout.GetHeight() - (padding * 2);
+			int childRelativeTop = selfLayoutPaddedHeight - (int)childLocal.GetHeight();
+			childLocal.SetPosition(childLocal.GetLeft(), childRelativeTop - (int)child.GetAnchor(Anchor::Bottom));
+		}
+	}
 	
 	// Move into parent space
 	Rect childRelative = childLocal.AdjustPosition(selfLayout.GetLeft(), selfLayout.GetTop());
 
 	// Apply parent padding
-	int padding = (int)skin->GetPadding();
+	// Apply padding, this will push all content so that 0, 0 is in an appropriate position
+	// We have to apply the padding here because some controls might choose not to pad
 	Rect padded = childRelative.AdjustPosition(padding, padding);
-
-	if (mAnchoring == Anchor::None) {
-		// Apply padding, this will push all content so that 0, 0 is in an appropriate position
-		// We have to apply the padding here because some controls might choose not to pad
-		return padded;
-	}
-
-	// Now for anchoring 
-	// TODO: Actually find the valuees of this
-	bool leftSet = false;
-	bool topSet = false;
-	bool rightSet = false;
-	bool bottomSet = false;
-
-	Rect result = padded;
-
-	if (leftSet && rightSet) {
-		// TODO: Change position and size
-	}
-	else if (leftSet) {
-		int xPos = selfLayout.GetLeft();
-		result.SetPosition(xPos, 0);
-		result = result.AdjustPosition(padding, 0);
-		result = result.AdjustPosition((int)ANCHOR_LEFT, 0);
-	}
-	else if (rightSet) {
-		// TODO: Change position only
-	}
-
-	if (topSet && bottomSet) {
-		// TODO: Change position and size
-	}
-	else if (topSet) {
-		// TODO: Change position only
-	}
-	else if (bottomSet) {
-		// TODO: Change position only
-	}
 
 	return padded;
 }

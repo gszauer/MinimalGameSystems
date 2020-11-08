@@ -155,7 +155,167 @@ void ClippingTest(HWND hwnd) {
 }
 
 void AnchoringTest(HWND hwnd) {
-	// TODO: Create anchor tests
+	if (gRenderer == 0) {
+		return;
+	}
+
+	RECT clientRect;
+	GetClientRect(hwnd, &clientRect);
+
+	gRenderer->Clear(Forms::Color(128, 158, 178)); // I call RGB(.5, .6, .7) as "Gabor Blue"
+
+	int root_pad = 5; // Should root touch the edges, or respect some padding?
+	Forms::Panel  root = Forms::Panel(0, Forms::Rect(root_pad, root_pad, clientRect.right - clientRect.left - root_pad * 2, clientRect.bottom - clientRect.top - root_pad * 2));
+	
+	Forms::Panel lr_test = Forms::Panel(&root, Forms::Rect(15, 15, 300, 175)); // Test left and right anchoring
+
+	Forms::Panel lr_a = Forms::Panel(&lr_test, Forms::Rect(100, 15, 100, 20)); // Anchored to the left
+	lr_a.SetAnchoring(Forms::Anchor::Left);
+	lr_a.SetAnchor(Forms::Anchor::Left, 0);
+
+	Forms::Panel lr_b = Forms::Panel(&lr_test, Forms::Rect(100, 45, 100, 20)); // Anchored to the left
+	lr_b.SetAnchoring(Forms::Anchor::Left);
+	lr_b.SetAnchor(Forms::Anchor::Left, 10);
+
+	Forms::Panel lr_c = Forms::Panel(&lr_test, Forms::Rect(100, 15, 100, 20)); // Anchored to the right
+	lr_c.SetAnchoring(Forms::Anchor::Right);
+	lr_c.SetAnchor(Forms::Anchor::Right, 0);
+
+	Forms::Panel lr_d = Forms::Panel(&lr_test, Forms::Rect(100, 45, 100, 20)); // Anchored to the right
+	lr_d.SetAnchoring(Forms::Anchor::Right);
+	lr_d.SetAnchor(Forms::Anchor::Right, 10);
+
+	Forms::Panel lr_e = Forms::Panel(&lr_test, Forms::Rect(100, 75, 100, 20)); // Anchored to both
+	lr_e.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right);
+	lr_e.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right, 0);
+
+	Forms::Panel lr_f = Forms::Panel(&lr_test, Forms::Rect(100, 105, 100, 20)); // Anchored to both
+	lr_f.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right);
+	lr_f.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right, 10);
+
+	Forms::Panel lr_g = Forms::Panel(&lr_test, Forms::Rect(100, 135, 100, 20)); // Anchored to both
+	lr_g.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right);
+	lr_g.SetAnchor(Forms::Anchor::Right, 5);
+	lr_g.SetAnchor(Forms::Anchor::Left, 30);
+
+	Forms::Panel ud_test = Forms::Panel(&root, Forms::Rect(330, 15, 170, 350)); // Test top and bottom anchoring
+
+	Forms::Panel ud_a = Forms::Panel(&ud_test, Forms::Rect(10, 50, 20, 80)); // anchored to top
+	ud_a.SetAnchoring(Forms::Anchor::Top);
+	ud_a.SetAnchor(Forms::Anchor::Top, 0);
+
+	Forms::Panel ud_b = Forms::Panel(&ud_test, Forms::Rect(40, 50, 20, 80)); // anchored to top
+	ud_b.SetAnchoring(Forms::Anchor::Top);
+	ud_b.SetAnchor(Forms::Anchor::Top, 10);
+
+	Forms::Panel ud_c = Forms::Panel(&ud_test, Forms::Rect(10, 50, 20, 80)); // anchored to bottom
+	ud_c.SetAnchoring(Forms::Anchor::Bottom);
+	ud_c.SetAnchor(Forms::Anchor::Bottom, 0);
+
+	Forms::Panel ud_d = Forms::Panel(&ud_test, Forms::Rect(40, 50, 20, 80)); // anchored to bottom
+	ud_d.SetAnchoring(Forms::Anchor::Bottom);
+	ud_d.SetAnchor(Forms::Anchor::Bottom, 10);
+
+	Forms::Panel ud_e = Forms::Panel(&ud_test, Forms::Rect(70, 50, 20, 80)); // anchored to top and bottom
+	ud_e.SetAnchoring(Forms::Anchor::Bottom | Forms::Anchor::Top);
+	ud_e.SetAnchor(Forms::Anchor::Bottom | Forms::Anchor::Top, 0);
+
+	Forms::Panel ud_f = Forms::Panel(&ud_test, Forms::Rect(100, 50, 20, 80)); // anchored to top and bottom
+	ud_f.SetAnchoring(Forms::Anchor::Bottom | Forms::Anchor::Top);
+	ud_f.SetAnchor(Forms::Anchor::Bottom | Forms::Anchor::Top, 10);
+
+	Forms::Panel ud_g = Forms::Panel(&ud_test, Forms::Rect(130, 50, 20, 80)); // anchored to top and bottom
+	ud_g.SetAnchoring(Forms::Anchor::Bottom | Forms::Anchor::Top);
+	ud_g.SetAnchor(Forms::Anchor::Bottom, 5);
+	ud_g.SetAnchor(Forms::Anchor::Top, 20);
+
+	Forms::Panel nesting_test_a = Forms::Panel(&root, Forms::Rect(15, 200, 300, 100)); // Test left and right anchoring
+
+	Forms::Panel na_a = Forms::Panel(&nesting_test_a, Forms::Rect(20, 20, 30, 30)); // Anchored to both
+	na_a.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	na_a.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 5);
+
+	Forms::Panel na_b = Forms::Panel(&na_a, Forms::Rect(20, 20, 30, 30)); // Anchored to both
+	na_b.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	na_b.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 5);
+
+	Forms::Panel na_c = Forms::Panel(&na_b, Forms::Rect(20, 20, 30, 30)); // Anchored to both
+	na_c.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	na_c.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 0);
+
+	Forms::Panel na_d = Forms::Panel(&na_c, Forms::Rect(20, 20, 30, 30)); // Anchored to both
+	na_d.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	na_d.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 0);
+
+	Forms::Panel na_e = Forms::Panel(&na_d, Forms::Rect(20, 20, 30, 30)); // Anchored to both
+	na_e.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	na_e.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 10);
+	
+	Forms::Panel nesting_test_b = Forms::Panel(&root, Forms::Rect(15, 310, 300, 100)); // Test left and right anchoring
+	Forms::ClassicSkin noBorder(*gRenderer);
+	noBorder.SetBorderSize(0);
+
+	Forms::Panel nb_a = Forms::Panel(&nesting_test_b, Forms::Rect(20, 20, 30, 30), &noBorder); // Anchored to both
+	nb_a.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	nb_a.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 5);
+
+	Forms::Panel nb_b = Forms::Panel(&nb_a, Forms::Rect(20, 20, 30, 30)); // Anchored to both
+	nb_b.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	nb_b.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 5);
+
+	Forms::Panel nb_c = Forms::Panel(&nb_b, Forms::Rect(20, 20, 30, 30)); // Anchored to both
+	nb_c.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	nb_c.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 0);
+
+	Forms::Panel nb_d = Forms::Panel(&nb_c, Forms::Rect(20, 20, 30, 30)); // Anchored to both
+	nb_d.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	nb_d.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 0);
+
+	Forms::Panel nb_e = Forms::Panel(&nb_d, Forms::Rect(20, 20, 30, 30)); // Anchored to both
+	nb_e.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	nb_e.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 10);
+
+	Forms::Panel nesting_test_c = Forms::Panel(&root, Forms::Rect(15, 420, 300, 100)); // Test left and right anchoring
+
+	Forms::Panel nc_a = Forms::Panel(&nesting_test_c, Forms::Rect(20, 20, 30, 30), &noBorder); // Anchored to both
+	nc_a.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	nc_a.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 5);
+
+	Forms::Panel nc_b = Forms::Panel(&nc_a, Forms::Rect(20, 20, 30, 30), &noBorder); // Anchored to both
+	nc_b.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	nc_b.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 5);
+
+	Forms::Panel nc_c = Forms::Panel(&nc_b, Forms::Rect(20, 20, 30, 30), &noBorder); // Anchored to both
+	nc_c.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	nc_c.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 0);
+
+	Forms::Panel nc_d = Forms::Panel(&nc_c, Forms::Rect(20, 20, 30, 30), &noBorder); // Anchored to both
+	nc_d.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	nc_d.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 0);
+
+	Forms::Panel nc_e = Forms::Panel(&nc_d, Forms::Rect(20, 20, 30, 30)); // Anchored to both
+	nc_e.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
+	nc_e.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 10);
+
+	root.Draw(*gClassicSkin);
+
+	Forms::Rect noClip(0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
+
+	Forms::Rect a_layout = na_e.GetAbsoluteLayout(*gClassicSkin);
+	Forms::Rect b_layout = nb_e.GetAbsoluteLayout(*gClassicSkin);
+	Forms::Rect c_layout = nc_e.GetAbsoluteLayout(*gClassicSkin);
+
+	gRenderer->DrawRect(a_layout.AdjustSize(-((int)a_layout.GetWidth() - 2), 400).AdjustPosition(0, 15), noClip, Forms::Color(255, 0, 0));
+	gRenderer->DrawRect(a_layout.AdjustSize(-((int)a_layout.GetWidth() - 2), 400).AdjustPosition(a_layout.GetWidth() - 2, 15), noClip, Forms::Color(255, 0, 0));
+
+	gRenderer->DrawRect(b_layout.AdjustSize(-((int)b_layout.GetWidth() - 2), 400).AdjustPosition(0, 15), noClip, Forms::Color(0, 255, 0));
+	gRenderer->DrawRect(b_layout.AdjustSize(-((int)b_layout.GetWidth() - 2), 400).AdjustPosition(b_layout.GetWidth() - 2, 15), noClip, Forms::Color(0, 255, 0));
+
+	gRenderer->DrawRect(c_layout.AdjustSize(-((int)c_layout.GetWidth() - 2), 400).AdjustPosition(0, 15), noClip, Forms::Color(0, 0, 255));
+	gRenderer->DrawRect(c_layout.AdjustSize(-((int)c_layout.GetWidth() - 2), 400).AdjustPosition(c_layout.GetWidth() - 2, 15), noClip, Forms::Color(0, 0, 255));
+
+
+	gRenderer->Present();
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
@@ -210,7 +370,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 		return 1;
 	case WM_PAINT:
 		if (gRenderer != 0) {
-			ClippingTest(hwnd);
+			//ClippingTest(hwnd);
+			AnchoringTest(hwnd);
 #if 0
 			if (currentTest == 0) {
 				GraphicsTest0(hwnd);

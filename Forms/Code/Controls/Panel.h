@@ -4,7 +4,7 @@
 #include "../Control.h"
 
 namespace Forms {
-	class Panel : public Control { // TODO: Panel or Pannel?
+	class Panel : public Control {
 	public:
 		Panel(Control* parent = 0, const Rect& rect = Rect(), const Skin* skin = 0);
 		virtual void Draw(const Skin& defaultSkin) const;

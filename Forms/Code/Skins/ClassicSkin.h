@@ -17,6 +17,9 @@ namespace Forms {
 	public:
 		ClassicSkin(Renderer& r);
 
+		void SetBorderSize(unsigned int border);
+		unsigned int GetBorderSize() const;
+
 		virtual unsigned int GetPadding() const;
 		virtual void DrawPanel(const Rect& layout, const Rect& clip) const;
 	};

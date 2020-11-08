@@ -8,6 +8,14 @@ unsigned int Forms::ClassicSkin::GetPadding() const {
 	return mBorderSize * 2;
 }
 
+void Forms::ClassicSkin::SetBorderSize(unsigned int border) {
+	mBorderSize = border;
+}
+
+unsigned int Forms::ClassicSkin::GetBorderSize() const {
+	return mBorderSize;
+}
+
 void Forms::ClassicSkin::DrawPanel(const Rect& layout, const Rect& clip) const {
 	if (layout.IsDegenerate() || clip.IsDegenerate()) {
 		return;

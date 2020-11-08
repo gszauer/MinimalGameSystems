@@ -20,6 +20,7 @@ void Forms::Panel::Draw(const Skin& defaultSkin) const {
 
 	unsigned int numKids = GetNumChildren();
 	for (unsigned int kid = 0; kid < numKids; ++kid) {
-		GetChild(kid)->Draw(defaultSkin);
+		Forms::Control* child = GetChild(kid);
+		child->Draw(defaultSkin);
 	}
 }

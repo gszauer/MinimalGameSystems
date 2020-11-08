@@ -9,11 +9,12 @@ namespace Forms {
 
 	enum class Anchor {
 		None = 0,
-		Left = 1 >> 1,
-		Top = 1 >> 2,
-		Right = 1 >> 3,
-		Bottom = 1 >> 4
+		Left = 1,
+		Top = 2,
+		Right = 4,
+		Bottom = 8
 	};
+	Anchor operator|(Anchor a, Anchor b);
 
 	class Control {
 	protected:
