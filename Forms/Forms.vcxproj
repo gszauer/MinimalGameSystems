@@ -139,15 +139,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Code\Control.h" />
+    <ClInclude Include="Code\Controls\Panel.h" />
+    <ClInclude Include="Code\Skin.h" />
     <ClInclude Include="Code\Rect.h" />
     <ClInclude Include="Code\Renderer.h" />
-    <ClInclude Include="Code\Skin.h" />
+    <ClInclude Include="Code\Skins\ClassicSkin.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\Control.cpp" />
+    <ClCompile Include="Code\Controls\Panel.cpp" />
     <ClCompile Include="Code\Rect.cpp" />
     <ClCompile Include="Code\Renderer.cpp" />
     <ClCompile Include="Code\Skin.cpp" />
+    <ClCompile Include="Code\Skins\ClassicSkin.cpp" />
     <ClCompile Include="Code\WinMain.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

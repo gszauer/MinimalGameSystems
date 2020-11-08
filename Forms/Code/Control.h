@@ -7,51 +7,44 @@
 namespace Forms {
 	class Skin;
 
-	enum class ControlState {
-		Normal,
-		Active,
-		Focused,
-		Disabled
-	};
-
 	class Control {
-	private:
+	protected:
 		Rect mRelativeLayout;
+
+		// TODO: Anchoring
 
 		Control* mParent;
 		std::vector<Control*> mChildren;
 		
-		Skin* mCustomSkin;
-		bool mEnabled;
+		const Skin* mCustomSkin;
 	public:
-		Control(Control* parent = 0, const Rect& rect = Rect(), Skin* skin = 0, bool enabled = true);
+		Control(Control* parent = 0, const Rect& rect = Rect(), const Skin* skin = 0);
+		virtual ~Control();
 		
-		Skin* GetSkin();
-		void SetSkin(Skin* skin);
+		const Skin* GetSkin() const;
+		void SetSkin(const Skin* skin);
 		
-		Rect GetRelativeLayout();
-		void SetRelativeLayout(const Rect& layout);
+		virtual Rect GetRelativeLayout() const;
+		virtual void SetRelativeLayout(const Rect& layout);
 		
-		bool GetEnabled() const;
-		void SetEnabled(bool enabled);
+		virtual Control* GetParent() const;
+		virtual void SetParent(Control* parent);
 
-		Control* GetParent();
-		void SetParent(Control* parent);
-
-		bool RemoveChild(Control* child);
-		bool AddChild(Control* child);
-		
-		unsigned int GetNumChildren() const;
-		Control* GetChild(unsigned int index) const;
-		Rect GetAbsoluteLayout(const Skin& defaultSkin) const;
-
-		// These need to be over-written for each control
-		void Draw(Skin& defaultSkin);
+		virtual bool AddChild(Control& child);
+		virtual unsigned int GetNumChildren() const;
+		virtual Control* GetChild(unsigned int index) const;
+		virtual bool RemoveChild(unsigned int index);
+		virtual bool RemoveChild(Control& child);
 
 		// Skin is needed for all of these, since the padding in the skin
+		virtual Rect GetAbsoluteLayout(const Skin& defaultSkin) const;
+
 		// might change the display properties of these controls
-		Rect GetChildLayout(const Skin& defaultSkin, const Rect& selfLayout, const Control& child) const;
-		Rect GetAbsoluteContentClip(const Skin& defaultSkin) const;
+		virtual Rect GetChildLayout(const Skin& defaultSkin, const Rect& selfLayout, const Control& child) const;
+		virtual Rect GetAbsoluteContentClip(const Skin& defaultSkin) const;
+
+		// These need to be over-written for each control
+		virtual void Draw(const Skin& defaultSkin) const = 0;
 	};
 }
 

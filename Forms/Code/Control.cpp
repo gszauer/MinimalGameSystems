@@ -2,6 +2,16 @@
 #include "Skin.h"
 #include <algorithm>
 
+Forms::Control::Control(Control* parent, const Rect& rect, const Skin* skin) :
+	mRelativeLayout(rect), mCustomSkin(skin) {
+	mParent = 0;
+	if (parent != 0) {
+		SetParent(parent);
+	}
+}
+
+Forms::Control::~Control() { }
+
 Forms::Rect Forms::Control::GetAbsoluteLayout(const Skin& defaultSkin) const {
 	Rect absoluteLayout = mRelativeLayout;
 
@@ -13,23 +23,15 @@ Forms::Rect Forms::Control::GetAbsoluteLayout(const Skin& defaultSkin) const {
 	return absoluteLayout;
 }
 
-Forms::Control::Control(Control* parent, const Rect& rect, Skin* skin, bool enabled) :
-	mRelativeLayout(rect), mCustomSkin(skin), mEnabled(enabled) {
-	mParent = 0;
-	if (parent != 0) {
-		SetParent(parent);
-	}
-}
-
-Forms::Skin* Forms::Control::GetSkin() {
+const Forms::Skin* Forms::Control::GetSkin() const {
 	return mCustomSkin;
 }
 
-void Forms::Control::SetSkin(Skin* skin) {
+void Forms::Control::SetSkin(const Skin* skin) {
 	mCustomSkin = skin;
 }
 
-Forms::Rect Forms::Control::GetRelativeLayout() {
+Forms::Rect Forms::Control::GetRelativeLayout() const {
 	return mRelativeLayout;
 }
 
@@ -37,56 +39,58 @@ void Forms::Control::SetRelativeLayout(const Rect& layout) {
 	mRelativeLayout = layout;
 }
 
-bool Forms::Control::GetEnabled() const {
-	if (mParent != 0 && !mParent->GetEnabled()) {
-		return false;
-	}
-	return mEnabled;
-}
-
-void Forms::Control::SetEnabled(bool enabled) {
-	mEnabled = enabled;
-}
-
-Forms::Control* Forms::Control::GetParent() {
+Forms::Control* Forms::Control::GetParent() const {
 	return mParent;
 }
 
 void Forms::Control::SetParent(Control* parent) {
 	if (mParent != 0) {
-		mParent->RemoveChild(this);
+		mParent->RemoveChild(*this);
 	}
 	mParent = 0;
 	if (parent != 0) {
-		parent->AddChild(this);
+		parent->AddChild(*this);
 		mParent = parent;
 	}
 }
 
-bool Forms::Control::RemoveChild(Control* child) {
+bool Forms::Control::RemoveChild(Control& child) {
 	unsigned int numChildren = (unsigned int)mChildren.size();
 	for (unsigned int c = 0; c < numChildren; ++c) {
-		if (mChildren[c] == child) {
-			mChildren[c]->mParent = 0;
-			mChildren.erase(mChildren.begin() + c);
-			return true;
+		if (mChildren[c] == &child) {
+			return RemoveChild(c);
 		}
 	}
 	return false;
 }
 
-bool Forms::Control::AddChild(Control* child) {
+bool Forms::Control::RemoveChild(unsigned int child) {
+	unsigned int numChildren = (unsigned int)mChildren.size();
+	if (child >= numChildren) {
+		return false;
+	}
+
+	mChildren[child]->mParent = 0;
+	mChildren.erase(mChildren.begin() + child);
+	return true;
+}
+
+bool Forms::Control::AddChild(Control& child) {
 	unsigned int numChildren = (unsigned int)mChildren.size();
 	for (unsigned int c = 0; c < numChildren; ++c) {
-		if (mChildren[c] == child) {
+		if (mChildren[c] == &child) {
 			return false;
 		}
 	}
-	if (child->mParent != 0) {
-		child->mParent->RemoveChild(child);
+	
+	if (child.mParent != 0) {
+		child.mParent->RemoveChild(child);
+		child.mParent = 0;
 	}
-	child->mParent = this;
-	mChildren.push_back(child);
+	
+	child.mParent = this;
+	mChildren.push_back(&child);
+
 	return true;
 }
 
@@ -96,28 +100,6 @@ unsigned int Forms::Control::GetNumChildren() const {
 
 Forms::Control* Forms::Control::GetChild(unsigned int index) const {
 	return mChildren[index];
-}
-
-void Forms::Control::Draw(Skin& defaultSkin) {
-	Skin* skin = &defaultSkin;
-	if (mCustomSkin != 0) {
-		skin = mCustomSkin;
-	}
-
-	Rect layoutRect = GetAbsoluteLayout(defaultSkin);
-	Rect clipRect = layoutRect; // Don't clip root component
-
-	if (mParent != 0) {
-		clipRect = mParent->GetAbsoluteContentClip(defaultSkin);
-	}
-
-	bool isEnabled = GetEnabled();
-	skin->DrawPanel(layoutRect, clipRect, isEnabled ? ControlState::Normal : ControlState::Disabled);
-
-	unsigned int numKids = GetNumChildren();
-	for (unsigned int kid = 0; kid < numKids; ++kid) {
-		GetChild(kid)->Draw(defaultSkin);
-	}
 }
 
 Forms::Rect Forms::Control::GetChildLayout(const Skin& defaultSkin, const Rect& selfLayout, const Control& child) const {

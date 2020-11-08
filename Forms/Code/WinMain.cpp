@@ -32,10 +32,10 @@ int main(int argc, const char** argv) {
 #pragma comment(lib, "opengl32.lib")
 
 #include "Renderer.h"
-#include "Control.h"
-#include "Skin.h"
+#include "Controls/Panel.h"
+#include "Skins/ClassicSkin.h"
 
-Forms::Skin* gClassicSkin;
+Forms::ClassicSkin* gClassicSkin;
 Forms::Renderer* gRenderer;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
@@ -70,7 +70,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	// Initialize Here
 	///////////////////////////////////////////////////////////////////////////////////////
 	gRenderer = new Forms::Renderer(hwnd);
-	gClassicSkin = new Forms::Skin(*gRenderer);
+	gClassicSkin = new Forms::ClassicSkin(*gRenderer);
 
 	ShowWindow(hwnd, SW_SHOW);
 	UpdateWindow(hwnd);
@@ -99,49 +99,50 @@ void ClippingTest(HWND hwnd) {
 	gRenderer->Clear(Forms::Color(128, 158, 178)); // I call RGB(.5, .6, .7) as "Gabor Blue"
 
 	int root_pad = 5; // Should root touch the edges, or respect some padding?
-	Forms::Control  root = Forms::Control(0, Forms::Rect(root_pad, root_pad, clientRect.right - clientRect.left - root_pad * 2, clientRect.bottom - clientRect.top - root_pad * 2));
-	
+	Forms::Panel  root = Forms::Panel(0, Forms::Rect(root_pad, root_pad, clientRect.right - clientRect.left - root_pad * 2, clientRect.bottom - clientRect.top - root_pad * 2));
+	Forms::Panel dummy;
+
 	// Testing vertical clipping
-	Forms::Control vertical_clipping = Forms::Control(&root, Forms::Rect(15, 15, 660, 300)); // Free floating inside root (not clipped by default)
-	Forms::Control v_a = Forms::Control(&vertical_clipping, Forms::Rect(40, 20, 80, 260)); // Top and bottom are in frame
-	Forms::Control v_b = Forms::Control(&vertical_clipping, Forms::Rect(140, 0, 80, 300 - 4)); // Top and bottom are at layout border
-	Forms::Control v_c = Forms::Control(&vertical_clipping, Forms::Rect(240, -1, 80, 300 - 2)); // Top and bottom are clipped by 1px
-	Forms::Control v_d = Forms::Control(&vertical_clipping, Forms::Rect(340, 20, 80, 350)); // Bottom is clipped only
-	Forms::Control v_e = Forms::Control(&vertical_clipping, Forms::Rect(440, -20, 80, 300)); // Top is clipped only
-	Forms::Control v_f = Forms::Control(&vertical_clipping, Forms::Rect(540, -20, 80, 360)); // Top and bottom are clipped
+	Forms::Panel vertical_clipping = Forms::Panel(&root, Forms::Rect(15, 15, 660, 300)); // Free floating inside root (not clipped by default)
+	Forms::Panel v_a = Forms::Panel(&vertical_clipping, Forms::Rect(40, 20, 80, 260)); // Top and bottom are in frame
+	Forms::Panel v_b = Forms::Panel(&vertical_clipping, Forms::Rect(140, 0, 80, 300 - 4)); // Top and bottom are at layout border
+	Forms::Panel v_c = Forms::Panel(&vertical_clipping, Forms::Rect(240, -1, 80, 300 - 2)); // Top and bottom are clipped by 1px
+	Forms::Panel v_d = Forms::Panel(&vertical_clipping, Forms::Rect(340, 20, 80, 350)); // Bottom is clipped only
+	Forms::Panel v_e = Forms::Panel(&vertical_clipping, Forms::Rect(440, -20, 80, 300)); // Top is clipped only
+	Forms::Panel v_f = Forms::Panel(&vertical_clipping, Forms::Rect(540, -20, 80, 360)); // Top and bottom are clipped
 
 	// Testing horizontal clipping
-	Forms::Control horizontal_clipping = Forms::Control(&root, Forms::Rect(15, 330, 300, 240), 0, false); // Free floating inside root (not clipped by default)
-	Forms::Control h_a = Forms::Control(&horizontal_clipping, Forms::Rect(40, 5, 300 - 80, 25)); // Left and right are both in frame
-	Forms::Control h_b = Forms::Control(&horizontal_clipping, Forms::Rect(0, 45, 300 - 4, 25)); // Left and right are at layout border
-	Forms::Control h_c = Forms::Control(&horizontal_clipping, Forms::Rect(-1, 85, 300 - 2, 25)); // Top and bottom are clipped by 1px
-	Forms::Control h_d = Forms::Control(&horizontal_clipping, Forms::Rect(40, 125, 300, 25)); // Right is clipped only
-	Forms::Control h_e = Forms::Control(&horizontal_clipping, Forms::Rect(-40, 165, 300, 25)); // Left is clipped only
-	Forms::Control h_f = Forms::Control(&horizontal_clipping, Forms::Rect(-40, 205, 500, 25)); // Right and left are clipped
+	Forms::Panel horizontal_clipping = Forms::Panel(&root, Forms::Rect(15, 330, 300, 240), 0); // Free floating inside root (not clipped by default)
+	Forms::Panel h_a = Forms::Panel(&horizontal_clipping, Forms::Rect(40, 5, 300 - 80, 25)); // Left and right are both in frame
+	Forms::Panel h_b = Forms::Panel(&horizontal_clipping, Forms::Rect(0, 45, 300 - 4, 25)); // Left and right are at layout border
+	Forms::Panel h_c = Forms::Panel(&horizontal_clipping, Forms::Rect(-1, 85, 300 - 2, 25)); // Top and bottom are clipped by 1px
+	Forms::Panel h_d = Forms::Panel(&horizontal_clipping, Forms::Rect(40, 125, 300, 25)); // Right is clipped only
+	Forms::Panel h_e = Forms::Panel(&horizontal_clipping, Forms::Rect(-40, 165, 300, 25)); // Left is clipped only
+	Forms::Panel h_f = Forms::Panel(&horizontal_clipping, Forms::Rect(-40, 205, 500, 25)); // Right and left are clipped
 
 	// Test multi clipping
-	Forms::Control multi_clipping = Forms::Control(&root, Forms::Rect(340, 330, 120, 100)); // Free floating inside root (not clipped by default)
-	Forms::Control m_a = Forms::Control(&multi_clipping, Forms::Rect(-2, -2, 124, 104)); // No borders should show at all
-	Forms::Control m_b = Forms::Control(&multi_clipping, Forms::Rect(-1, -1, 118, 98)); // 1 pixel on the inset
-	Forms::Control m_c = Forms::Control(&m_b, Forms::Rect(-10, -10, 30, 30)); // clip top left
-	Forms::Control m_d = Forms::Control(&m_b, Forms::Rect(100, 80, 300, 300)); // clip bottom right
-	Forms::Control m_e = Forms::Control(&m_b, Forms::Rect(100, -10, 30, 30)); // clip top right
-	Forms::Control m_f = Forms::Control(&m_b, Forms::Rect(-10, 80, 50, 300)); // clip bottom left
+	Forms::Panel multi_clipping = Forms::Panel(&root, Forms::Rect(340, 330, 120, 100)); // Free floating inside root (not clipped by default)
+	Forms::Panel m_a = Forms::Panel(&multi_clipping, Forms::Rect(-2, -2, 124, 104)); // No borders should show at all
+	Forms::Panel m_b = Forms::Panel(&multi_clipping, Forms::Rect(-1, -1, 118, 98)); // 1 pixel on the inset
+	Forms::Panel m_c = Forms::Panel(&m_b, Forms::Rect(-10, -10, 30, 30)); // clip top left
+	Forms::Panel m_d = Forms::Panel(&m_b, Forms::Rect(100, 80, 300, 300)); // clip bottom right
+	Forms::Panel m_e = Forms::Panel(&m_b, Forms::Rect(100, -10, 30, 30)); // clip top right
+	Forms::Panel m_f = Forms::Panel(&m_b, Forms::Rect(-10, 80, 50, 300)); // clip bottom left
 
 	// Test complex clipping
-	Forms::Control complex_clipping = Forms::Control(&root, Forms::Rect(340, 460, 120, 100)); // Free floating inside root (not clipped by default)
-	Forms::Control c_a = Forms::Control(&complex_clipping, Forms::Rect(10 + 100, 10, 50, 50)); // Partially clipped on right
-	Forms::Control c_b = Forms::Control(&complex_clipping, Forms::Rect(-50, 10, 10, 10)); // Far back enough to not be clipped (should be clipped tough)
+	Forms::Panel complex_clipping = Forms::Panel(&root, Forms::Rect(340, 460, 120, 100)); // Free floating inside root (not clipped by default)
+	Forms::Panel c_a = Forms::Panel(&complex_clipping, Forms::Rect(10 + 100, 10, 50, 50)); // Partially clipped on right
+	Forms::Panel c_b = Forms::Panel(&complex_clipping, Forms::Rect(-50, 10, 10, 10)); // Far back enough to not be clipped (should be clipped tough)
 
 	// Test flush inside, deep nesting
-	Forms::Control no_clipping = Forms::Control(&root, Forms::Rect(490, 460, 120, 100)); // Free floating inside root (not clipped by default)
-	Forms::Control n_a = Forms::Control(&no_clipping, Forms::Rect(0, 0, 120 - 4, 100 - 4)); // Should not clip
-	Forms::Control n_b = Forms::Control(&n_a, Forms::Rect(0, 0, 120 - 8, 100 - 8)); // Should not clip
-	Forms::Control n_c = Forms::Control(&n_b, Forms::Rect(2, 2, 120 - 12 - 4, 100 - 12 - 4)); // Should not clip
-	Forms::Control n_d = Forms::Control(&n_c, Forms::Rect(0, 0, 120 - 16 - 4, 100 - 16 - 4), 0, false); // Should not clip
-	Forms::Control n_e = Forms::Control(&n_d, Forms::Rect(n_d.GetRelativeLayout().AdjustPosition(30, -20).AdjustSize(-64, 20))); // Should clip top and bottom
-	Forms::Control n_f = Forms::Control(&n_d, Forms::Rect(n_d.GetRelativeLayout().AdjustPosition(-20, 30).AdjustSize(20, -64))); // Should clip left and right
-	Forms::Control n_g = Forms::Control(&n_d, Forms::Rect(n_d.GetRelativeLayout().AdjustPosition(30, 30).AdjustSize(-64, -64))); // Should not clip
+	Forms::Panel no_clipping = Forms::Panel(&root, Forms::Rect(490, 460, 120, 100)); // Free floating inside root (not clipped by default)
+	Forms::Panel n_a = Forms::Panel(&no_clipping, Forms::Rect(0, 0, 120 - 4, 100 - 4)); // Should not clip
+	Forms::Panel n_b = Forms::Panel(&n_a, Forms::Rect(0, 0, 120 - 8, 100 - 8)); // Should not clip
+	Forms::Panel n_c = Forms::Panel(&n_b, Forms::Rect(2, 2, 120 - 12 - 4, 100 - 12 - 4)); // Should not clip
+	Forms::Panel n_d = Forms::Panel(&n_c, Forms::Rect(0, 0, 120 - 16 - 4, 100 - 16 - 4), 0); // Should not clip
+	Forms::Panel n_e = Forms::Panel(&n_d, Forms::Rect(n_d.GetRelativeLayout().AdjustPosition(30, -20).AdjustSize(-64, 20))); // Should clip top and bottom
+	Forms::Panel n_f = Forms::Panel(&n_d, Forms::Rect(n_d.GetRelativeLayout().AdjustPosition(-20, 30).AdjustSize(20, -64))); // Should clip left and right
+	Forms::Panel n_g = Forms::Panel(&n_d, Forms::Rect(n_d.GetRelativeLayout().AdjustPosition(30, 30).AdjustSize(-64, -64))); // Should not clip
 
 	root.Draw(*gClassicSkin);
 

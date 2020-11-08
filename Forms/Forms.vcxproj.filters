@@ -19,6 +19,12 @@
     <Filter Include="Source Files\Controls">
       <UniqueIdentifier>{0e1b3c26-a1e8-41a3-a61d-3ccc61892bc1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Skins">
+      <UniqueIdentifier>{d741b952-cc38-409c-9d0d-0bc0779be15b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Skins">
+      <UniqueIdentifier>{75a63452-b644-4a5f-8656-94d9ebb56b54}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Rect.h">
@@ -30,8 +36,14 @@
     <ClInclude Include="Code\Control.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Skins\ClassicSkin.h">
+      <Filter>Header Files\Skins</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Skin.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Controls\Panel.h">
+      <Filter>Header Files\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -41,14 +53,20 @@
     <ClCompile Include="Code\Control.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Skin.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Code\Rect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Code\Renderer.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Skins\ClassicSkin.cpp">
+      <Filter>Source Files\Skins</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Skin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Controls\Panel.cpp">
+      <Filter>Source Files\Controls</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
