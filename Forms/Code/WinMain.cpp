@@ -162,11 +162,46 @@ void AnchoringTest(HWND hwnd) {
 	RECT clientRect;
 	GetClientRect(hwnd, &clientRect);
 
+	Forms::ClassicSkin noBorder(*gRenderer);
+	noBorder.SetBorderSize(0);
+
 	gRenderer->Clear(Forms::Color(128, 158, 178)); // I call RGB(.5, .6, .7) as "Gabor Blue"
 
 	int root_pad = 5; // Should root touch the edges, or respect some padding?
 	Forms::Panel  root = Forms::Panel(0, Forms::Rect(root_pad, root_pad, clientRect.right - clientRect.left - root_pad * 2, clientRect.bottom - clientRect.top - root_pad * 2));
 	
+	Forms::Panel pa_test_2 = Forms::Panel(&root, Forms::Rect(515 - 2, 15 - 2, 250 + 4, 175 + 4)); // Test left and right anchoring
+	Forms::Panel pa_test = Forms::Panel(&root, Forms::Rect(515, 15, 250, 175), &noBorder); // Test left and right anchoring
+
+	Forms::Panel pa_a = Forms::Panel(&pa_test, Forms::Rect(100, 15, 100, 20)); // Anchored to the left
+	pa_a.SetAnchoring(Forms::Anchor::Left);
+	pa_a.SetAnchor(Forms::Anchor::Left, 0);
+
+	Forms::Panel pa_b = Forms::Panel(&pa_test, Forms::Rect(100, 45, 100, 20)); // Anchored to the left
+	pa_b.SetAnchoring(Forms::Anchor::Left);
+	pa_b.SetAnchor(Forms::Anchor::Left, 10);
+
+	Forms::Panel pa_c = Forms::Panel(&pa_test, Forms::Rect(100, 15, 100, 20)); // Anchored to the right
+	pa_c.SetAnchoring(Forms::Anchor::Right);
+	pa_c.SetAnchor(Forms::Anchor::Right, 0);
+
+	Forms::Panel pa_d = Forms::Panel(&pa_test, Forms::Rect(100, 45, 100, 20)); // Anchored to the right
+	pa_d.SetAnchoring(Forms::Anchor::Right);
+	pa_d.SetAnchor(Forms::Anchor::Right, 10);
+
+	Forms::Panel pa_e = Forms::Panel(&pa_test, Forms::Rect(100, 75, 100, 20)); // Anchored to both
+	pa_e.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right);
+	pa_e.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right, 0);
+
+	Forms::Panel pa_f = Forms::Panel(&pa_test, Forms::Rect(100, 105, 100, 20)); // Anchored to both
+	pa_f.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right);
+	pa_f.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right, 10);
+
+	Forms::Panel pa_g = Forms::Panel(&pa_test, Forms::Rect(100, 135, 100, 20)); // Anchored to both
+	pa_g.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right);
+	pa_g.SetAnchor(Forms::Anchor::Right, 5);
+	pa_g.SetAnchor(Forms::Anchor::Left, 30);
+
 	Forms::Panel lr_test = Forms::Panel(&root, Forms::Rect(15, 15, 300, 175)); // Test left and right anchoring
 
 	Forms::Panel lr_a = Forms::Panel(&lr_test, Forms::Rect(100, 15, 100, 20)); // Anchored to the left
@@ -252,9 +287,7 @@ void AnchoringTest(HWND hwnd) {
 	na_e.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 10);
 	
 	Forms::Panel nesting_test_b = Forms::Panel(&root, Forms::Rect(15, 310, 300, 100)); // Test left and right anchoring
-	Forms::ClassicSkin noBorder(*gRenderer);
-	noBorder.SetBorderSize(0);
-
+	
 	Forms::Panel nb_a = Forms::Panel(&nesting_test_b, Forms::Rect(20, 20, 30, 30), &noBorder); // Anchored to both
 	nb_a.SetAnchoring(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom);
 	nb_a.SetAnchor(Forms::Anchor::Left | Forms::Anchor::Right | Forms::Anchor::Top | Forms::Anchor::Bottom, 5);
